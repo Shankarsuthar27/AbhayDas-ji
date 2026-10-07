@@ -1,0 +1,119 @@
+/* Global Design System & Reset */
+:root {
+  --primary: #fc791a;
+  --primary-hover: #c2410c;
+  --secondary: #f59e0b;
+  --dark: #111827;
+  --light-bg: #fdfbf7;
+  --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Tienne', serif;
+  /* Required Theme Design Tokens */
+  --e-global-color-primary: #02A95C;
+  --e-global-color-secondary: rgb(252, 121, 26);
+  --e-global-color-text: #676666;
+  --tec-font-family-sans-serif: 'Quicksand', sans-serif;
+  --donatm-heading-font-family: 'Quicksand', sans-serif;
+  --donatm-font-sans-serif: 'Plus Jakarta Sans', sans-serif;
+  --donatm-heading-color: #17342f;
+  --width: 227.04px;
+  --height: 127.6px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-main);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  color: #1f2937;
+  background-color: #ffffff;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  border: none !important;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #fc791a;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c2410c;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive display utilities */
+@media (max-width: 1199.98px) {
+  .d-xl-flex {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .d-xl-none {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .d-md-block {
+    display: none !important;
+  }
+  .d-none.d-md-inline {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .d-none.d-md-inline {
+    display: inline !important;
+  }
+  .d-md-block {
+    display: block !important;
+  }
+}

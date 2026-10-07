@@ -1,0 +1,1076 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, X, Plus, Minus, ChevronDown } from 'lucide-react';
+import { websiteData } from '../data/websiteData';
+
+/* =========================================================================
+   CRISP BRAND SOCIAL ICONS (White SVGs matching reference image exactly)
+   ========================================================================= */
+const FacebookIcon = ({ size = 13, className = '' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    style={{ display: 'block' }}
+  >
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
+
+const TwitterBirdIcon = ({ size = 13, className = '' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    style={{ display: 'block' }}
+  >
+    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.936 9.936 0 0024 4.59z" />
+  </svg>
+);
+
+const InstagramIcon = ({ size = 13, className = '' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={{ display: 'block' }}
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+);
+
+const YouTubeIcon = ({ size = 14, className = '' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    style={{ display: 'block' }}
+  >
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+  </svg>
+);
+
+const OrangeEnvelopeIcon = ({ size = 14, className = '' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#fc791a"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={{ display: 'block', flexShrink: 0 }}
+  >
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </svg>
+);
+
+const WarningTriangleIcon = ({ size = 11, className = '' }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#ffffff"
+    strokeWidth="2.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={{ display: 'block' }}
+  >
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
+
+/* =========================================================================
+   NAVIGATION LINKS CONFIGURATION (Matching reference image: "Event" singular)
+   ========================================================================= */
+const NAV_ITEMS = [
+  { id: 'home', label: 'Home', href: '/' },
+  { id: 'about', label: 'About Us', href: '/about' },
+  { id: 'events', label: 'Event', href: '/events' },
+  {
+    id: 'volunteers',
+    label: 'Volunteers',
+    href: '#team',
+    dropdown: [
+      { label: 'Become a Volunteer', action: 'volunteer' },
+      { label: 'Our Volunteers / Team', href: '#team' },
+    ],
+  },
+  { id: 'kathas', label: 'Kathas', href: '/kathas' },
+  { id: 'gallery', label: 'Gallery', href: '/gallery' },
+  {
+    id: 'pages',
+    label: 'Pages',
+    href: '#pages',
+    dropdown: [
+      { label: 'News & Updates', href: '/news' },
+      { label: 'Contact Us', href: '#contact' },
+    ],
+  },
+];
+
+/* =========================================================================
+   MAIN COMPONENT: ResponsiveNavbar
+   ========================================================================= */
+export default function ResponsiveNavbar({
+  onOpenDonate,
+  onOpenSearch,
+  onOpenVolunteer,
+  currentRoute = '/',
+  onNavigate,
+}) {
+  const [isSticky, setIsSticky] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [mobileAccordion, setMobileAccordion] = useState(null);
+
+  const getActiveId = () => {
+    if (currentRoute === '/about') return 'about';
+    if (currentRoute.startsWith('/event') || currentRoute.startsWith('/events')) return 'events';
+    if (currentRoute.startsWith('/kathas') || currentRoute.includes('spiritual-discourses-kathas')) return 'kathas';
+    if (currentRoute === '/gallery' || currentRoute.startsWith('/gallery')) return 'gallery';
+    if (currentRoute === '/news' || currentRoute.startsWith('/news') || currentRoute.startsWith('/blog')) return 'pages';
+    return 'home';
+  };
+
+  const activeNavId = getActiveId();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsSticky(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  const handleLinkClick = (e, item) => {
+    if (e && e.preventDefault) e.preventDefault();
+    setMobileMenuOpen(false);
+    setOpenDropdown(null);
+
+    if (item.action === 'volunteer' && onOpenVolunteer) {
+      onOpenVolunteer();
+      return;
+    }
+
+    const href = item.href || '/';
+
+    if (href.startsWith('#')) {
+      if (currentRoute !== '/') {
+        if (onNavigate) onNavigate('/');
+        setTimeout(() => {
+          const el = document.querySelector(href);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 120);
+      } else {
+        const el = document.querySelector(href);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+
+    if (onNavigate) {
+      onNavigate(href);
+    } else {
+      window.history.pushState({}, '', href);
+      window.dispatchEvent(new Event('popstate'));
+    }
+  };
+
+  const toggleAccordion = (id) => {
+    setMobileAccordion((prev) => (prev === id ? null : id));
+  };
+
+  const socialLinks = websiteData?.general?.socialLinks || {
+    facebook: 'https://facebook.com',
+    twitter: 'https://twitter.com',
+    instagram: 'https://instagram.com',
+    youtube: 'https://youtube.com',
+  };
+
+  return (
+    <>
+      <header
+        className={`site-header ${isSticky ? 'is-sticky' : ''}`}
+        style={{
+          width: '100%',
+          position: isSticky ? 'fixed' : 'relative',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          backgroundColor: '#ffffff',
+          boxShadow: isSticky ? '0 4px 20px rgba(0,0,0,0.08)' : 'none',
+          transition: 'box-shadow 0.25s ease',
+          fontFamily: '"Plus Jakarta Sans", sans-serif',
+        }}
+      >
+        {/* Left Curved Orange Logo Stadium Tab with Layered Outer Rim */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            zIndex: 40,
+            display: 'flex',
+            alignItems: 'center',
+            pointerEvents: 'none',
+          }}
+        >
+          {/* Outer Translucent Orange Crescent Rim (Opacity 0.36) */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: isSticky ? '206px' : '230px',
+              backgroundColor: '#fc791a',
+              opacity: 0.36,
+              borderRadius: '0 100px 100px 0',
+              transition: 'width 0.25s ease',
+            }}
+          />
+
+          {/* Inner Solid Orange Pill Shape */}
+          <a
+            href="/"
+            onClick={(e) => handleLinkClick(e, { href: '/' })}
+            style={{
+              position: 'relative',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: isSticky ? '196px' : '220px',
+              height: '100%',
+              backgroundColor: '#fc791a',
+              borderRadius: '0 100px 100px 0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingLeft: '12px',
+              paddingRight: '22px',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              pointerEvents: 'auto',
+              boxShadow: '0 4px 18px rgba(252, 121, 26, 0.25)',
+              transition: 'width 0.25s ease',
+            }}
+            title="HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj"
+          >
+            <img
+              src="/images/img_1.png"
+              alt="HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj"
+              style={{
+                maxHeight: isSticky ? '44px' : '52px',
+                width: 'auto',
+                maxWidth: '100%',
+                objectFit: 'contain',
+                display: 'block',
+                transition: 'max-height 0.25s ease',
+                filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.12))',
+              }}
+              onError={(e) => {
+                if (!e.target.dataset.triedFallback) {
+                  e.target.dataset.triedFallback = 'true';
+                  e.target.src = '/images/logo_white.png';
+                }
+              }}
+            />
+          </a>
+        </div>
+
+        {/* 1. DARK TOP BAR */}
+        {!isSticky && (
+          <div
+            style={{
+              backgroundColor: '#0e261f',
+              color: '#ffffff',
+              height: '38px',
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              position: 'relative',
+              zIndex: 30,
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                height: '100%',
+                paddingLeft: '238px',
+                paddingRight: '0px',
+              }}
+            >
+              {/* HelpLine & Email */}
+              <div
+                className="d-none d-lg-flex"
+                style={{
+                  alignItems: 'center',
+                  fontSize: '12.5px',
+                  color: '#ffffff',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ fontWeight: '700', color: '#ffffff' }}>HelpLine Number:</span>
+                  <a
+                    href="tel:+918696298489"
+                    style={{ color: '#ffffff', fontWeight: '600', textDecoration: 'none' }}
+                  >
+                    +91 8696298489
+                  </a>
+                  <span style={{ color: '#ffffff' }}>,</span>
+                  <a
+                    href="tel:+919509587824"
+                    style={{ color: '#ffffff', fontWeight: '600', textDecoration: 'none' }}
+                  >
+                    +919509587824
+                  </a>
+                </div>
+
+                <span style={{ color: 'rgba(255,255,255,0.25)', margin: '0 15px', fontWeight: '300' }}>
+                  |
+                </span>
+
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+                  <OrangeEnvelopeIcon size={14} />
+                  <a
+                    href="mailto:info@shreeabhaydas.com"
+                    style={{ color: '#ffffff', fontWeight: '500', textDecoration: 'none' }}
+                  >
+                    info@shreeabhaydas.com
+                  </a>
+                </div>
+              </div>
+
+              {/* Right: Signature Follow Us Badge with Layered Rim */}
+              <div
+                style={{
+                  marginLeft: 'auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  position: 'relative',
+                }}
+              >
+                <div
+                  className="d-none d-sm-flex"
+                  style={{
+                    position: 'relative',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: '-8px',
+                      top: 0,
+                      bottom: 0,
+                      width: '24px',
+                      backgroundColor: '#fc791a',
+                      opacity: 0.36,
+                      borderRadius: '20px 0 0 20px',
+                      pointerEvents: 'none',
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      position: 'relative',
+                      backgroundColor: '#fc791a',
+                      color: '#ffffff',
+                      height: '38px',
+                      paddingLeft: '16px',
+                      paddingRight: '22px',
+                      borderRadius: '20px 0 0 20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      zIndex: 1,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        letterSpacing: '0.2px',
+                        whiteSpace: 'nowrap',
+                        color: '#ffffff',
+                      }}
+                    >
+                      Follow Us:
+                    </span>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+                      <a href={socialLinks.facebook} target="_blank" rel="noreferrer" title="Facebook" style={{ color: '#ffffff', display: 'flex' }}>
+                        <FacebookIcon size={13} />
+                      </a>
+                      <a href={socialLinks.twitter} target="_blank" rel="noreferrer" title="Twitter" style={{ color: '#ffffff', display: 'flex' }}>
+                        <TwitterBirdIcon size={13} />
+                      </a>
+                      <a href={socialLinks.instagram} target="_blank" rel="noreferrer" title="Instagram" style={{ color: '#ffffff', display: 'flex' }}>
+                        <InstagramIcon size={13} />
+                      </a>
+                      <a href={socialLinks.youtube} target="_blank" rel="noreferrer" title="YouTube" style={{ color: '#ffffff', display: 'flex' }}>
+                        <YouTubeIcon size={14} />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile Socials */}
+                <div className="d-flex d-sm-none" style={{ alignItems: 'center', gap: '12px', paddingRight: '14px' }}>
+                  <a href={socialLinks.facebook} target="_blank" rel="noreferrer" style={{ color: '#ffffff' }}><FacebookIcon size={13} /></a>
+                  <a href={socialLinks.twitter} target="_blank" rel="noreferrer" style={{ color: '#ffffff' }}><TwitterBirdIcon size={13} /></a>
+                  <a href={socialLinks.instagram} target="_blank" rel="noreferrer" style={{ color: '#ffffff' }}><InstagramIcon size={13} /></a>
+                  <a href={socialLinks.youtube} target="_blank" rel="noreferrer" style={{ color: '#ffffff' }}><YouTubeIcon size={14} /></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2. MAIN NAVBAR BAR */}
+        <div
+          style={{
+            height: isSticky ? '68px' : '74px',
+            backgroundColor: '#ffffff',
+            position: 'relative',
+            zIndex: 20,
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%',
+            transition: 'height 0.25s ease',
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              height: '100%',
+              paddingLeft: isSticky ? '218px' : '238px',
+              paddingRight: '24px',
+            }}
+          >
+            {/* Desktop Navigation Links */}
+            <nav
+              className="d-none d-xl-flex"
+              style={{
+                alignItems: 'center',
+                gap: '28px',
+                height: '100%',
+              }}
+            >
+              {NAV_ITEMS.map((item) => {
+                const hasDropdown = Boolean(item.dropdown);
+                const isActive = activeNavId === item.id;
+                const isOpen = openDropdown === item.id;
+
+                return (
+                  <div
+                    key={item.id}
+                    style={{ position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}
+                    onMouseEnter={() => hasDropdown && setOpenDropdown(item.id)}
+                    onMouseLeave={() => hasDropdown && setOpenDropdown(null)}
+                  >
+                    <a
+                      href={item.href}
+                      onClick={(e) => {
+                        if (hasDropdown) {
+                          e.preventDefault();
+                          setOpenDropdown(isOpen ? null : item.id);
+                        } else {
+                          handleLinkClick(e, item);
+                        }
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        color: isActive ? '#fc791a' : '#1f2937',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        padding: '6px 0',
+                        transition: 'color 0.2s ease',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = '#fc791a')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = isActive ? '#fc791a' : '#1f2937')}
+                    >
+                      {item.label}
+                      {hasDropdown && (
+                        <ChevronDown
+                          size={13}
+                          strokeWidth={2.5}
+                          style={{
+                            color: '#6b7280',
+                            transition: 'transform 0.2s ease, color 0.2s ease',
+                            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                          }}
+                        />
+                      )}
+                    </a>
+
+                    {/* Dropdown Menu */}
+                    {hasDropdown && isOpen && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 'calc(100% - 6px)',
+                          left: 0,
+                          backgroundColor: '#ffffff',
+                          boxShadow: '0 10px 28px rgba(0,0,0,0.12)',
+                          borderRadius: '8px',
+                          padding: '6px 0',
+                          minWidth: '200px',
+                          zIndex: 1000,
+                          border: '1px solid #f1f5f9',
+                        }}
+                      >
+                        {item.dropdown.map((sub, idx) => (
+                          <a
+                            key={idx}
+                            href={sub.href || '#'}
+                            onClick={(e) => handleLinkClick(e, sub)}
+                            style={{
+                              display: 'block',
+                              padding: '10px 18px',
+                              color: '#334155',
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              textDecoration: 'none',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#fff7ed';
+                              e.currentTarget.style.color = '#fc791a';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                              e.currentTarget.style.color = '#334155';
+                            }}
+                          >
+                            {sub.label}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
+
+            {/* Right Section */}
+            <div
+              style={{
+                marginLeft: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+              }}
+            >
+              {/* Desktop Search Button */}
+              <button
+                type="button"
+                onClick={onOpenSearch}
+                aria-label="Search"
+                className="d-none d-xl-flex"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#1f2937',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  transition: 'color 0.2s ease, transform 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#fc791a';
+                  e.currentTarget.style.transform = 'scale(1.08)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#1f2937';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                <Search size={19} strokeWidth={2.1} />
+              </button>
+
+              {/* Desktop Notice Box */}
+              <div
+                onClick={() => onOpenDonate && onOpenDonate()}
+                title="Click to Donate"
+                className="d-none d-xl-flex"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: '38px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #eef2f6',
+                  borderRadius: '4px',
+                  paddingRight: '16px',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#ffba00';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 186, 0, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#eef2f6';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.03)';
+                }}
+              >
+                <div
+                  style={{
+                    position: 'relative',
+                    height: '100%',
+                    width: '28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: '2.5px',
+                      backgroundColor: '#ffba00',
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: 'relative',
+                      zIndex: 2,
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ffba00',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 1px 4px rgba(255, 186, 0, 0.35)',
+                    }}
+                  >
+                    <WarningTriangleIcon size={11} />
+                  </div>
+                </div>
+
+                <span
+                  style={{
+                    color: '#556372',
+                    fontSize: '13.5px',
+                    fontWeight: '500',
+                    marginLeft: '7px',
+                    whiteSpace: 'nowrap',
+                    letterSpacing: '0.1px',
+                  }}
+                >
+                  The form is not published.
+                </span>
+              </div>
+
+              {/* Mobile Hamburger Button */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open mobile navigation"
+                className="d-flex d-xl-none"
+                style={{
+                  backgroundColor: '#f3f4f6',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '10px',
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4.5px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                }}
+              >
+                <span style={{ width: '23px', height: '2.5px', backgroundColor: '#02A95C', borderRadius: '3px', display: 'block' }} />
+                <span style={{ width: '23px', height: '2.5px', backgroundColor: '#02A95C', borderRadius: '3px', display: 'block' }} />
+                <span style={{ width: '23px', height: '2.5px', backgroundColor: '#02A95C', borderRadius: '3px', display: 'block' }} />
+              </button>
+
+              {/* Mobile Search Button */}
+              <button
+                type="button"
+                onClick={onOpenSearch}
+                aria-label="Search"
+                className="d-flex d-xl-none"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#1f2937',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                }}
+              >
+                <Search size={22} strokeWidth={2.2} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Spacer */}
+      {isSticky && <div style={{ width: '100%', height: '112px' }} />}
+
+      {/* Mobile Slide-in Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              key="mobile-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                zIndex: 999998,
+              }}
+            />
+
+            <motion.div
+              key="mobile-drawer-panel"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                width: '88vw',
+                maxWidth: '380px',
+                backgroundColor: '#ffffff',
+                zIndex: 999999,
+                display: 'flex',
+                flexDirection: 'column',
+                overflowY: 'auto',
+                boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
+                fontFamily: '"Plus Jakarta Sans", sans-serif',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '16px 20px',
+                  borderBottom: '1px solid #f1f5f9',
+                  backgroundColor: '#ffffff',
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 10,
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: '#fc791a',
+                    padding: '8px 18px',
+                    borderRadius: '0 0 24px 0',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <img
+                    src="/images/img_1.png"
+                    alt="Logo"
+                    style={{ maxHeight: '38px', width: 'auto', display: 'block' }}
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Close menu"
+                  style={{
+                    background: '#f3f4f6',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#1f2937',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X size={22} strokeWidth={2.4} />
+                </button>
+              </div>
+
+              <div style={{ flex: 1, padding: '8px 0' }}>
+                {NAV_ITEMS.map((item) => {
+                  const hasDropdown = Boolean(item.dropdown);
+                  const isExpanded = mobileAccordion === item.id;
+                  const isActive = activeNavId === item.id;
+
+                  return (
+                    <div key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      {hasDropdown ? (
+                        <div>
+                          <div
+                            onClick={() => toggleAccordion(item.id)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '16px 24px',
+                              cursor: 'pointer',
+                              userSelect: 'none',
+                              backgroundColor: isExpanded ? '#f8fafc' : 'transparent',
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                color: isActive ? '#fc791a' : '#1f2937',
+                              }}
+                            >
+                              {item.label}
+                            </span>
+                            <span style={{ color: '#64748b', display: 'flex', alignItems: 'center' }}>
+                              {isExpanded ? <Minus size={18} /> : <Plus size={18} />}
+                            </span>
+                          </div>
+
+                          {isExpanded && (
+                            <div style={{ backgroundColor: '#f8fafc', borderTop: '1px solid #f1f5f9' }}>
+                              {item.dropdown.map((sub, i) => (
+                                <a
+                                  key={i}
+                                  href={sub.href || '#'}
+                                  onClick={(e) => handleLinkClick(e, sub)}
+                                  style={{
+                                    display: 'block',
+                                    padding: '12px 24px 12px 38px',
+                                    fontSize: '14.5px',
+                                    fontWeight: '500',
+                                    color: '#475569',
+                                    textDecoration: 'none',
+                                    borderBottom: i < item.dropdown.length - 1 ? '1px solid #edf2f7' : 'none',
+                                  }}
+                                >
+                                  • {sub.label}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <a
+                          href={item.href}
+                          onClick={(e) => handleLinkClick(e, item)}
+                          style={{
+                            display: 'block',
+                            padding: '16px 24px',
+                            fontSize: '16px',
+                            fontWeight: isActive ? '700' : '600',
+                            color: isActive ? '#fc791a' : '#1f2937',
+                            textDecoration: 'none',
+                            backgroundColor: isActive ? '#fff7ed' : 'transparent',
+                          }}
+                        >
+                          {item.label}
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div
+                style={{
+                  padding: '20px',
+                  borderTop: '1px solid #f1f5f9',
+                  backgroundColor: '#f8fafc',
+                  marginTop: 'auto',
+                }}
+              >
+                <div
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (onOpenDonate) onOpenDonate();
+                  }}
+                  style={{
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    backgroundColor: '#ffffff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    marginBottom: '16px',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ffba00',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <WarningTriangleIcon size={11} />
+                  </div>
+                  <span style={{ fontSize: '13px', color: '#475569', fontWeight: '500' }}>
+                    The form is not published.
+                  </span>
+                </div>
+
+                <div style={{ fontSize: '12.5px', color: '#64748b', textAlign: 'center', lineHeight: '1.8' }}>
+                  <div>📞 +91 8696298489, +919509587824</div>
+                  <div>✉ info@shreeabhaydas.com</div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', marginTop: '14px' }}>
+                  <a
+                    href={socialLinks.facebook}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fc791a',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <FacebookIcon size={13} />
+                  </a>
+                  <a
+                    href={socialLinks.twitter}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fc791a',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <TwitterBirdIcon size={13} />
+                  </a>
+                  <a
+                    href={socialLinks.instagram}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fc791a',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <InstagramIcon size={13} />
+                  </a>
+                  <a
+                    href={socialLinks.youtube}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fc791a',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <YouTubeIcon size={14} />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}

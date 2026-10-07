@@ -1,0 +1,765 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700;800&display=swap');
+
+/* ==========================================================================
+   Design Tokens & Foundations: About Us – Shree Abhay Das Ji Maharaj
+   WCAG 2.2 AA Compliant | Token-Driven Architecture
+   ========================================================================== */
+
+:root {
+  /* --- Typography Tokens --- */
+  --font-family-primary: 'Plus Jakarta Sans', sans-serif;
+  --font-family-heading: 'Quicksand', sans-serif;
+  --font-family-stack: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --donatm-link-color: #122f2a;
+  
+  --font-size-xs: 14px;
+  --font-size-sm: 15px;
+  --font-size-base: 16px;
+  --font-size-md: 16px;
+  --font-size-lg: 24px;
+  --font-size-xl: 50px;
+  --font-size-2xl: 42px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  --font-line-height-tight: 1.25;
+  --font-line-height-base: 28.8px;
+  --font-line-height-relaxed: 1.8;
+
+  /* --- Color Palette Tokens --- */
+  --color-text-primary: #676666;
+  --color-text-secondary: #d9d9d9;
+  --color-text-tertiary: #122f2a;
+  --color-text-inverse: #ffffff;
+  --color-text-heading: #122f2a;
+  --color-text-bold: #122f2a;
+
+  --color-surface-base: #ffffff;
+  --color-surface-muted: #020101;
+  --color-surface-raised: #3d3d73;
+  --color-surface-cream: #fcf8f2;
+  --color-surface-cream-alt: #f8f4ec;
+  --color-surface-notch: #f3d7d7;
+  --color-surface-card: #ffffff;
+  
+  --color-brand-primary: #fc791a;
+  --color-brand-hover: #e5680c;
+  --color-brand-subtle: #fff7ed;
+  --color-brand-border: #fcd4b8;
+  --color-brand-dark: #0b231c;
+
+  /* --- Spacing Scale Tokens --- */
+  --space-1: 3px;
+  --space-2: 6px;
+  --space-3: 7.5px;
+  --space-4: 15px;
+  --space-5: 16px;
+  --space-6: 17.5px;
+  --space-7: 18px;
+  --space-8: 24px;
+  --space-9: 32px;
+  --space-10: 48px;
+  --space-11: 64px;
+  --space-12: 80px;
+
+  /* --- Radius, Elevation & Motion Tokens --- */
+  --radius-xs: 10px;
+  --radius-sm: 16px;
+  --radius-md: 20px;
+  --radius-arch: 280px 280px 24px 24px;
+  --radius-pill: 9999px;
+
+  --shadow-1: rgba(0, 0, 0, 0.125) 0px 1px 1px 0px;
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.06);
+  --shadow-elevated: 0 20px 45px rgba(18, 47, 42, 0.12);
+  --shadow-glow: 0 0 0 4px rgba(252, 121, 26, 0.25);
+
+  --motion-duration-instant: 200ms;
+  --motion-duration-fast: 300ms;
+  --motion-duration-normal: 350ms;
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Page Scope & Structure
+   ========================================================================== */
+
+.about-page-container {
+  font-family: var(--font-family-stack);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--font-line-height-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-base);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Focus-visible global consistency */
+.about-page-container :focus-visible {
+  outline: 3px solid var(--color-brand-primary);
+  outline-offset: 3px;
+  box-shadow: var(--shadow-glow);
+  border-radius: 4px;
+}
+
+/* Breadcrumb / Top Hero Banner */
+.about-hero-banner {
+  background: linear-gradient(135deg, #0b231c 0%, #122f2a 100%);
+  color: var(--color-text-inverse);
+  padding: var(--space-10) var(--space-8);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-hero-banner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 450px;
+  height: 100%;
+  background: radial-gradient(circle at 80% 50%, rgba(252, 121, 26, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.about-banner-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  position: relative;
+  z-index: 2;
+}
+
+.about-banner-title {
+  font-family: Quicksand, sans-serif;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 700;
+  line-height: 48px;
+  text-align: left;
+  color: var(--color-text-inverse);
+  cursor: crosshair;
+  transition: all;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.about-banner-title span {
+  font-family: Quicksand, sans-serif;
+  font-weight: 700;
+  cursor: crosshair;
+  transition: all;
+}
+
+.about-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.about-breadcrumb li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.about-breadcrumb a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--motion-duration-instant) var(--motion-ease-standard);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+}
+
+.about-breadcrumb a:hover {
+  color: var(--color-brand-primary);
+  text-decoration: underline;
+}
+
+.about-breadcrumb-sep {
+  color: rgba(255, 255, 255, 0.4);
+  user-select: none;
+}
+
+.about-breadcrumb-current {
+  color: var(--color-brand-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ==========================================================================
+   Section 1: Hero Profile (HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj)
+   Matches reference image layout: Left Photo, Right Intro + Heading
+   ========================================================================== */
+
+.about-profile-section {
+  padding: var(--space-12) var(--space-8) var(--space-10);
+  background-color: var(--color-surface-base);
+  position: relative;
+}
+
+.about-profile-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(320px, 490px) 1fr;
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+  position: relative;
+}
+
+/* Left Photo Container */
+.about-mic-photo-wrapper {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard),
+              box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
+  background-color: #f1f5f9;
+}
+
+.about-mic-photo-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-elevated);
+}
+
+.about-mic-photo {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 4.4;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* Right Text Content */
+.about-profile-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Heart Tag / Badge */
+.about-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-transform: capitalize;
+  margin-bottom: var(--space-4);
+  letter-spacing: 0.5px;
+}
+
+.about-heart-icon {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Main Heading */
+.about-page-container h2,
+.about-main-heading {
+  font-family: Quicksand, sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 48px;
+  text-align: left;
+  color: var(--donatm-link-color, #122f2a);
+  cursor: crosshair;
+  transition: all;
+  margin: 0 0 var(--space-7) 0;
+  letter-spacing: -0.5px;
+}
+
+.about-page-container h2 span,
+.about-main-heading span {
+  font-family: Quicksand, sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 48px;
+  text-align: left;
+  color: var(--donatm-link-color, #122f2a);
+  cursor: crosshair;
+  transition: all;
+}
+
+/* Bio Paragraphs */
+.about-bio-text {
+  font-size: var(--font-size-base);
+  line-height: var(--font-line-height-base);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-6) 0;
+}
+
+.about-bio-text:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Decorative side contour line (matches reference visual) */
+.about-contour-accent-right {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 130px;
+  height: 280px;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   Section 2: Sacred Tradition & Lineage (Centered Notch Box)
+   Matches reference image: centered text with top notched pink/peach divider
+   ========================================================================== */
+
+.about-tradition-section {
+  padding: 0 var(--space-8) var(--space-12);
+  background-color: var(--color-surface-base);
+  position: relative;
+}
+
+.about-tradition-container {
+  max-width: 940px;
+  margin: 0 auto;
+  position: relative;
+  padding-top: var(--space-10);
+  border-top: 1px solid var(--color-surface-notch);
+}
+
+/* Centered Top Tab / Notch (exact match to reference design) */
+.about-divider-notch {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 38px;
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.about-divider-notch svg {
+  width: 38px;
+  height: 18px;
+  fill: var(--color-surface-base);
+  stroke: var(--color-surface-notch);
+  stroke-width: 1.5;
+}
+
+.about-tradition-content p {
+  font-size: var(--font-size-base);
+  line-height: var(--font-line-height-base);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-7);
+}
+
+.about-tradition-content p:last-child {
+  margin-bottom: 0;
+}
+
+.about-tradition-content strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+}
+
+/* ==========================================================================
+   Section 3: A Life Dedicated to Dharma & Katha List
+   Matches reference image: Cream bg, contour curves, chakra list, arch photo
+   ========================================================================== */
+
+.about-dharma-section {
+  background-color: var(--color-surface-cream);
+  padding: var(--space-12) var(--space-8);
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid #f1e9dd;
+}
+
+/* Background Topographic Wave Contours */
+.about-dharma-bg-curves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.45;
+}
+
+/* Left Watermark / Sketch Devotion Graphic */
+.about-dharma-sketch-left {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 220px;
+  height: 220px;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Right Saffron Brush Texture Accent */
+.about-dharma-brush-right {
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-40%);
+  width: 240px;
+  height: 240px;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.about-dharma-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.05fr minmax(320px, 460px);
+  gap: clamp(36px, 5vw, 70px);
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* Left Column */
+.about-dharma-content {
+  position: relative;
+}
+
+.about-dharma-heading {
+  font-family: Quicksand, sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 48px;
+  text-align: left;
+  color: var(--donatm-link-color, #122f2a);
+  cursor: crosshair;
+  transition: all;
+  margin: 0 0 var(--space-6) 0;
+  letter-spacing: -0.5px;
+}
+
+.about-dharma-heading span {
+  font-family: Quicksand, sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 48px;
+  text-align: left;
+  color: var(--donatm-link-color, #122f2a);
+  cursor: crosshair;
+  transition: all;
+}
+
+.about-dharma-lead {
+  font-size: var(--font-size-base);
+  line-height: var(--font-line-height-base);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-7);
+}
+
+.about-katha-subhead {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+  margin: 0 0 var(--space-5) 0;
+}
+
+/* Katha List & Rosette / Chakra Bullets */
+.about-katha-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-9) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.about-katha-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  transition: transform var(--motion-duration-instant) var(--motion-ease-standard),
+              color var(--motion-duration-instant) var(--motion-ease-standard);
+  padding: 4px 6px;
+  border-radius: var(--radius-xs);
+}
+
+.about-katha-item:hover {
+  transform: translateX(4px);
+  color: var(--color-text-tertiary);
+}
+
+.about-katha-chakra-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: #7b7878;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--motion-duration-instant) var(--motion-ease-standard),
+              transform var(--motion-duration-instant) var(--motion-ease-standard);
+}
+
+.about-katha-item:hover .about-katha-chakra-icon {
+  color: var(--color-brand-primary);
+  transform: rotate(45deg);
+}
+
+/* Action Buttons */
+.about-action-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.btn-about-primary {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+  padding: 13px 28px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  border: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: all var(--motion-duration-instant) var(--motion-ease-standard);
+  box-shadow: 0 4px 14px rgba(252, 121, 26, 0.25);
+  cursor: pointer;
+}
+
+.btn-about-primary:hover {
+  background-color: var(--color-brand-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(252, 121, 26, 0.35);
+  color: var(--color-text-inverse);
+}
+
+.btn-about-secondary {
+  background-color: transparent;
+  color: var(--color-text-tertiary);
+  padding: 12px 26px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  border: 2px solid var(--color-text-tertiary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: all var(--motion-duration-instant) var(--motion-ease-standard);
+  cursor: pointer;
+}
+
+.btn-about-secondary:hover {
+  background-color: var(--color-text-tertiary);
+  color: var(--color-text-inverse);
+  transform: translateY(-2px);
+}
+
+/* Right Arched Dome Portrait Container */
+.about-arch-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Outer Concentric Arch Outline */
+.about-arch-outer-ring {
+  position: absolute;
+  inset: -14px;
+  border: 1.5px solid #e5d3ba;
+  border-radius: 300px 300px 36px 36px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Inner Frame */
+.about-arch-frame {
+  width: 100%;
+  max-width: 440px;
+  border-radius: var(--radius-arch);
+  overflow: hidden;
+  box-shadow: var(--shadow-elevated);
+  background-color: #ffffff;
+  position: relative;
+  z-index: 2;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.about-arch-frame:hover {
+  transform: scale(1.02);
+}
+
+.about-arch-photo {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5.2;
+  object-fit: cover;
+  object-position: center 20%;
+  display: block;
+}
+
+/* ==========================================================================
+   Section 4: Sacred Pillars & Highlights Grid
+   ========================================================================== */
+
+.about-pillars-section {
+  padding: var(--space-12) var(--space-8);
+  background-color: var(--color-surface-base);
+}
+
+.about-pillars-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.about-section-header-center {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto var(--space-10);
+}
+
+.about-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-8);
+}
+
+.about-pillar-card {
+  background-color: var(--color-surface-base);
+  border: 1px solid #f1f5f9;
+  border-radius: var(--radius-sm);
+  padding: var(--space-8) var(--space-7);
+  box-shadow: var(--shadow-card);
+  transition: all var(--motion-duration-fast) var(--motion-ease-standard);
+  display: flex;
+  flex-direction: column;
+}
+
+.about-pillar-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-brand-border);
+  box-shadow: 0 16px 35px rgba(252, 121, 26, 0.1);
+}
+
+.about-pillar-icon-box {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background-color: var(--color-brand-subtle);
+  color: var(--color-brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: var(--space-5);
+}
+
+.about-pillar-title {
+  font-size: 19px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.about-pillar-desc {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .about-profile-grid {
+    grid-template-columns: 1fr;
+    max-width: 650px;
+  }
+
+  .about-dharma-grid {
+    grid-template-columns: 1fr;
+    max-width: 650px;
+  }
+
+  .about-arch-frame {
+    margin: 0 auto;
+  }
+
+  .about-contour-accent-right {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-profile-section {
+    padding: var(--space-9) var(--space-5);
+  }
+
+  .about-tradition-section {
+    padding: 0 var(--space-5) var(--space-9);
+  }
+
+  .about-dharma-section {
+    padding: var(--space-9) var(--space-5);
+  }
+
+  .about-hero-banner {
+    padding: var(--space-8) var(--space-5);
+  }
+
+  .about-main-heading,
+  .about-dharma-heading,
+  .about-main-heading span,
+  .about-dharma-heading span {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .about-arch-outer-ring {
+    inset: -8px;
+  }
+
+  .about-action-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-about-primary,
+  .btn-about-secondary {
+    justify-content: center;
+    width: 100%;
+  }
+}

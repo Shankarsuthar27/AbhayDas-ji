@@ -1,0 +1,579 @@
+/* ==========================================================================
+   Mobile-First Optimization for Shree Abhaydas Portal Home Page
+   Matches the Mobile Reference Design (max-width: 768px)
+   ========================================================================== */
+
+/* Default Sticky Spacer and Header Classes */
+.site-header {
+  width: 100%;
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #ffffff;
+  transition: box-shadow 0.25s ease;
+}
+
+.site-header.is-sticky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.header-sticky-spacer {
+  height: 112px;
+}
+
+@media (max-width: 768px) {
+  /* --------------------------------------------------
+     1. Header & Navigation (Mobile Reference Precision)
+     -------------------------------------------------- */
+  .site-header {
+    width: 100% !important;
+    background-color: #ffffff !important;
+  }
+
+  /* Non-Sticky State (Top of page: 38px top bar + 62px navbar = 100px total) */
+  .site-header:not(.is-sticky) {
+    position: relative !important;
+  }
+
+  .site-header:not(.is-sticky) .header-top-bar {
+    height: 38px !important;
+    background-color: #0b231c !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 16px !important;
+  }
+
+  .site-header:not(.is-sticky) .header-main-navbar {
+    height: 62px !important;
+    background-color: #ffffff !important;
+    position: relative !important;
+    width: 100% !important;
+  }
+
+  .site-header:not(.is-sticky) .header-orange-logo-tab,
+  .site-header:not(.is-sticky) .region-logo-two {
+    position: absolute !important;
+    top: -38px !important;
+    left: 0 !important;
+    width: 175px !important;
+    height: 100px !important; /* Spans across top bar and navbar */
+    background-color: #fc791a !important;
+    border-radius: 0 0 32px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px 16px !important;
+    z-index: 1001 !important;
+    box-shadow: 0 4px 15px rgba(252, 121, 26, 0.35) !important;
+    text-decoration: none !important;
+  }
+
+  .site-header:not(.is-sticky) .header-orange-logo-tab img {
+    max-height: 44px !important;
+    max-width: 88% !important;
+    width: auto !important;
+    object-fit: contain !important;
+    margin-top: 6px !important;
+  }
+
+  /* Sticky State (When scrolled down: 60px solid navbar pinned to top) */
+  .site-header.is-sticky {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .site-header.is-sticky .header-main-navbar {
+    height: 60px !important;
+    background-color: #ffffff !important;
+    position: relative !important;
+    width: 100% !important;
+  }
+
+  .site-header.is-sticky .header-orange-logo-tab,
+  .site-header.is-sticky .region-logo-two {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 170px !important;
+    height: 60px !important; /* Exactly matches 60px sticky navbar */
+    background-color: #fc791a !important;
+    border-radius: 0 0 28px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px 14px !important;
+    z-index: 1001 !important;
+    box-shadow: 0 3px 12px rgba(252, 121, 26, 0.3) !important;
+    text-decoration: none !important;
+  }
+
+  .site-header.is-sticky .header-orange-logo-tab img {
+    max-height: 40px !important;
+    max-width: 88% !important;
+    width: auto !important;
+    object-fit: contain !important;
+    margin-top: 0 !important;
+  }
+
+  /* Inner Navbar Flex Container on Mobile */
+  .header-main-navbar-inner {
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding: 0 16px 0 0 !important;
+  }
+
+  /* Right Controls: Hamburger + Search */
+  .header-right-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+    margin-left: auto !important;
+  }
+
+  .header-mobile-hamburger-btn {
+    background-color: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 9px !important;
+    padding: 7px 11px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  .header-mobile-search-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #1f2937 !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Spacer to prevent ANY content jump when switching to sticky */
+  .header-sticky-spacer {
+    height: 100px !important;
+  }
+
+  /* --------------------------------------------------
+     2. Hero Section
+     -------------------------------------------------- */
+  .hero-slider-section {
+    padding: 12px 0 20px !important;
+  }
+
+  .hero-slider-section > div {
+    padding: 0 14px !important;
+  }
+
+  .hero-slider-card {
+    min-height: 600px !important;
+    height: auto !important;
+    border-radius: 24px !important;
+  }
+
+  /* Maharaj Ji background photo position for mobile */
+  .hero-slider-card img {
+    object-position: 72% 35% !important;
+  }
+
+  /* Hide navigation side zones on mobile to avoid overlapping */
+  .hero-nav-zone-left,
+  .hero-nav-zone-right,
+  .hero-slider-nav-btn {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  /* Hero Content Position & Typography */
+  .hero-slider-content-wrap {
+    left: 18px !important;
+    right: 18px !important;
+    bottom: 28px !important;
+    max-width: calc(100% - 36px) !important;
+  }
+
+  .hero-slider-badge {
+    font-size: 11.5px !important;
+    padding: 5px 14px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .hero-slider-heading {
+    font-size: 26px !important;
+    line-height: 1.25 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .hero-slider-desc {
+    font-size: 13px !important;
+    line-height: 1.58 !important;
+    margin-bottom: 18px !important;
+  }
+
+  .hero-slider-actions-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .hero-slider-notice-box {
+    width: 100% !important;
+    max-width: 280px !important;
+    font-size: 13px !important;
+  }
+
+  .hero-slider-volunteer-btn {
+    font-size: 13.5px !important;
+  }
+
+  /* --------------------------------------------------
+     3. About Section ("Brief Introduction")
+     -------------------------------------------------- */
+  #about {
+    padding: 42px 0 48px !important;
+  }
+
+  #about > div {
+    padding: 0 16px !important;
+  }
+
+  .about-beige-card {
+    border-radius: 0 45px 0 0 !important;
+    padding: 32px 20px 36px !important;
+  }
+
+  .about-heading-title {
+    font-size: 28px !important;
+    line-height: 1.22 !important;
+    margin-bottom: 16px !important;
+  }
+
+  .about-desc-paragraph {
+    font-size: 13.5px !important;
+    line-height: 1.72 !important;
+    margin-bottom: 24px !important;
+  }
+
+  .about-cta-btn {
+    height: 44px !important;
+    font-size: 14px !important;
+    padding: 5px 22px 5px 6px !important;
+  }
+
+  /* Two photos displayed side-by-side matching screenshot */
+  .about-images-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    margin-top: 24px !important;
+  }
+
+  .about-img-box {
+    height: 235px !important;
+    min-height: 235px !important;
+    border-radius: 18px !important;
+  }
+
+  .about-img-box > div {
+    border-radius: 18px !important;
+  }
+
+  /* Centered circular play button on left Krishna image */
+  .about-play-badge {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    bottom: auto !important;
+    transform: translate(-50%, -50%) !important;
+    width: 50px !important;
+    height: 50px !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .about-play-badge svg:first-child {
+    display: none !important; /* Hide outer rotating text on compact mobile */
+  }
+
+  .about-play-badge > div {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .about-play-badge > div svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* --------------------------------------------------
+     4. Spiritual Kathas (3 Temple-Arched Cards)
+     -------------------------------------------------- */
+  #kathas {
+    padding: 45px 0 55px !important;
+  }
+
+  #kathas > div:last-child {
+    padding: 0 16px !important;
+  }
+
+  #kathas h2 {
+    font-size: 28px !important;
+  }
+
+  /* 3 Arched Cards cleanly stacked vertically */
+  #kathas [style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: 36px !important;
+  }
+
+  #kathas [style*="borderRadius: '500px 500px 0 0'"] {
+    height: 380px !important;
+    max-width: 310px !important;
+    margin: 0 auto !important;
+  }
+
+  /* --------------------------------------------------
+     5. Campaigns / Urgent Causes (Donation)
+     -------------------------------------------------- */
+  #campaigns {
+    padding: 48px 0 54px !important;
+  }
+
+  #campaigns .max-w-7xl,
+  #campaigns [style*="maxWidth: '1280px'"] {
+    padding: 0 16px !important;
+  }
+
+  #campaigns h2 {
+    font-size: 28px !important;
+  }
+
+  /* Hide floating side navigation arrows on mobile */
+  .campaign-arrow-btn,
+  #campaigns button[aria-label="Previous campaign"],
+  #campaigns button[aria-label="Next campaign"] {
+    display: none !important;
+  }
+
+  /* Centered 1-card presentation with snap */
+  #campaigns .overflow-x-auto,
+  #campaigns [style*="overflowX: 'auto'"] {
+    scroll-snap-type: x mandatory !important;
+    gap: 16px !important;
+  }
+
+  #campaigns .flex-none,
+  #campaigns [style*="flex: '0 0"] {
+    min-width: calc(100vw - 44px) !important;
+    max-width: calc(100vw - 44px) !important;
+    scroll-snap-align: center !important;
+    margin: 0 auto !important;
+  }
+
+  /* --------------------------------------------------
+     6. Katha Names Marquee Ticker
+     -------------------------------------------------- */
+  .gsc-marquee {
+    padding: 22px 0 34px !important;
+  }
+
+  .marquee-title {
+    font-size: 34px !important;
+    line-height: 38px !important;
+  }
+
+  .marquee-dot-icon {
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 16px !important;
+  }
+
+  /* --------------------------------------------------
+     7. Photo Gallery Grid
+     -------------------------------------------------- */
+  #gallery {
+    padding: 30px 0 40px !important;
+  }
+
+  /* --------------------------------------------------
+     8. Video Section ("Recent Katha")
+     -------------------------------------------------- */
+  #videos {
+    padding: 44px 0 52px !important;
+  }
+
+  #videos > div:last-child {
+    padding: 0 16px !important;
+  }
+
+  #videos h2 {
+    font-size: 28px !important;
+  }
+
+  /* Hide header watch more button on mobile */
+  .katha-header-watch-more-btn {
+    display: none !important;
+  }
+
+  /* Hide carousel arrow buttons on mobile */
+  .katha-slider-arrow {
+    display: none !important;
+  }
+
+  /* Single centered video card presentation */
+  .recent-katha-cards-row {
+    scroll-snap-type: x mandatory !important;
+    gap: 16px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .recent-katha-card-col {
+    min-width: calc(100vw - 44px) !important;
+    max-width: calc(100vw - 44px) !important;
+    scroll-snap-align: center !important;
+    margin: 0 auto !important;
+  }
+
+  /* Centered bottom Watch More Videos button */
+  .katha-bottom-watch-more-wrap {
+    display: block !important;
+    margin-top: 24px !important;
+  }
+
+  .katha-bottom-watch-more-btn {
+    padding: 10px 24px !important;
+    font-size: 14px !important;
+  }
+
+  /* --------------------------------------------------
+     9. Events Section ("Upcoming Event Schedule")
+     -------------------------------------------------- */
+  #events {
+    padding: 48px 0 55px !important;
+  }
+
+  #events > div:last-child {
+    padding: 0 16px !important;
+  }
+
+  #events h2 {
+    font-size: 26px !important;
+  }
+
+  #events [style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* --------------------------------------------------
+     10. News Section ("Latest News And Articles")
+     -------------------------------------------------- */
+  #news {
+    padding: 45px 0 55px !important;
+  }
+
+  #news > div {
+    padding: 0 16px !important;
+  }
+
+  #news h2 {
+    font-size: 26px !important;
+  }
+
+  /* News Card 100% width on mobile */
+  #news [style*="flex: 0 0 calc(50%"] {
+    flex: 0 0 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* --------------------------------------------------
+     11. Team Section
+     -------------------------------------------------- */
+  #team {
+    padding: 48px 0 55px !important;
+  }
+
+  #team > div {
+    padding: 0 16px !important;
+  }
+
+  #team h2 {
+    font-size: 26px !important;
+  }
+
+  #team [style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+
+  /* Featured Sachin Sharma Card centered */
+  #team [style*="borderRadius: '130px 130px 20px 20px'"] {
+    width: 240px !important;
+    height: 290px !important;
+    margin: 0 auto !important;
+  }
+
+  #team [style*="borderRadius: '0 0 115px 115px'"] {
+    width: 215px !important;
+    margin: -30px auto 0 !important;
+    padding: 22px 14px 26px !important;
+  }
+
+  /* --------------------------------------------------
+     12. Contact Bar
+     -------------------------------------------------- */
+  #contact-bar,
+  div:has(> div > [style*="backgroundColor: '#fc791a'"]) {
+    padding: 0 0 28px !important;
+  }
+
+  [style*="backgroundColor: '#fc791a'"][style*="borderRadius: '20px'"],
+  [style*="background-color: rgb(252, 121, 26)"][style*="border-radius: 20px"] {
+    grid-template-columns: 1fr !important;
+    padding: 22px 18px !important;
+    gap: 18px !important;
+    border-radius: 18px !important;
+  }
+
+  .contact-bar-item {
+    gap: 14px !important;
+  }
+
+  /* --------------------------------------------------
+     13. Footer
+     -------------------------------------------------- */
+  footer#contact > div:first-child {
+    padding: 42px 18px 36px !important;
+  }
+
+  footer#contact [style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+
+  footer#contact > div:last-child {
+    padding: 16px 18px !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 8px !important;
+  }
+}

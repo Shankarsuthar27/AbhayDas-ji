@@ -1,0 +1,635 @@
+/* ==========================================================================
+   GalleryPage.css - Responsive 5-Column Grid, Scroll Reveal & Lightbox
+   Shree Abhay Das Ji Maharaj
+   ========================================================================== */
+
+.gallery-page-container {
+  width: 100%;
+  background-color: #ffffff;
+  color: #1f2937;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   1. Hero Banner Section
+   Maharaj Ji namaste banner with "Our Gallery" & breadcrumb
+   -------------------------------------------------------------------------- */
+.gallery-hero-banner {
+  position: relative;
+  width: 100%;
+  min-height: 340px;
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  overflow: hidden;
+}
+
+.gallery-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 35, 28, 0.45) 0%,
+    rgba(11, 35, 28, 0.65) 100%
+  );
+  backdrop-filter: blur(1px);
+  z-index: 1;
+}
+
+.gallery-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 860px;
+  margin: 0 auto;
+  color: #ffffff;
+  animation: galleryHeroFade 0.8s ease-out;
+}
+
+.gallery-hero-title {
+  font-size: clamp(38px, 5.5vw, 62px);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  line-height: 1.15;
+}
+
+.gallery-hero-subtitle {
+  font-size: clamp(16px, 2vw, 21px);
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 20px 0;
+  font-weight: 400;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  line-height: 1.5;
+}
+
+.gallery-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  padding: 6px 18px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.gallery-breadcrumb-link {
+  color: #ffffff;
+  text-decoration: none;
+  opacity: 0.88;
+  transition: opacity 0.2s, color 0.2s;
+  cursor: pointer;
+}
+
+.gallery-breadcrumb-link:hover {
+  opacity: 1;
+  color: #fc791a;
+}
+
+.gallery-breadcrumb-sep {
+  opacity: 0.6;
+}
+
+.gallery-breadcrumb-current {
+  color: #fc791a;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   2. Gallery Main Section & Toolbar
+   -------------------------------------------------------------------------- */
+.gallery-main-section {
+  max-width: 1540px;
+  margin: 0 auto;
+  padding: 40px 24px 70px;
+}
+
+.gallery-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.gallery-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b231c;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 8px 18px;
+  border-radius: 20px;
+}
+
+.gallery-badge-icon {
+  font-size: 16px;
+}
+
+.gallery-count-number {
+  color: #fc791a;
+  font-weight: 800;
+}
+
+.gallery-search-box {
+  position: relative;
+  min-width: 280px;
+  max-width: 420px;
+  flex: 1;
+}
+
+.gallery-search-input {
+  width: 100%;
+  padding: 10px 38px 10px 42px;
+  border-radius: 30px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 14px;
+  color: #1f2937;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.gallery-search-input:focus {
+  border-color: #fc791a;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(252, 121, 26, 0.15);
+}
+
+.gallery-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.gallery-search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #e2e8f0;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.gallery-search-clear:hover {
+  background: #cbd5e1;
+  color: #0f172a;
+}
+
+/* --------------------------------------------------------------------------
+   3. Specification 1: Clean, Uniform 5-Column Grid with Small Gap (10px-15px)
+   -------------------------------------------------------------------------- */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px; /* Small 12px gap between uniform thumbnails */
+}
+
+@media (max-width: 1280px) {
+  .gallery-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 960px) {
+  .gallery-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Specification 2: Scroll Reveal Entrance Animation
+   Uniform square thumbnails cropping, fade-in and slide-up entrance animation
+   -------------------------------------------------------------------------- */
+.gallery-card {
+  position: relative;
+  aspect-ratio: 1 / 1; /* Cropped to uniform square thumbnail */
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #1e293b;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  outline: none;
+  
+  /* Scroll reveal initial state: 0% opacity & lower position (translateY 28px) */
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s ease;
+  transition-delay: var(--col-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+/* Scroll reveal visible state: 100% opacity & resting position */
+.gallery-card.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gallery-card:hover,
+.gallery-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+}
+
+.gallery-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Uniform square crop */
+  display: block;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.gallery-card:hover .gallery-card-img,
+.gallery-card:focus-visible .gallery-card-img {
+  transform: scale(1.08);
+}
+
+/* Hover Overlay */
+.gallery-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 35, 28, 0.15) 0%,
+    rgba(11, 35, 28, 0.55) 100%
+  );
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.25s ease;
+  padding: 16px;
+}
+
+.gallery-card:hover .gallery-card-overlay,
+.gallery-card:focus-visible .gallery-card-overlay {
+  opacity: 1;
+}
+
+.gallery-card-zoom-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(252, 121, 26, 0.95);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  transform: scale(0.85);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-card:hover .gallery-card-zoom-icon,
+.gallery-card:focus-visible .gallery-card-zoom-icon {
+  transform: scale(1);
+}
+
+/* Empty State */
+.gallery-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 1px dashed #cbd5e1;
+}
+
+.gallery-empty-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0b231c;
+  margin-bottom: 8px;
+}
+
+.gallery-empty-desc {
+  font-size: 15px;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.gallery-empty-btn {
+  background: #fc791a;
+  color: #ffffff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 25px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.gallery-empty-btn:hover {
+  background: #e66609;
+}
+
+/* --------------------------------------------------------------------------
+   5. Specification 3 & 4: Fullscreen Interactive Lightbox Modal
+   Dark semi-transparent backdrop, top-right toolbar, centered scaled image,
+   < and > navigation arrows, and centered name caption directly below
+   -------------------------------------------------------------------------- */
+.gallery-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  /* Dark semi-transparent overlay matching reference screenshot */
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: lightboxFadeIn 0.2s ease-out;
+  cursor: pointer; /* Clicking outside closes modal */
+  user-select: none;
+}
+
+/* Top-Right Control Toolbar matching reference screenshot */
+.gallery-lightbox-header {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.gallery-lightbox-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.gallery-lightbox-btn:hover {
+  background: #fc791a;
+  border-color: #fc791a;
+  transform: scale(1.08);
+}
+
+.gallery-lightbox-btn.is-active {
+  background: #fc791a;
+  border-color: #fc791a;
+}
+
+.gallery-lightbox-close:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  transform: rotate(90deg) scale(1.08);
+}
+
+/* Navigation Arrows (< and > on left & right sides of screen) */
+.gallery-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 990;
+}
+
+.gallery-lightbox-nav:hover {
+  background: #fc791a;
+  border-color: #fc791a;
+  transform: translateY(-50%) scale(1.12);
+  box-shadow: 0 0 20px rgba(252, 121, 26, 0.4);
+}
+
+.gallery-lightbox-prev {
+  left: 24px;
+}
+
+.gallery-lightbox-next {
+  right: 24px;
+}
+
+@media (max-width: 768px) {
+  .gallery-lightbox-nav {
+    width: 42px;
+    height: 42px;
+  }
+  .gallery-lightbox-prev {
+    left: 12px;
+  }
+  .gallery-lightbox-next {
+    right: 12px;
+  }
+  .gallery-lightbox-header {
+    top: 12px;
+    right: 14px;
+    gap: 8px;
+  }
+  .gallery-lightbox-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Lightbox Stage: Centered Enlarged Image */
+.gallery-lightbox-stage {
+  position: relative;
+  max-width: 90vw;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: default; /* Clicking image area doesn't close */
+  animation: lightboxScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-lightbox-img-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 85vw;
+  max-height: 76vh;
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.gallery-lightbox-img-wrapper.is-zoomed-wrapper {
+  overflow: auto;
+  max-width: 92vw;
+  max-height: 80vh;
+}
+
+/* Image maintains natural aspect ratio without stretching or distortion */
+.gallery-lightbox-img {
+  max-width: 85vw;
+  max-height: 76vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: zoom-in;
+}
+
+.gallery-lightbox-img.is-zoomed {
+  transform: scale(1.6);
+  cursor: zoom-out;
+}
+
+/* Dynamic text caption centered directly below the enlarged image */
+.gallery-lightbox-caption-area {
+  margin-top: 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.gallery-lightbox-caption {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+  user-select: text;
+}
+
+.gallery-lightbox-counter {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+}
+
+/* Floating Toast Notification */
+.gallery-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fc791a;
+  color: #ffffff;
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  z-index: 1000000;
+  animation: galleryToastFade 0.3s ease-out;
+}
+
+/* Keyframe Animations */
+@keyframes lightboxFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lightboxScaleUp {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes galleryHeroFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes galleryToastFade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 15px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

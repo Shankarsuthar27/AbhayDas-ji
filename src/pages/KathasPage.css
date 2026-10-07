@@ -1,0 +1,404 @@
+/* ==========================================================================
+   Kathas Page Styles – Shree Abhay Das Ji Maharaj
+   URL: https://shreeabhaydas.com/spiritual-discourses-kathas/
+   Tokens: --donatm-font-sans-serif, --e-global-color-text, --donatm-link-color
+   ========================================================================== */
+
+:root {
+  --donatm-font-sans-serif: 'Plus Jakarta Sans', sans-serif;
+  --e-global-color-text: #676666;
+  --donatm-heading-font-family: 'Quicksand', sans-serif;
+  --color-katha-title: #9a3412; /* Rich warm amber-brown matching live inspect */
+}
+
+.kathas-page-container {
+  background-color: #ffffff;
+  color: var(--e-global-color-text, #676666);
+  font-family: var(--donatm-font-sans-serif);
+  font-size: 16px;
+  line-height: 28.8px;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   Section 1: Hero / Introduction (Spiritual Discourses & Kathas)
+   ========================================================================== */
+
+.kathas-intro-section {
+  padding: 60px 24px 48px;
+  background-color: #ffffff;
+}
+
+.kathas-intro-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+}
+
+.kathas-intro-content {
+  position: relative;
+}
+
+.kathas-intro-title {
+  font-family: var(--donatm-heading-font-family, 'Quicksand', sans-serif);
+  font-size: clamp(32px, 4vw, 42px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-katha-title, #9a3412);
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+  cursor: crosshair;
+  transition: all;
+}
+
+.kathas-intro-text {
+  font-family: var(--donatm-font-sans-serif);
+  font-size: 16px;
+  line-height: 28.8px;
+  color: var(--e-global-color-text, #676666);
+  margin-bottom: 20px;
+}
+
+.kathas-intro-text:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Authoritative element spec: img.attachment-large */
+.attachment-large {
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: auto 900 / 600;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 16px;
+  line-height: 28.8px;
+  text-align: center;
+  color: var(--e-global-color-text, #676666);
+  border-radius: 0px 171px 395px 90px;
+  overflow: clip;
+  opacity: 0.9;
+  cursor: crosshair;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.attachment-large:hover {
+  opacity: 1;
+  transform: scale(1.01);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================================================
+   Section 2: 4 Kathas Cards with Decorative Outline & Interlocking Hearts
+   ========================================================================== */
+
+.kathas-list-section {
+  padding: 30px 24px 80px;
+  background-color: #ffffff;
+}
+
+.kathas-cards-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* Authoritative container spec: .e-con-inner */
+.katha-card {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  padding: 24px 36px;
+  background: #ffffff;
+  border: 1.5px solid #f6cbb0;
+  border-radius: 54px 18px 54px 18px;
+  box-shadow: 0 4px 15px rgba(252, 121, 26, 0.04);
+  transition: all 0.3s ease;
+  cursor: crosshair;
+  position: relative;
+  overflow: hidden;
+}
+
+.katha-card:hover {
+  border-color: #fc791a;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(252, 121, 26, 0.12);
+}
+
+.katha-card-thumb-wrapper {
+  flex-shrink: 0;
+  width: 230px;
+  height: 165px;
+  position: relative;
+}
+
+.katha-card-thumb {
+  width: 100%;
+  height: 100%;
+  border-radius: 95px 95px 14px 14px;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.katha-card:hover .katha-card-thumb {
+  transform: scale(1.02);
+}
+
+/* Authoritative .e-con-inner text container */
+.katha-card-content.e-con-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  max-width: min(100%, 1200px);
+  font-family: var(--donatm-font-sans-serif, "Plus Jakarta Sans", sans-serif);
+  font-size: 16px;
+  line-height: 28.8px;
+  color: var(--e-global-color-text, #676666);
+  padding: 10px 0;
+  cursor: crosshair;
+  transition: all;
+  flex: 1;
+}
+
+.katha-card-title {
+  font-family: var(--donatm-heading-font-family, 'Quicksand', sans-serif);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-katha-title, #9a3412);
+  margin: 0;
+  transition: color 0.2s ease;
+}
+
+.katha-card:hover .katha-card-title {
+  color: #ea580c;
+}
+
+.katha-card-desc {
+  font-family: var(--donatm-font-sans-serif, "Plus Jakarta Sans", sans-serif);
+  font-size: 15.5px;
+  line-height: 28.8px;
+  color: var(--e-global-color-text, #676666);
+  margin: 0;
+}
+
+/* Right Interlocking Double Hearts Icon */
+.katha-card-hearts {
+  flex-shrink: 0;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f97316;
+  opacity: 0.85;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  user-select: none;
+}
+
+.katha-card:hover .katha-card-hearts {
+  opacity: 1;
+  transform: scale(1.08) rotate(3deg);
+}
+
+/* ==========================================================================
+   Section 3: Essence of Maharaj Ji's Pravachan
+   ========================================================================== */
+
+.kathas-essence-section {
+  background-color: #fcf8f2;
+  padding: 80px 24px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid #f1e9dd;
+}
+
+.kathas-essence-bg-curves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.45;
+}
+
+.kathas-essence-brush-right {
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-40%);
+  width: 240px;
+  height: 240px;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.kathas-essence-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr minmax(320px, 460px);
+  gap: clamp(36px, 5vw, 70px);
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.kathas-essence-content {
+  position: relative;
+}
+
+.kathas-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fc791a;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: capitalize;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+.kathas-essence-heading {
+  font-family: var(--donatm-heading-font-family, 'Quicksand', sans-serif);
+  font-size: clamp(32px, 3.8vw, 44px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: #122f2a;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+}
+
+.kathas-essence-lead {
+  font-size: 16px;
+  line-height: 28.8px;
+  color: var(--e-global-color-text, #676666);
+  margin-bottom: 28px;
+}
+
+/* Feature Checklist */
+.kathas-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.kathas-check-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.kathas-check-icon {
+  width: 20px;
+  height: 20px;
+  color: #02A95C;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Right Arched Dome Portrait Container */
+.kathas-arch-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.kathas-arch-outer-ring {
+  position: absolute;
+  inset: -12px;
+  border: 1.5px solid #fcd4b8;
+  border-radius: 260px 260px 24px 24px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.kathas-arch-frame {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 250px 250px 20px 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(18, 47, 42, 0.12);
+  background-color: #0b231c;
+}
+
+.kathas-arch-photo {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5.2;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .kathas-intro-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kathas-essence-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kathas-arch-frame {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .katha-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+    gap: 20px;
+    border-radius: 28px;
+  }
+
+  .katha-card-thumb-wrapper {
+    width: 100%;
+    height: 190px;
+  }
+
+  .katha-card-thumb {
+    border-radius: 20px;
+  }
+
+  .katha-card-hearts {
+    align-self: flex-end;
+    width: 60px;
+    height: 60px;
+  }
+
+  .attachment-large {
+    border-radius: 0px 80px 180px 45px;
+  }
+}
