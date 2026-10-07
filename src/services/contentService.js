@@ -133,7 +133,7 @@ export function formatFirestoreEvent(id, data) {
     fullDescription: data.fullDescription || [
       data.description || 'पूज्य स्वामी श्री अभयदास जी महाराज के पावन सानिध्य में आयोजित विशेष कार्यक्रम।'
     ],
-    schedule: data.schedule || [
+    schedule: (Array.isArray(data.schedule) && data.schedule.length > 0) ? data.schedule : [
       { time: '07:30 PM', activity: 'भक्तजनों का आगमन एवं स्वागत' },
       { time: '08:00 PM', activity: 'दीप प्रज्वलन एवं आशीर्वचन' },
       { time: '11:00 PM', activity: 'महाआरती एवं प्रसादी वितरण' }

@@ -260,3 +260,64 @@ export async function processGalleryImage(file, onProgress) {
     };
   }
 }
+
+/**
+ * Unified Event Poster/Banner Image Processor:
+ * 1. Optimizes the event poster with client-side canvas compression (up to 1600x1100, quality 0.85, ~60-140KB).
+ * 2. Attempts Firebase Storage upload into 'events_uploads' folder with a 3.5-second timeout.
+ * 3. Gracefully falls back to high-clarity direct data URL if storage is 404/unavailable or offline.
+ * 4. Ensures event creation always succeeds reliably without blocking errors.
+ */
+export async function processEventImage(file, onProgress) {
+  if (!file) throw new Error('No file provided for event image.');
+
+  if (onProgress) onProgress(20);
+  // 1. Client-side canvas compression tailored for event banners & posters
+  const compressed = await compressImage(file, { maxWidth: 1600, maxHeight: 1100, quality: 0.85 });
+  if (onProgress) onProgress(50);
+
+  // 2. Attempt Firebase Storage with a 3.5-second timeout
+  try {
+    const storagePromise = uploadToFirebaseStorage(file, 'events_uploads', (pct) => {
+      if (onProgress) {
+        onProgress(Math.min(99, 50 + Math.round(pct * 0.5)));
+      }
+    });
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Storage unavailable')), 3500)
+    );
+
+    const result = await Promise.race([storagePromise, timeoutPromise]);
+    if (onProgress) onProgress(100);
+
+    return {
+      url: result.downloadUrl,
+      storagePath: result.path,
+      source: 'storage',
+      width: compressed.width,
+      height: compressed.height,
+      dimensions: compressed.dimensions,
+      sizeKB: compressed.sizeKB,
+      originalName: compressed.originalName,
+      message: 'Uploaded to Firebase Storage'
+    };
+  } catch (storageErr) {
+    // Graceful fallback to client-optimized Data URL
+    console.warn('Firebase Storage note (using optimized event direct image fallback):', storageErr.message);
+    if (onProgress) onProgress(100);
+
+    return {
+      url: compressed.dataUrl,
+      storagePath: '',
+      source: 'direct',
+      width: compressed.width,
+      height: compressed.height,
+      dimensions: compressed.dimensions,
+      sizeKB: compressed.sizeKB,
+      originalName: compressed.originalName,
+      message: 'Optimized event banner ready'
+    };
+  }
+}
+

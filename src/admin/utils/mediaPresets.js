@@ -87,3 +87,43 @@ export const NEWS_MEDIA_PRESETS = [
     description: 'भव्य दीप प्रज्वलन एवं महाआरती'
   }
 ];
+
+export const EVENT_MEDIA_PRESETS = [
+  {
+    id: 'preset-chhotu-singh',
+    title: 'छोटू सिंह रावणा भजन संध्या',
+    url: '/images/event_chhotu_singh_rawna.jpg',
+    description: 'विराट भजन संध्या एवं संत सानिध्य'
+  },
+  {
+    id: 'preset-hemraj-goyal',
+    title: 'हेमराज गोयल भजन उत्सव',
+    url: '/images/event_hemraj_goyal.jpg',
+    description: 'भक्ति संगीत एवं अमृतवाणी संध्या'
+  },
+  {
+    id: 'preset-dham-takhatgarh',
+    title: 'सद्गुरु धाम तखतगढ़ महोत्सव',
+    url: '/images/img_33.jpg',
+    description: 'वार्षिक पाटोत्सव एवं महाआरती'
+  },
+  {
+    id: 'preset-satsang-mandap',
+    title: 'सत्संग मंडप एवं कथा',
+    url: '/images/img_31.webp',
+    description: 'सद्गुरु त्रिकम दास जी धाम सत्संग'
+  },
+  {
+    id: 'preset-maharajji-podium',
+    title: 'पूज्य स्वामी श्री अभयदास जी',
+    url: '/images/about_maharajji_podium.jpg',
+    description: 'व्यासपीठ से पावन अमृतवर्षा'
+  },
+  {
+    id: 'preset-gurukulam',
+    title: 'तखतगढ़ गुरुकुलम लोकार्पण',
+    url: '/images/img_30.png',
+    description: 'गुरुकुल एवं समाज सेवा महोत्सव'
+  }
+];
+

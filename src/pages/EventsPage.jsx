@@ -252,7 +252,11 @@ export default function EventsPage({
                 कार्यक्रम समय सारिणी (Program Schedule)
               </h4>
               <div className="event-schedule-list">
-                {activeEvent.schedule.map((item, idx) => (
+                {(Array.isArray(activeEvent.schedule) && activeEvent.schedule.length > 0 ? activeEvent.schedule : [
+                  { time: '07:30 PM', activity: 'भक्तजनों का आगमन एवं स्वागत' },
+                  { time: '08:00 PM', activity: 'दीप प्रज्वलन एवं आशीर्वचन' },
+                  { time: '11:00 PM', activity: 'महाआरती एवं प्रसादी वितरण' }
+                ]).map((item, idx) => (
                   <div key={idx} className="event-schedule-item">
                     <span className="event-schedule-time">{item.time}</span>
                     <span className="event-schedule-desc">{item.activity}</span>

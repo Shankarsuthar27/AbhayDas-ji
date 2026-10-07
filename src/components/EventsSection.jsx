@@ -285,9 +285,55 @@ export default function EventsSection({ onOpenVolunteer, onNavigate }) {
             <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#111827', margin: '4px 0 10px 0' }}>
               {selectedEvent.title}
             </h3>
-            <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '20px' }}>
+            <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px' }}>
               📍 {selectedEvent.location} • ⏰ {selectedEvent.time}
             </p>
+
+            {/* कार्यक्रम समय सारिणी (Program Schedule) */}
+            <div style={{
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '12px 14px',
+              marginBottom: '18px'
+            }}>
+              <div style={{
+                fontSize: '12px',
+                fontWeight: '800',
+                color: '#0f172a',
+                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span>🕒</span> कार्यक्रम समय सारिणी (Program Schedule)
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {(selectedEvent.schedule && selectedEvent.schedule.length > 0 ? selectedEvent.schedule : [
+                  { time: '07:30 PM', activity: 'भक्तजनों का आगमन एवं स्वागत' },
+                  { time: '08:00 PM', activity: 'दीप प्रज्वलन एवं आशीर्वचन' },
+                  { time: '11:00 PM', activity: 'महाआरती एवं प्रसादी वितरण' }
+                ]).map((slot, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
+                    <span style={{
+                      fontWeight: '800',
+                      color: '#059669',
+                      backgroundColor: '#ecfdf5',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      minWidth: '68px',
+                      textAlign: 'center',
+                      fontSize: '11px'
+                    }}>
+                      {slot.time}
+                    </span>
+                    <span style={{ color: '#334155', fontWeight: '600' }}>
+                      {slot.activity}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {rsvpSuccess ? (
               <div style={{
