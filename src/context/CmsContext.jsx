@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { DEFAULT_HOMEPAGE_CMS, subscribeHomepageCms, saveHomepageCms } from '../services/cmsService';
 
-const CmsContext = createContext({
+export const CmsContext = createContext({
   cms: DEFAULT_HOMEPAGE_CMS,
   loading: true,
   updateCms: () => {},

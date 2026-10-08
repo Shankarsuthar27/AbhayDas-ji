@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* Global Design System & Reset */
 :root {
   --primary: #fc791a;
@@ -88,32 +90,76 @@ button {
 }
 
 /* Responsive display utilities */
-@media (max-width: 1199.98px) {
-  .d-xl-flex {
-    display: none !important;
-  }
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-flex { display: flex !important; }
+.d-inline { display: inline !important; }
+.d-inline-flex { display: inline-flex !important; }
+
+@media (min-width: 576px) {
+  .d-sm-none { display: none !important; }
+  .d-sm-block { display: block !important; }
+  .d-sm-flex { display: flex !important; }
+  .d-sm-inline { display: inline !important; }
+  .d-sm-inline-flex { display: inline-flex !important; }
 }
 
-@media (min-width: 1200px) {
-  .d-xl-none {
-    display: none !important;
-  }
-}
-
-@media (max-width: 767.98px) {
-  .d-md-block {
-    display: none !important;
-  }
-  .d-none.d-md-inline {
-    display: none !important;
-  }
+@media (max-width: 575.98px) {
+  .d-none.d-sm-flex { display: none !important; }
+  .d-none.d-sm-block { display: none !important; }
 }
 
 @media (min-width: 768px) {
-  .d-none.d-md-inline {
-    display: inline !important;
-  }
-  .d-md-block {
-    display: block !important;
+  .d-md-none { display: none !important; }
+  .d-md-block { display: block !important; }
+  .d-md-flex { display: flex !important; }
+  .d-md-inline { display: inline !important; }
+  .d-md-inline-flex { display: inline-flex !important; }
+}
+
+@media (max-width: 767.98px) {
+  .d-none.d-md-flex { display: none !important; }
+  .d-none.d-md-block { display: none !important; }
+  .d-none.d-md-inline { display: none !important; }
+}
+
+@media (min-width: 992px) {
+  .d-lg-none { display: none !important; }
+  .d-lg-block { display: block !important; }
+  .d-lg-flex { display: flex !important; }
+  .d-lg-inline { display: inline !important; }
+  .d-lg-inline-flex { display: inline-flex !important; }
+}
+
+@media (max-width: 991.98px) {
+  .d-none.d-lg-flex { display: none !important; }
+  .d-none.d-lg-block { display: none !important; }
+}
+
+@media (min-width: 1200px) {
+  .d-xl-none { display: none !important; }
+  .d-xl-block { display: block !important; }
+  .d-xl-flex { display: flex !important; }
+  .d-xl-inline { display: inline !important; }
+  .d-xl-inline-flex { display: inline-flex !important; }
+}
+
+@media (max-width: 1199.98px) {
+  .d-xl-flex { display: none !important; }
+  .d-none.d-xl-flex { display: none !important; }
+}
+
+/* Global Mobile Form Zoom Guard (Prevents iOS zoom on focus) */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 }
+

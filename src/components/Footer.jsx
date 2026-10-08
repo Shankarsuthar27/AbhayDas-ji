@@ -163,12 +163,15 @@ export default function Footer({ currentRoute = '/', onNavigate }) {
 
       {/* ── MAIN CONTENT CONTAINER ── */}
       <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '64px 28px 48px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '44px',
-          alignItems: 'start',
-        }}>
+        <div
+          className="footer-grid-container"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '44px',
+            alignItems: 'start',
+          }}
+        >
 
           {/* ── COL 1: Logo + Tagline + Socials ── */}
           <div style={{ maxWidth: '340px' }}>

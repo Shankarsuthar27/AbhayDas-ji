@@ -282,6 +282,7 @@ export default function Header({
           =====================================================================
         */}
         <div
+          className="header-logo-tab-wrapper"
           style={{
             position: 'absolute',
             left: 0,
@@ -295,6 +296,7 @@ export default function Header({
         >
           {/* Outer Translucent Orange Crescent Rim (Opacity 0.36) */}
           <div
+            className="header-logo-rim"
             style={{
               position: 'absolute',
               left: 0,
@@ -312,6 +314,7 @@ export default function Header({
           <a
             href="/"
             onClick={(e) => handleLinkClick(e, { href: '/' })}
+            className="header-orange-logo-tab"
             style={{
               position: 'relative',
               left: 0,
@@ -365,6 +368,7 @@ export default function Header({
         */}
         {!isSticky && (
           <div
+            className="header-top-bar"
             style={{
               backgroundColor: '#0e261f',
               color: '#ffffff',
@@ -378,6 +382,7 @@ export default function Header({
             }}
           >
             <div
+              className="header-top-bar-inner"
               style={{
                 width: '100%',
                 display: 'flex',
@@ -578,6 +583,7 @@ export default function Header({
           =====================================================================
         */}
         <div
+          className="header-main-navbar"
           style={{
             height: isSticky ? '68px' : '74px',
             backgroundColor: '#ffffff',
@@ -590,6 +596,7 @@ export default function Header({
           }}
         >
           <div
+            className="header-main-navbar-inner"
             style={{
               width: '100%',
               display: 'flex',
@@ -718,6 +725,7 @@ export default function Header({
               ---------------------------------------------------------------
             */}
             <div
+              className="header-right-group"
               style={{
                 marginLeft: 'auto',
                 display: 'flex',
@@ -881,7 +889,7 @@ export default function Header({
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Open mobile navigation"
-                className="d-flex d-xl-none"
+                className="header-mobile-hamburger-btn d-flex d-xl-none"
                 style={{
                   backgroundColor: '#f3f4f6',
                   border: '1px solid #e5e7eb',
@@ -907,7 +915,7 @@ export default function Header({
                 type="button"
                 onClick={onOpenSearch}
                 aria-label="Search"
-                className="d-flex d-xl-none"
+                className="header-mobile-search-btn d-flex d-xl-none"
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -929,7 +937,7 @@ export default function Header({
       </header>
 
       {/* Spacer to prevent layout shift when header fixes to top in sticky state */}
-      {isSticky && <div style={{ width: '100%', height: '112px' }} />}
+      {isSticky && <div className="header-sticky-spacer" style={{ width: '100%', height: '112px' }} />}
 
       {/* 
         =====================================================================

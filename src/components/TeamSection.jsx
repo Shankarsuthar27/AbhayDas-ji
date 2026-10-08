@@ -82,17 +82,21 @@ export default function TeamSection() {
         </div>
 
         {/* Compact Name & Role Cards */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '35px',
-          maxWidth: '960px',
-          margin: '0 auto',
-          paddingTop: '15px'
-        }}>
+        <div
+          className="team-cards-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '35px',
+            maxWidth: '960px',
+            margin: '0 auto',
+            paddingTop: '15px'
+          }}
+        >
           {teamMembers.map((member) => (
             <div
               key={member.id}
+              className="team-member-card"
               style={{
                 position: 'relative',
                 display: 'flex',

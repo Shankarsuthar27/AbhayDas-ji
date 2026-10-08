@@ -174,6 +174,7 @@ export default function SpiritualKathas({ onOpenVideo, onNavigate }) {
 
         {/* 3 Temple-Arched Cards Grid matching reference image */}
         <div
+          className="spiritual-kathas-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
@@ -191,6 +192,7 @@ export default function SpiritualKathas({ onOpenVideo, onNavigate }) {
             return (
               <div
                 key={card.id}
+                className="spiritual-katha-card"
                 onClick={() => handleCardClick(card)}
                 onMouseEnter={() => setHoveredCard(card.id)}
                 onMouseLeave={() => setHoveredCard(null)}
@@ -206,6 +208,7 @@ export default function SpiritualKathas({ onOpenVideo, onNavigate }) {
               >
                 {/* Arched Photo Card Container */}
                 <div
+                  className="spiritual-katha-arch-box"
                   style={{
                     position: 'relative',
                     height: 'clamp(410px, 40vw, 455px)',

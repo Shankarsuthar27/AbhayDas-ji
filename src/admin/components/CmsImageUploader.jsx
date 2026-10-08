@@ -17,6 +17,12 @@ export default function CmsImageUploader({
   const [urlInput, setUrlInput] = useState('');
   const fileInputRef = useRef(null);
 
+  // Safely normalize value into a string
+  const stringValue = typeof value === 'string'
+    ? value
+    : (value && typeof value === 'object' ? (value.src || value.url || value.image || '') : '');
+  const hasValue = Boolean(typeof stringValue === 'string' && stringValue.trim().length > 0);
+
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
   const handleFileProcess = async (file) => {
@@ -186,7 +192,7 @@ export default function CmsImageUploader({
             style={{ display: 'none' }}
           />
 
-          {value ? (
+          {hasValue ? (
             /* Image Preview */
             <div style={{
               display: 'flex',
@@ -207,7 +213,7 @@ export default function CmsImageUploader({
                 border: '1px solid #cbd5e1'
               }}>
                 <img
-                  src={value}
+                  src={stringValue}
                   alt="Preview"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   onError={(e) => { e.target.src = '/images/img_1.png'; }}
@@ -216,7 +222,7 @@ export default function CmsImageUploader({
 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '12px', fontWeight: '600', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {value.startsWith('data:') ? 'Optimized Local Image' : value.split('/').pop() || 'Attached Image'}
+                  {stringValue.startsWith('data:') ? 'Optimized Local Image' : stringValue.split('/').pop() || 'Attached Image'}
                 </div>
                 <div style={{ fontSize: '11px', color: '#059669', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
                   <CheckCircle2 size={12} /> Image Ready &amp; Validated

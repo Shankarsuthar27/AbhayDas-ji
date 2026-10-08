@@ -260,6 +260,7 @@ export default function NewsSection({ onNavigate }) {
             {articles.map((item) => (
               <div
                 key={item.id}
+                className="news-card-wrapper"
                 style={{
                   flex: '0 0 calc(50% - 15px)',
                   minWidth: '320px',

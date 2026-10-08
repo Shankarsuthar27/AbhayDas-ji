@@ -206,7 +206,7 @@ export default function CampaignsSection({ onOpenDonate }) {
           <button
             onClick={() => scroll('left')}
             aria-label="Previous campaign"
-            className="absolute -left-2 sm:-left-4 lg:-left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-600 hover:scale-110 transition-transform duration-200 cursor-pointer"
+            className="campaign-slider-arrow campaign-slider-prev absolute -left-2 sm:-left-4 lg:-left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center text-gray-600 hover:scale-110 transition-transform duration-200 cursor-pointer"
             style={{
               position: 'absolute',
               left: '-16px',
@@ -247,7 +247,7 @@ export default function CampaignsSection({ onOpenDonate }) {
           <button
             onClick={() => scroll('right')}
             aria-label="Next campaign"
-            className="absolute -right-2 sm:-right-4 lg:-right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-green-500 shadow-md flex items-center justify-center text-white hover:scale-110 transition-transform duration-200 cursor-pointer"
+            className="campaign-slider-arrow campaign-slider-next absolute -right-2 sm:-right-4 lg:-right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-green-500 shadow-md flex items-center justify-center text-white hover:scale-110 transition-transform duration-200 cursor-pointer"
             style={{
               position: 'absolute',
               right: '-16px',
@@ -304,7 +304,7 @@ export default function CampaignsSection({ onOpenDonate }) {
             {donationCards.map((card) => (
               <div
                 key={card.id}
-                className="w-[86vw] sm:w-[340px] md:w-[345px] lg:w-[350px] shrink-0 bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 snap-center md:snap-start overflow-hidden flex flex-col border border-gray-100"
+                className="campaign-slide-card w-[86vw] sm:w-[340px] md:w-[345px] lg:w-[350px] shrink-0 bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 snap-center md:snap-start overflow-hidden flex flex-col border border-gray-100"
                 style={{
                   width: '350px',
                   maxWidth: '90vw',

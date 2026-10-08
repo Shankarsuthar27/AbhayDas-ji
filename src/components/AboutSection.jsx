@@ -35,12 +35,15 @@ export default function AboutSection({ onOpenDonate, onOpenVideo, onNavigate }) 
       <div style={{ maxWidth: '1420px', margin: '0 auto', padding: '0 24px' }}>
         
         {/* Main 2-Column Layout matching Reference Image */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-          gap: 'clamp(30px, 4vw, 56px)',
-          alignItems: 'center'
-        }}>
+        <div
+          className="about-main-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+            gap: 'clamp(30px, 4vw, 56px)',
+            alignItems: 'center'
+          }}
+        >
           
           {/* Left Column: Beige Card with Curved Top-Right Corner */}
           <div className="about-beige-card" style={{

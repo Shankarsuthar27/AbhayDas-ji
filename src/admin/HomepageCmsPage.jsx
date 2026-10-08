@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCms } from '../context/CmsContext';
 import CmsImageUploader from './components/CmsImageUploader';
+import CmsSectionPreview from './components/CmsSectionPreview';
 import { compressImage } from './utils/helpers';
 import {
-  Compass,
   Sliders,
   Image as ImageIcon,
   Heart,
@@ -26,13 +26,16 @@ import {
   EyeOff,
   Sparkles,
   Link2,
-  UploadCloud
+  UploadCloud,
+  Monitor,
+  Tablet,
+  Smartphone,
+  X
 } from 'lucide-react';
 import './Admin.css';
 
 // Section Navigation Tab Definitions
 const CMS_SECTIONS = [
-  { id: 'header', label: 'Header & Navigation', icon: Compass, badge: 'Nav & Logo' },
   { id: 'hero', label: 'Hero Section', icon: Sliders, badge: 'Main Banner' },
   { id: 'about', label: 'Brief Introduction', icon: Layout, badge: 'About Us' },
   { id: 'kathas', label: 'Spiritual Katha', icon: Sparkles, badge: 'Katha Cards' },
@@ -48,11 +51,16 @@ const CMS_SECTIONS = [
 
 export default function HomepageCmsPage() {
   const { cms, saveCms, resetDefaults, loading } = useCms();
-  const [activeSection, setActiveSection] = useState('header');
+  const [activeSection, setActiveSection] = useState('hero');
   const [formData, setFormData] = useState(cms);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [dirty, setDirty] = useState(false);
+  const [viewMode, setViewMode] = useState('split'); // 'split' | 'edit' | 'preview'
+  const [viewport, setViewport] = useState('desktop'); // 'desktop' | 'tablet' | 'mobile'
+  const [fullPagePreviewOpen, setFullPagePreviewOpen] = useState(false);
+
+  const currentSecMeta = CMS_SECTIONS.find(s => s.id === activeSection) || CMS_SECTIONS[0];
 
   // Sync formData with incoming CMS data on load or external sync
   useEffect(() => {
@@ -311,7 +319,7 @@ export default function HomepageCmsPage() {
             letterSpacing: '0.8px',
             padding: '8px 12px 4px'
           }}>
-            Homepage Sections (12)
+            Homepage Sections ({CMS_SECTIONS.length})
           </div>
 
           {CMS_SECTIONS.map((sec, idx) => {
@@ -366,186 +374,114 @@ export default function HomepageCmsPage() {
           boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '24px'
+          gap: '20px',
+          minWidth: 0
         }}>
 
-          {/* ========================================================================= */}
-          {/* SECTION 1: HEADER & NAVIGATION                                            */}
-          {/* ========================================================================= */}
-          {activeSection === 'header' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div>
-                <h2 className="admin-card-title">1. Header &amp; Navigation Configuration</h2>
-                <p className="admin-page-desc">Manage logo branding, navigation menu links, and primary action button.</p>
+          {/* Top Live Preview View Mode Bar */}
+          <div className="cms-view-mode-bar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <div className="cms-mode-tabs">
+                <button
+                  type="button"
+                  className={`cms-mode-tab ${viewMode === 'edit' ? 'active' : ''}`}
+                  onClick={() => setViewMode('edit')}
+                  title="Editor form with embedded live preview below"
+                >
+                  <Sliders size={13} /> Edit Form
+                </button>
+                <button
+                  type="button"
+                  className={`cms-mode-tab ${viewMode === 'split' ? 'active' : ''}`}
+                  onClick={() => setViewMode('split')}
+                  title="Side-by-side editing and live preview"
+                >
+                  <Layout size={13} /> Split View (Live)
+                </button>
+                <button
+                  type="button"
+                  className={`cms-mode-tab ${viewMode === 'preview' ? 'active' : ''}`}
+                  onClick={() => setViewMode('preview')}
+                  title="Full live preview of this section"
+                >
+                  <Eye size={13} /> Full Preview
+                </button>
               </div>
 
-              {/* Logo Upload */}
-              <CmsImageUploader
-                label="Website Header Logo"
-                description="Upload clean PNG or SVG logo for top navbar"
-                value={formData.header.logo}
-                onChange={(url) => updateSection('header', { logo: url })}
-                maxSizeMB={5}
-              />
-
-              {/* Action Button */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div className="admin-form-group">
-                  <label className="admin-label">Action Button Text</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.header.actionButtonText}
-                    onChange={(e) => updateSection('header', { actionButtonText: e.target.value })}
-                    placeholder="Donate Now"
-                  />
-                </div>
-                <div className="admin-form-group">
-                  <label className="admin-label">Action Button URL Destination</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.header.actionButtonUrl}
-                    onChange={(e) => updateSection('header', { actionButtonUrl: e.target.value })}
-                    placeholder="#donate or /donate"
-                  />
-                </div>
-              </div>
-
-              {/* Navigation Menu List Manager */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <label className="admin-label" style={{ margin: 0 }}>
-                    Navigation Menu Items ({formData.header.menuItems.length})
-                  </label>
-                  <button
-                    type="button"
-                    className="admin-btn-secondary"
-                    onClick={() => {
-                      setDirty(true);
-                      const newId = `m_${Date.now()}`;
-                      setFormData((prev) => ({
-                        ...prev,
-                        header: {
-                          ...prev.header,
-                          menuItems: [...prev.header.menuItems, { id: newId, label: 'New Link', url: '/', status: 'published' }]
-                        }
-                      }));
-                    }}
-                    style={{ padding: '4px 10px', fontSize: '12px' }}
-                  >
-                    <Plus size={13} /> Add Menu Item
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {formData.header.menuItems.map((item, idx) => (
-                    <div
-                      key={item.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        padding: '10px 14px',
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px'
-                      }}
-                    >
-                      <span style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', width: '20px' }}>
-                        #{idx + 1}
-                      </span>
-                      <input
-                        type="text"
-                        value={item.label}
-                        onChange={(e) => {
-                          setDirty(true);
-                          const list = [...formData.header.menuItems];
-                          list[idx].label = e.target.value;
-                          updateSection('header', { menuItems: list });
-                        }}
-                        placeholder="Menu Label"
-                        className="admin-input-control"
-                        style={{ flex: 1, padding: '6px 10px' }}
-                      />
-                      <input
-                        type="text"
-                        value={item.url}
-                        onChange={(e) => {
-                          setDirty(true);
-                          const list = [...formData.header.menuItems];
-                          list[idx].url = e.target.value;
-                          updateSection('header', { menuItems: list });
-                        }}
-                        placeholder="Destination Link"
-                        className="admin-input-control"
-                        style={{ flex: 1, padding: '6px 10px' }}
-                      />
-
-                      {/* Status Toggle */}
-                      <button
-                        type="button"
-                        onClick={() => toggleStatus('menuItems', 'header', idx)}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          fontSize: '11px',
-                          fontWeight: '700',
-                          border: 'none',
-                          cursor: 'pointer',
-                          backgroundColor: item.status === 'published' ? '#ecfdf5' : '#f1f5f9',
-                          color: item.status === 'published' ? '#059669' : '#64748b'
-                        }}
-                      >
-                        {item.status === 'published' ? <Eye size={12} /> : <EyeOff size={12} />}
-                        {item.status === 'published' ? 'Published' : 'Draft'}
-                      </button>
-
-                      {/* Reorder */}
-                      <div style={{ display: 'flex', gap: '2px' }}>
-                        <button
-                          type="button"
-                          onClick={() => moveItem('menuItems', 'header', idx, -1)}
-                          disabled={idx === 0}
-                          style={{ padding: '4px', border: 'none', background: 'none', cursor: idx === 0 ? 'default' : 'pointer' }}
-                        >
-                          <ChevronUp size={14} color={idx === 0 ? '#cbd5e1' : '#475569'} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => moveItem('menuItems', 'header', idx, 1)}
-                          disabled={idx === formData.header.menuItems.length - 1}
-                          style={{ padding: '4px', border: 'none', background: 'none', cursor: idx === formData.header.menuItems.length - 1 ? 'default' : 'pointer' }}
-                        >
-                          <ChevronDown size={14} color={idx === formData.header.menuItems.length - 1 ? '#cbd5e1' : '#475569'} />
-                        </button>
-                      </div>
-
-                      {/* Remove */}
-                      <button
-                        type="button"
-                        onClick={() => removeItem('menuItems', 'header', idx)}
-                        style={{ padding: '4px', border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer' }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+              <div className="cms-live-indicator" style={{ color: '#16a34a' }}>
+                <span className="cms-live-pulse-dot" />
+                <span style={{ fontSize: '12px' }}>Real-Time Preview</span>
               </div>
             </div>
-          )}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div className="cms-viewport-group">
+                <button
+                  type="button"
+                  className={`cms-viewport-btn ${viewport === 'desktop' ? 'active' : ''}`}
+                  onClick={() => setViewport('desktop')}
+                  title="Desktop View (100%)"
+                >
+                  <Monitor size={12} /> Desktop
+                </button>
+                <button
+                  type="button"
+                  className={`cms-viewport-btn ${viewport === 'tablet' ? 'active' : ''}`}
+                  onClick={() => setViewport('tablet')}
+                  title="Tablet View (768px)"
+                >
+                  <Tablet size={12} /> Tablet
+                </button>
+                <button
+                  type="button"
+                  className={`cms-viewport-btn ${viewport === 'mobile' ? 'active' : ''}`}
+                  onClick={() => setViewport('mobile')}
+                  title="Mobile View (390px)"
+                >
+                  <Smartphone size={12} /> Mobile
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="admin-btn-secondary"
+                onClick={() => setFullPagePreviewOpen(true)}
+                style={{ padding: '5px 12px', fontSize: '11px', fontWeight: '600' }}
+                title="Preview all 11 homepage sections composed together"
+              >
+                <Sparkles size={12} /> Full Page Preview
+              </button>
+            </div>
+          </div>
+
+          {/* Main Content Layout Container */}
+          <div
+            className={viewMode === 'split' ? 'cms-split-grid' : ''}
+            style={{
+              display: viewMode === 'split' ? 'grid' : 'flex',
+              flexDirection: 'column',
+              gap: '24px',
+              alignItems: 'start'
+            }}
+          >
+            {/* Form Column */}
+            <div
+              style={{
+                display: viewMode === 'preview' ? 'none' : 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+                minWidth: 0,
+                width: '100%'
+              }}
+            >
 
           {/* ========================================================================= */}
-          {/* SECTION 2: HERO SECTION                                                   */}
+          {/* SECTION 1: HERO SECTION                                                   */}
           {/* ========================================================================= */}
           {activeSection === 'hero' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">2. Hero Banner Section</h2>
+                <h2 className="admin-card-title">1. Hero Banner Section</h2>
                 <p className="admin-page-desc">Customize the hero background media, typography, and call-to-action buttons.</p>
               </div>
 
@@ -808,12 +744,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 3: BRIEF INTRODUCTION SECTION                                     */}
+          {/* SECTION 2: BRIEF INTRODUCTION SECTION                                     */}
           {/* ========================================================================= */}
           {activeSection === 'about' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">3. Brief Introduction Section</h2>
+                <h2 className="admin-card-title">2. Brief Introduction Section</h2>
                 <p className="admin-page-desc">Configure the introductory about block, portrait images, and biography text.</p>
               </div>
 
@@ -903,12 +839,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 4: SPIRITUAL KATHA (CAROUSEL / GRID)                             */}
+          {/* SECTION 3: SPIRITUAL KATHA (CAROUSEL / GRID)                             */}
           {/* ========================================================================= */}
           {activeSection === 'kathas' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">4. Spiritual Katha (Carousel / Grid)</h2>
+                <h2 className="admin-card-title">3. Spiritual Katha (Carousel / Grid)</h2>
                 <p className="admin-page-desc">Manage katha card titles, arch images, links, and publication visibility.</p>
               </div>
 
@@ -1078,12 +1014,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 5: DONATION SECTION                                               */}
+          {/* SECTION 4: DONATION SECTION                                               */}
           {/* ========================================================================= */}
           {activeSection === 'donations' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">5. Donation Campaigns Section</h2>
+                <h2 className="admin-card-title">4. Donation Campaigns Section</h2>
                 <p className="admin-page-desc">
                   Manage fundraising campaigns, target goal amounts, raised amounts, and automated progress calculations.
                 </p>
@@ -1310,12 +1246,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 6: GALLERY SECTION                                                */}
+          {/* SECTION 5: GALLERY SECTION                                                */}
           {/* ========================================================================= */}
           {activeSection === 'gallery' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">6. Gallery Section</h2>
+                <h2 className="admin-card-title">5. Gallery Section</h2>
                 <p className="admin-page-desc">Manage the center-aligned heading, photo gallery grid, and view more button.</p>
               </div>
 
@@ -1522,12 +1458,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 7: RECENT KATHA (VIDEOS)                                         */}
+          {/* SECTION 6: RECENT KATHA (VIDEOS)                                         */}
           {/* ========================================================================= */}
           {activeSection === 'recentKatha' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">7. Recent Katha (Video &amp; Audio Cards)</h2>
+                <h2 className="admin-card-title">6. Recent Katha (Video &amp; Audio Cards)</h2>
                 <p className="admin-page-desc">Manage repeatable video cards with thumbnails, timestamps, and streaming links.</p>
               </div>
 
@@ -1720,12 +1656,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 8: UPCOMING EVENT SCHEDULE                                        */}
+          {/* SECTION 7: UPCOMING EVENT SCHEDULE                                        */}
           {/* ========================================================================= */}
           {activeSection === 'events' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">8. Upcoming Event Schedule Section</h2>
+                <h2 className="admin-card-title">7. Upcoming Event Schedule Section</h2>
                 <p className="admin-page-desc">Manage upcoming gatherings, katha dates, venues, and event details.</p>
               </div>
 
@@ -1956,12 +1892,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 9: LATEST NEWS AND ARTICLES                                       */}
+          {/* SECTION 8: LATEST NEWS AND ARTICLES                                       */}
           {/* ========================================================================= */}
           {activeSection === 'news' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">9. Latest News &amp; Articles Section</h2>
+                <h2 className="admin-card-title">8. Latest News &amp; Articles Section</h2>
                 <p className="admin-page-desc">Configure the press &amp; news cards on the homepage.</p>
               </div>
 
@@ -2154,12 +2090,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 10: TESTIMONIALS / SUCCESS STORIES                                */}
+          {/* SECTION 9: TESTIMONIALS / SUCCESS STORIES                                */}
           {/* ========================================================================= */}
           {activeSection === 'testimonials' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">10. Testimonials / Success Stories Section</h2>
+                <h2 className="admin-card-title">9. Testimonials / Success Stories Section</h2>
                 <p className="admin-page-desc">Manage reviews and management team stories behind Maharaj Ji's mission.</p>
               </div>
 
@@ -2339,12 +2275,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 11: CONTACT CTA BANNER                                            */}
+          {/* SECTION 10: CONTACT CTA BANNER                                            */}
           {/* ========================================================================= */}
           {activeSection === 'contact' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">11. Contact CTA Banner (Orange Ribbon)</h2>
+                <h2 className="admin-card-title">10. Contact CTA Banner (Orange Ribbon)</h2>
                 <p className="admin-page-desc">Configure the details shown in the prominent orange contact strip.</p>
               </div>
 
@@ -2385,12 +2321,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 12: FOOTER SETTINGS                                               */}
+          {/* SECTION 11: FOOTER SETTINGS                                               */}
           {/* ========================================================================= */}
           {activeSection === 'footer' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">12. Footer Settings</h2>
+                <h2 className="admin-card-title">11. Footer Settings</h2>
                 <p className="admin-page-desc">
                   Manage footer brand logo, description, link columns, social profiles, and news widget toggle.
                 </p>
@@ -2793,9 +2729,134 @@ export default function HomepageCmsPage() {
               <Save size={15} /> {saving ? 'Saving...' : 'Save All Changes'}
             </button>
           </div>
+        </div>
 
-        </section>
+        {/* Live Preview Container (Rendered for all 11 sections in real-time!) */}
+        <div
+          className={viewMode === 'split' ? 'cms-sticky-preview' : 'cms-live-preview-card'}
+          style={{
+            width: '100%',
+            minWidth: 0,
+            marginTop: viewMode === 'edit' ? '12px' : 0
+          }}
+        >
+          <div className="cms-preview-header">
+            <div className="cms-live-indicator">
+              <span className="cms-live-pulse-dot" />
+              <span>Live Preview: {currentSecMeta?.label}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="cms-preview-badge">Live Draft Sync</span>
+              {viewMode === 'preview' && (
+                <button
+                  type="button"
+                  className="admin-btn-secondary"
+                  onClick={() => setViewMode('edit')}
+                  style={{ padding: '3px 8px', fontSize: '11px', backgroundColor: '#ffffff', color: '#0f172a' }}
+                >
+                  <Sliders size={11} /> Edit Form
+                </button>
+              )}
+            </div>
+          </div>
+          <CmsSectionPreview
+            sectionId={activeSection}
+            formData={formData}
+            updateSection={updateSection}
+            viewport={viewport}
+            onNotify={(msg) => showToast('info', msg)}
+          />
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  {/* Full Page Live Preview Modal (All 11 Sections) */}
+  {fullPagePreviewOpen && (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      backgroundColor: 'rgba(15, 23, 42, 0.75)',
+      backdropFilter: 'blur(4px)',
+      zIndex: 9999,
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    }}>
+      {/* Modal Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '12px 24px',
+        backgroundColor: '#0f172a',
+        color: '#ffffff',
+        borderBottom: '1px solid #334155'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span className="cms-live-pulse-dot" />
+          <span style={{ fontSize: '15px', fontWeight: '700' }}>
+            Full Homepage Live Preview (All 11 Sections)
+          </span>
+          <span className="cms-preview-badge">Live Draft Sync</span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="cms-viewport-group">
+            <button
+              type="button"
+              className={`cms-viewport-btn ${viewport === 'desktop' ? 'active' : ''}`}
+              onClick={() => setViewport('desktop')}
+            >
+              <Monitor size={12} /> Desktop
+            </button>
+            <button
+              type="button"
+              className={`cms-viewport-btn ${viewport === 'tablet' ? 'active' : ''}`}
+              onClick={() => setViewport('tablet')}
+            >
+              <Tablet size={12} /> Tablet
+            </button>
+            <button
+              type="button"
+              className={`cms-viewport-btn ${viewport === 'mobile' ? 'active' : ''}`}
+              onClick={() => setViewport('mobile')}
+            >
+              <Smartphone size={12} /> Mobile
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setFullPagePreviewOpen(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              padding: '4px',
+              display: 'flex'
+            }}
+            title="Close Full Preview"
+          >
+            <X size={20} color="#ffffff" />
+          </button>
+        </div>
+      </div>
+
+      {/* Modal Scrollable Body */}
+      <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#f1f5f9' }}>
+        <CmsSectionPreview
+          sectionId="all"
+          formData={formData}
+          updateSection={updateSection}
+          viewport={viewport}
+          onNotify={(msg) => showToast('info', msg)}
+        />
       </div>
     </div>
+  )}
+</div>
   );
 }

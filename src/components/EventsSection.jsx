@@ -131,11 +131,14 @@ export default function EventsSection({ onOpenVolunteer, onNavigate }) {
         </div>
 
         {/* Event Cards Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '20px'
-        }}>
+        <div
+          className="events-section-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '20px'
+          }}
+        >
           {events.map((evt) => (
             <div
               key={evt.id}
