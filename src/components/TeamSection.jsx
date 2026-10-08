@@ -41,7 +41,8 @@ export default function TeamSection() {
         }))
     : defaultMembers;
 
-  const sectionTitle = testData.sectionTitle || "Meet the team behind their success story";
+  const sectionTitle = testData.title || testData.sectionTitle || "Meet the team behind their success story";
+  const subheading = testData.subheading || "WHAT WE DO";
 
   return (
     <section id="team" style={{
@@ -66,7 +67,7 @@ export default function TeamSection() {
             letterSpacing: '1px',
             marginBottom: '12px'
           }}>
-            WHAT WE DO
+            {subheading}
           </div>
           <h2 style={{
             fontSize: 'clamp(28px, 3.5vw, 40px)',

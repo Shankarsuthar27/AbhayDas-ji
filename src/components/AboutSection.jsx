@@ -2,7 +2,13 @@ import React, { useState } from 'react';
 import { websiteData } from '../data/websiteData';
 import { useCms } from '../context/CmsContext';
 
-export default function AboutSection({ onOpenDonate, onOpenVideo }) {
+function extractYtId(url) {
+  if (!url) return 'X0UPcFj_ZNQ';
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|live\/|shorts\/)|youtube\.com\/(?:.*[?&]v=))([^#&?]*)/);
+  return match && match[1] ? match[1] : (url.length < 20 ? url : 'X0UPcFj_ZNQ');
+}
+
+export default function AboutSection({ onOpenDonate, onOpenVideo, onNavigate }) {
   const { cms } = useCms();
   const aboutData = cms?.about || {};
 
@@ -12,12 +18,13 @@ export default function AboutSection({ onOpenDonate, onOpenVideo }) {
   const defaultIntroText = "Pujya Abhaydas Ji Maharaj Shri is a spiritual guru, religious preacher, and social reformer who embraced the path of dharma and humanitarian service from early childhood. At the tender age of four, he received spiritual initiation (Diksha) from the pujya Acharya Shri Nirbhaydas Ji Maharaj Shri. Since then, he has been wholly dedicated to the promotion of spirituality, moral values, Indian culture, and spiritual awakening. He is presently seated as the fifth Acharya (heir apparent) of the 150-year-old Sadguru Trikam Das Ji Dham tradition located in Takhatgarh, Pali district, Rajasthan, and continues to carry forward its sacred spiritual legacy";
 
   const sectionLabel = aboutData.sectionLabel || "About Us";
-  const sectionHeading = aboutData.heading || "Brief Introduction";
+  const sectionHeading = aboutData.mainHeading || aboutData.heading || "Brief Introduction";
   const briefIntroText = aboutData.paragraph || defaultIntroText;
-  const artworkImg = aboutData.artworkImage || "/images/img_9.jpg";
-  const portraitImg = aboutData.portraitImage || "/images/img_10.jpg";
-  const buttonLabel = aboutData.buttonText || "Read More";
-  const buttonUrl = aboutData.buttonUrl || "/about";
+  const artworkImg = aboutData.artworkImage || aboutData.artworkImg || "/images/img_10.jpg";
+  const portraitImg = aboutData.portraitImage || aboutData.portraitImg || "/images/img_11.jpg";
+  const buttonLabel = aboutData.readMoreButtonText || aboutData.buttonText || "Read More";
+  const buttonUrl = aboutData.readMoreButtonUrl || aboutData.buttonUrl || "/about";
+  const videoId = extractYtId(aboutData.videoUrl);
 
   return (
     <section id="about" style={{
@@ -115,7 +122,19 @@ export default function AboutSection({ onOpenDonate, onOpenVideo }) {
             {/* CTA Button: [>>] About More */}
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <button
-                onClick={() => setShowFullBio(!showFullBio)}
+                onClick={() => {
+                  if (buttonUrl && buttonUrl !== '#bio' && !showFullBio) {
+                    if (buttonUrl.startsWith('http')) {
+                      window.open(buttonUrl, '_blank');
+                    } else if (onNavigate) {
+                      onNavigate(buttonUrl);
+                    } else {
+                      window.location.href = buttonUrl;
+                    }
+                  } else {
+                    setShowFullBio(!showFullBio);
+                  }
+                }}
                 aria-label="About More"
                 className="about-cta-btn"
                 style={{
@@ -204,7 +223,7 @@ export default function AboutSection({ onOpenDonate, onOpenVideo }) {
 
               {/* Floating Circular Rotating Play Badge (Overlapping Bottom-Left of Image 1) */}
               <div
-                onClick={() => onOpenVideo && onOpenVideo('X0UPcFj_ZNQ')}
+                onClick={() => onOpenVideo && onOpenVideo(videoId)}
                 title="Play Pravachan Video"
                 className="about-play-badge"
                 style={{

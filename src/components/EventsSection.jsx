@@ -6,7 +6,7 @@ import { useCms } from '../context/CmsContext';
 export default function EventsSection({ onOpenVolunteer, onNavigate }) {
   const { cms } = useCms();
   const eventsCms = cms?.events || {};
-  const sectionTitle = eventsCms.sectionTitle || 'Upcoming Event Schedule';
+  const sectionTitle = eventsCms.title || eventsCms.sectionTitle || 'Upcoming Event Schedule';
   const viewAllUrl = eventsCms.viewAllUrl || '/events';
 
   const [events, setEvents] = useState(websiteData.events);
@@ -14,8 +14,9 @@ export default function EventsSection({ onOpenVolunteer, onNavigate }) {
   const [rsvpSuccess, setRsvpSuccess] = useState(false);
 
   useEffect(() => {
-    if (eventsCms.cards && eventsCms.cards.length > 0) {
-      const activeCards = eventsCms.cards.filter(c => c.status !== 'draft');
+    const rawEvents = eventsCms.items || eventsCms.cards || [];
+    if (rawEvents && rawEvents.length > 0) {
+      const activeCards = rawEvents.filter(c => c.status !== 'draft');
       setEvents(activeCards);
       return;
     }
@@ -135,7 +136,7 @@ export default function EventsSection({ onOpenVolunteer, onNavigate }) {
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           gap: '20px'
         }}>
-          {events.slice(0, 3).map((evt) => (
+          {events.map((evt) => (
             <div
               key={evt.id}
               style={{
@@ -202,7 +203,7 @@ export default function EventsSection({ onOpenVolunteer, onNavigate }) {
                   fontSize: '11px',
                   fontWeight: '700'
                 }}>
-                  {evt.status || 'Upcoming'}
+                  {evt.badge || (evt.status === 'published' ? 'Upcoming' : (evt.status || 'Upcoming'))}
                 </span>
 
                 <button

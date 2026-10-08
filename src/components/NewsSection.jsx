@@ -6,7 +6,7 @@ import { useCms } from '../context/CmsContext';
 export default function NewsSection({ onNavigate }) {
   const { cms } = useCms();
   const newsCms = cms?.news || {};
-  const sectionTitle = newsCms.sectionTitle || 'Latest News And Articles';
+  const sectionTitle = newsCms.title || newsCms.sectionTitle || 'Latest News And Articles';
   const viewAllUrl = newsCms.viewAllUrl || '/news';
 
   const [articles, setArticles] = useState(newsArticles);
@@ -15,22 +15,24 @@ export default function NewsSection({ onNavigate }) {
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
-    if (newsCms.cards && newsCms.cards.length > 0) {
-      const parsedCards = newsCms.cards
+    const rawArticles = newsCms.articles || newsCms.cards || [];
+    if (rawArticles && rawArticles.length > 0) {
+      const parsedCards = rawArticles
         .filter(c => c.status !== 'draft')
         .map(c => {
-          const parts = (c.date || '24 OCT').split(' ');
+          const dateStr = c.date || '24 OCT';
+          const parts = dateStr.includes(' ') ? dateStr.split(' ') : ['24', dateStr];
           return {
             id: c.id,
             title: c.title,
             date: c.date || '24 OCT 2026',
             day: parts[0] || '24',
             month: parts[1] || 'OCT',
-            image: c.image || '/images/img_26.jpg',
-            author: 'Admin',
+            image: c.featuredImage || c.image || c.src || c.url || '/images/img_30.png',
+            author: c.author || 'Shree Abhaydas',
             comments: '2 Comments',
             slug: c.id,
-            link: c.link || `/news/${c.id}`,
+            link: c.readMoreUrl || c.link || `/news/${c.id}`,
             fullContent: c.excerpt || c.title
           };
         });

@@ -50,13 +50,13 @@ export default function CampaignsSection({ onOpenDonate }) {
     ? donationsData.campaigns
         .filter(c => c.status !== 'draft')
         .map((c, idx) => {
-          const target = Number(c.targetGoal) || 1;
-          const raised = Number(c.raisedAmount) || 0;
+          const target = Number(c.goal !== undefined ? c.goal : c.targetGoal) || 50000;
+          const raised = Number(c.raised !== undefined ? c.raised : c.raisedAmount) || 0;
           const pct = Math.min(100, Math.round((raised / target) * 100));
           return {
             id: c.id || `campaign-${idx}`,
             title: c.title,
-            image: c.image || '/images/img_14.avif',
+            image: c.image || c.src || c.url || '/images/img_14.avif',
             percent: pct,
             raisedText: `₹${raised.toLocaleString('en-IN')}`,
             goalText: `₹${target.toLocaleString('en-IN')}`,
@@ -65,8 +65,8 @@ export default function CampaignsSection({ onOpenDonate }) {
         })
     : defaultCards;
 
-  const subheading = donationsData.subheading || "Urgent Causes";
-  const mainTitle = donationsData.title || "Donation";
+  const subheading = donationsData.subheading || "HELP THE NEEDY";
+  const mainTitle = donationsData.mainTitle || donationsData.title || "Find The Popular Cause And Donate Them";
 
   // Scroll carousel left or right
   const scroll = (direction) => {

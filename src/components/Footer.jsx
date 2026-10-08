@@ -9,7 +9,7 @@ export default function Footer({ currentRoute = '/', onNavigate }) {
   const footerData = cms?.footer || {};
   const footerLogo = footerData.logo || '/images/img_1.png';
   const footerDesc = footerData.description || 'Discover the life, teachings, discourses, spiritual lineage, seva initiatives, and mission of HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj.';
-  const showNewsWidget = footerData.showLatestNewsWidget !== false;
+  const showNewsWidget = (footerData.showNewsWidget !== undefined ? footerData.showNewsWidget : (footerData.showLatestNewsWidget !== false));
   const copyrightText = footerData.copyright || `Shree Abhay Das Ji Maharaj © ${new Date().getFullYear()} Copyrights | All Rights Reserved & Developed By AsthaSoftIndia`;
 
   const socialUrls = {

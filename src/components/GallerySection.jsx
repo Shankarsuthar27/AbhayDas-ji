@@ -49,7 +49,7 @@ export default function GallerySection({ onOpenLightbox, onNavigate }) {
         .filter(img => img.status !== 'draft')
         .map((img, idx) => ({
           id: img.id || idx + 1,
-          src: img.url || '/images/img_17.jpg',
+          src: img.src || img.url || img.image || '/images/img_17.jpg',
           title: img.title || `Sacred Moment ${idx + 1}`,
           alt: img.title || 'Sacred Photo'
         }))
@@ -63,6 +63,13 @@ export default function GallerySection({ onOpenLightbox, onNavigate }) {
   const [slideIndex, setSlideIndex] = useState(originalLength); // Start at middle set (index 6)
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [containerWidth, setContainerWidth] = useState(1260);
+
+  // Sync slideIndex whenever CMS gallery items update
+  useEffect(() => {
+    if (originalLength > 0) {
+      setSlideIndex(originalLength);
+    }
+  }, [originalLength]);
 
   // Live real-time drag offset state
   const [dragOffset, setDragOffset] = useState(0);

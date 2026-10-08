@@ -39,15 +39,15 @@ export default function SpiritualKathas({ onOpenVideo, onNavigate }) {
         .map((card, idx) => ({
           id: card.id || `katha-${idx}`,
           title: card.title,
-          image: card.image || '/images/img_11.jpg',
+          image: card.image || card.src || card.url || '/images/img_11.jpg',
           videoId: card.videoId || 'X0UPcFj_ZNQ',
-          link: card.destinationLink || card.link || '/kathas',
+          link: card.link || card.destinationLink || '/kathas',
           isCenter: idx === 1 // center styling on second item
         }))
     : defaultCards;
 
-  const subheading = kathaData.subheading || "What We do";
-  const mainTitle = kathaData.title || "Spiritual katha'";
+  const subheading = kathaData.subheading || "DEVOTIONAL DISCOURSES";
+  const mainTitle = kathaData.mainTitle || kathaData.title || "Spiritual katha'";
 
   const handleCardClick = (card) => {
     const target = card.link || card.destinationLink;

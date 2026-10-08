@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
+import { useCms } from '../context/CmsContext';
 
 export default function KathaTicker({ onNavigate }) {
+  const { cms } = useCms();
   const [isPaused, setIsPaused] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState(null);
 
-  const kathaTitles = [
+  const defaultTitles = [
     "Shrimad Bhagwad Katha",
     "Ram Katha",
     "Nani Bai Ka Mayra",
     "Baba Ramdev Katha"
   ];
+
+  const cmsTitles = cms?.spiritualKathas?.items
+    ?.filter(item => item.status !== 'draft')
+    ?.map(item => item.title)
+    ?.filter(Boolean);
+
+  const kathaTitles = (cmsTitles && cmsTitles.length > 0) ? cmsTitles : defaultTitles;
 
   // Repeat items for seamless, gapless infinite loop
   const tickerItems = [...kathaTitles, ...kathaTitles, ...kathaTitles];

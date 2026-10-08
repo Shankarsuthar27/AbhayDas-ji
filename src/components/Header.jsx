@@ -144,7 +144,7 @@ export default function Header({
   const { cms } = useCms();
   const headerData = cms?.header || {};
   const logoSrc = headerData.logo || '/images/img_1.png';
-  const actionButtonText = headerData.actionButtonText || 'Donate Now';
+  const actionButtonText = headerData.actionButtonText || 'The form is not published.';
   const actionButtonUrl = headerData.actionButtonUrl || '#donate';
 
   const [isSticky, setIsSticky] = useState(false);
@@ -152,20 +152,30 @@ export default function Header({
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileAccordion, setMobileAccordion] = useState(null);
 
-  // Derive nav items from CMS if available (published only), else use NAV_ITEMS
-  const activeNavList = (headerData.menuItems && headerData.menuItems.length > 0)
-    ? headerData.menuItems
-        .filter(item => item.status !== 'draft')
-        .map(item => {
-          const matched = NAV_ITEMS.find(n => n.label.toLowerCase() === item.label.toLowerCase() || n.href === item.url);
-          return {
-            id: item.id || (matched ? matched.id : item.label.toLowerCase().replace(/\s+/g, '-')),
-            label: item.label,
-            href: item.url || (matched ? matched.href : '/'),
-            dropdown: matched ? matched.dropdown : null
-          };
-        })
+  // Derive nav items from CMS if available (published only), else use NAV_ITEMS matching screenshot
+  const rawList = (headerData.menuItems && headerData.menuItems.length > 0)
+    ? headerData.menuItems.filter(item => item.status !== 'draft')
     : NAV_ITEMS;
+
+  const activeNavList = rawList.map(item => {
+    const matched = NAV_ITEMS.find(
+      n => n.label.toLowerCase() === item.label.toLowerCase() || n.href === item.url || n.id === item.id
+    );
+    const isVolunteers = item.label.toLowerCase() === 'volunteers';
+    const isPages = item.label.toLowerCase() === 'pages';
+    return {
+      id: item.id || (matched ? matched.id : item.label.toLowerCase().replace(/\s+/g, '-')),
+      label: item.label,
+      href: item.url || item.href || (matched ? matched.href : '/'),
+      dropdown: matched?.dropdown || (isVolunteers ? [
+        { label: 'Become a Volunteer', action: 'volunteer' },
+        { label: 'Our Volunteers / Team', href: '#team' },
+      ] : isPages ? [
+        { label: 'News & Updates', href: '/news' },
+        { label: 'Contact Us', href: '#contact' },
+      ] : null)
+    };
+  });
 
   // Active navigation highlighting based on currentRoute
   const getActiveId = () => {
@@ -745,40 +755,32 @@ export default function Header({
                 <Search size={19} strokeWidth={2.1} />
               </button>
 
-              {/* Dynamic Desktop Action Button or Notice Box */}
+              {/* Dynamic Desktop Action Button or Notice Box (Matching Screenshot) */}
               {actionButtonText === 'The form is not published.' ? (
                 <div
                   onClick={() => onOpenDonate && onOpenDonate()}
-                  title="Click to Donate"
+                  title="The form is not published."
                   className="d-none d-xl-flex"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     height: '38px',
                     backgroundColor: '#ffffff',
-                    border: '1px solid #eef2f6',
+                    border: '1px solid #e2e8f0',
                     borderRadius: '4px',
                     paddingRight: '16px',
-                    cursor: 'pointer',
+                    cursor: 'default',
                     position: 'relative',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
                     transition: 'all 0.2s ease',
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#ffba00';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 186, 0, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#eef2f6';
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.03)';
-                  }}
                 >
-                  {/* Left Vertical Amber Accent Line with Warning Triangle Badge */}
+                  {/* Left Vertical Amber Accent Line with Centered Warning Triangle Badge */}
                   <div
                     style={{
                       position: 'relative',
                       height: '100%',
-                      width: '28px',
+                      width: '24px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -788,12 +790,13 @@ export default function Header({
                     <div
                       style={{
                         position: 'absolute',
-                        top: 0,
-                        bottom: 0,
+                        top: '-4px',
+                        bottom: '-4px',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         width: '2.5px',
                         backgroundColor: '#ffba00',
+                        borderRadius: '1px',
                       }}
                     />
                     <div
@@ -808,7 +811,7 @@ export default function Header({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 1px 4px rgba(255, 186, 0, 0.35)',
+                        boxShadow: '0 1px 4px rgba(255, 186, 0, 0.4)',
                       }}
                     >
                       <WarningTriangleIcon size={11} />
@@ -819,9 +822,10 @@ export default function Header({
                       color: '#556372',
                       fontSize: '13.5px',
                       fontWeight: '500',
-                      marginLeft: '7px',
+                      marginLeft: '8px',
                       whiteSpace: 'nowrap',
                       letterSpacing: '0.1px',
+                      userSelect: 'none',
                     }}
                   >
                     The form is not published.

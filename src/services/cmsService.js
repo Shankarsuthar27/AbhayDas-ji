@@ -3,23 +3,23 @@ import { db } from '../firebase';
 import { websiteData } from '../data/websiteData';
 
 // Storage Key for Offline & Instant Cache
-const CMS_STORAGE_KEY = 'shree_homepage_cms_v1';
+const CMS_STORAGE_KEY = 'shree_homepage_cms_v2';
 
 // Default Comprehensive Homepage Data Blueprint
 export const DEFAULT_HOMEPAGE_CMS = {
-  // 1. Header & Navigation
+  // 1. Header & Navigation (Matching Screenshot Navbar Layout)
   header: {
     logo: websiteData.general.logos.main || '/images/img_1.png',
-    actionButtonText: 'Donate Now',
+    actionButtonText: 'The form is not published.',
     actionButtonUrl: '#donate',
     menuItems: [
       { id: 'm1', label: 'Home', url: '/', status: 'published' },
       { id: 'm2', label: 'About Us', url: '/about', status: 'published' },
-      { id: 'm3', label: 'Katha', url: '/kathas', status: 'published' },
-      { id: 'm4', label: 'Events', url: '/events', status: 'published' },
-      { id: 'm5', label: 'Gallery', url: '/gallery', status: 'published' },
-      { id: 'm6', label: 'Blog', url: '/news', status: 'published' },
-      { id: 'm7', label: 'Contact Us', url: '#contact', status: 'published' }
+      { id: 'm3', label: 'Event', url: '/events', status: 'published' },
+      { id: 'm4', label: 'Volunteers', url: '#team', status: 'published' },
+      { id: 'm5', label: 'Kathas', url: '/kathas', status: 'published' },
+      { id: 'm6', label: 'Gallery', url: '/gallery', status: 'published' },
+      { id: 'm7', label: 'Pages', url: '#pages', status: 'published' }
     ]
   },
 
@@ -154,12 +154,12 @@ export const DEFAULT_HOMEPAGE_CMS = {
     viewMoreText: 'View More Gallery',
     viewMoreUrl: '/gallery',
     images: [
-      { id: 'g1', src: '/images/img_17.jpg', title: 'Pujya Maharaj Ji with Saints & Devotees', status: 'published' },
-      { id: 'g2', src: '/images/img_18.jpg', title: 'Devotee Offering Pranam & Sacred Blessings', status: 'published' },
-      { id: 'g3', src: '/images/img_19.jpg', title: 'Spiritual Discourse & Guidance Session', status: 'published' },
-      { id: 'g4', src: '/images/img_20.jpg', title: 'Evening Satsang & Devotional Bhajan Sandhya', status: 'published' },
-      { id: 'g5', src: '/images/img_21.jpg', title: 'National Honor & Sacred Felicitation Ceremony', status: 'published' },
-      { id: 'g6', src: '/images/img_22.jpg', title: 'Takhatgarh Dham Seva & Community Assembly', status: 'published' }
+      { id: 'g1', src: '/images/img_17.jpg', url: '/images/img_17.jpg', title: 'Pujya Maharaj Ji with Saints & Devotees', status: 'published' },
+      { id: 'g2', src: '/images/img_18.jpg', url: '/images/img_18.jpg', title: 'Devotee Offering Pranam & Sacred Blessings', status: 'published' },
+      { id: 'g3', src: '/images/img_19.jpg', url: '/images/img_19.jpg', title: 'Spiritual Discourse & Guidance Session', status: 'published' },
+      { id: 'g4', src: '/images/img_20.jpg', url: '/images/img_20.jpg', title: 'Evening Satsang & Devotional Bhajan Sandhya', status: 'published' },
+      { id: 'g5', src: '/images/img_21.jpg', url: '/images/img_21.jpg', title: 'National Honor & Sacred Felicitation Ceremony', status: 'published' },
+      { id: 'g6', src: '/images/img_22.jpg', url: '/images/img_22.jpg', title: 'Takhatgarh Dham Seva & Community Assembly', status: 'published' }
     ]
   },
 

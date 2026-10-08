@@ -344,6 +344,7 @@ export default function App() {
             <AboutSection
               onOpenDonate={handleOpenDonate}
               onOpenVideo={handleOpenVideo}
+              onNavigate={navigateTo}
             />
 
             {/* 4. Spiritual Katha' (3 Temple-Arched Cards) */}

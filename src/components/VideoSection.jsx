@@ -65,8 +65,8 @@ export function extractYouTubeId(url) {
 export default function VideoSection({ videoUrls = DEFAULT_VIDEO_URLS, onOpenVideo }) {
   const { cms } = useCms();
   const recentKathaData = cms?.recentKatha || {};
-  const sectionTitle = recentKathaData.sectionTitle || 'Recent Katha';
-  const viewAllUrl = recentKathaData.viewAllUrl || 'https://www.youtube.com/@shreeabhaydas';
+  const sectionTitle = recentKathaData.title || recentKathaData.sectionTitle || 'Recent Katha';
+  const viewAllUrl = recentKathaData.viewAllUrl || '/kathas';
 
   const [displayVideos, setDisplayVideos] = useState([]);
   const [playingVideoId, setPlayingVideoId] = useState(null);
@@ -74,22 +74,26 @@ export default function VideoSection({ videoUrls = DEFAULT_VIDEO_URLS, onOpenVid
   const sliderRef = useRef(null);
 
   useEffect(() => {
-    if (recentKathaData.cards && recentKathaData.cards.length > 0) {
-      const parsed = recentKathaData.cards
+    const rawCards = recentKathaData.mediaCards || recentKathaData.cards || [];
+    if (rawCards && rawCards.length > 0) {
+      const parsed = rawCards
         .filter(c => c.status !== 'draft')
         .map((card, index) => {
-          const id = extractYouTubeId(card.mediaUrl);
+          const mediaUrl = card.mediaUrl || card.url || card.link || '';
+          const id = extractYouTubeId(mediaUrl);
+          const thumb = card.thumbnail || card.src || card.image || (id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "/images/img_25.jpg");
+          const timeText = card.dateText || card.metadataText || card.timestamp || "Katha Satsang";
           return {
             uniqueKey: card.id || `card-${index}`,
             id,
-            url: card.mediaUrl,
+            url: mediaUrl,
             title: card.title,
             channel: "Shree Abhaydas",
-            duration: card.metadataText || "Katha Satsang",
-            timestamp: card.metadataText || "0:00 / 15:00",
-            fallbackThumb: card.thumbnail || "/images/img_25.jpg",
-            hqThumb: card.thumbnail || (id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "/images/img_25.jpg"),
-            maxThumb: card.thumbnail || (id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : "/images/img_25.jpg")
+            duration: timeText,
+            timestamp: timeText,
+            fallbackThumb: thumb,
+            hqThumb: thumb,
+            maxThumb: thumb
           };
         });
       setDisplayVideos(parsed);

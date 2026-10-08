@@ -50,15 +50,18 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
   const slides = (heroData.slides && heroData.slides.length > 0)
     ? heroData.slides
         .filter(s => s.status !== 'draft')
-        .map((s, idx) => ({
-          id: s.id || idx,
-          badge: s.badge || heroData.badge || "Sanatan Parampara",
-          titleLine1: s.title || heroData.headingLine1 || "Preserving Heritage,",
-          titleLine2: s.titleLine2 || (s.title ? '' : (heroData.headingLine2 || "Inspiring Generations")),
-          desc: s.desc || heroData.paragraph || "",
-          image: s.image || heroData.backgroundMedia || "/images/img_4.jpg",
-          objectPosition: "center 30%"
-        }))
+        .map((s, idx) => {
+          const isFirst = idx === 0;
+          return {
+            id: s.id || idx,
+            badge: (isFirst && heroData.badge) ? heroData.badge : (s.badge || heroData.badge || "Sanatan Parampara"),
+            titleLine1: (isFirst && heroData.headingLine1) ? heroData.headingLine1 : (s.title || heroData.headingLine1 || "Preserving Heritage,"),
+            titleLine2: (isFirst && heroData.headingLine2) ? heroData.headingLine2 : (s.titleLine2 || ""),
+            desc: (isFirst && heroData.paragraph) ? heroData.paragraph : (s.desc || heroData.paragraph || ""),
+            image: (isFirst && heroData.backgroundMedia) ? heroData.backgroundMedia : (s.image || s.src || s.url || "/images/img_4.jpg"),
+            objectPosition: "center 30%"
+          };
+        })
     : defaultSlides;
 
   useEffect(() => {

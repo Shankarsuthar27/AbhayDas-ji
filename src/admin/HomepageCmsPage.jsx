@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCms } from '../context/CmsContext';
 import CmsImageUploader from './components/CmsImageUploader';
+import { compressImage } from './utils/helpers';
 import {
   Compass,
   Sliders,
@@ -24,7 +25,8 @@ import {
   Eye,
   EyeOff,
   Sparkles,
-  Link2
+  Link2,
+  UploadCloud
 } from 'lucide-react';
 import './Admin.css';
 
@@ -74,6 +76,50 @@ export default function HomepageCmsPage() {
         ...updates
       }
     }));
+  };
+
+  // Bulk Gallery Upload Handler
+  const bulkGalleryInputRef = useRef(null);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+
+  const handleBulkGalleryUpload = async (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setBulkProcessing(true);
+    setDirty(true);
+    try {
+      const newItems = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) continue;
+        try {
+          const dataUrl = await compressImage(file, { maxWidth: 1280, maxHeight: 850, quality: 0.82 });
+          const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+          newItems.push({
+            id: `g_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`,
+            src: dataUrl,
+            url: dataUrl,
+            title: cleanName || `Sacred Photo ${(formData.gallery.images || []).length + i + 1}`,
+            status: 'published'
+          });
+        } catch (err) {
+          console.warn('Error compressing gallery file:', file.name, err);
+        }
+      }
+      if (newItems.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          gallery: {
+            ...prev.gallery,
+            images: [...(prev.gallery.images || []), ...newItems]
+          }
+        }));
+        showToast('success', `Added ${newItems.length} photos to gallery! Click "Publish Changes" to save live.`);
+      }
+    } finally {
+      setBulkProcessing(false);
+      if (e.target) e.target.value = '';
+    }
   };
 
   // Save All Changes to Firestore and LocalStorage
@@ -594,6 +640,168 @@ export default function HomepageCmsPage() {
                     placeholder="YouTube Video URL"
                     style={{ marginTop: '6px' }}
                   />
+                </div>
+              </div>
+
+              {/* Repeatable Hero Slides Carousel Manager */}
+              <div style={{ marginTop: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <label className="admin-label" style={{ margin: 0 }}>
+                    Hero Carousel Slides ({(formData.hero.slides || []).length})
+                  </label>
+                  <button
+                    type="button"
+                    className="admin-btn-secondary"
+                    onClick={() => {
+                      setDirty(true);
+                      const newId = `hs_${Date.now()}`;
+                      setFormData((prev) => ({
+                        ...prev,
+                        hero: {
+                          ...prev.hero,
+                          slides: [
+                            ...(prev.hero.slides || []),
+                            {
+                              id: newId,
+                              title: 'New Hero Slide Title',
+                              badge: 'Sacred Parampara',
+                              desc: 'Spiritual discourse and sacred teachings description...',
+                              image: '/images/img_4.jpg',
+                              status: 'published'
+                            }
+                          ]
+                        }
+                      }));
+                    }}
+                    style={{ padding: '4px 10px', fontSize: '12px' }}
+                  >
+                    <Plus size={13} /> Add Hero Slide
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {(formData.hero.slides || []).map((slide, idx) => (
+                    <div
+                      key={slide.id || idx}
+                      style={{
+                        padding: '16px',
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>
+                          Slide #{idx + 1}: {slide.title || 'Untitled Slide'}
+                        </span>
+
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => toggleStatus('slides', 'hero', idx)}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              fontWeight: '700',
+                              border: 'none',
+                              cursor: 'pointer',
+                              backgroundColor: slide.status === 'published' ? '#ecfdf5' : '#f1f5f9',
+                              color: slide.status === 'published' ? '#059669' : '#64748b'
+                            }}
+                          >
+                            {slide.status === 'published' ? 'Published' : 'Draft'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => moveItem('slides', 'hero', idx, -1)}
+                            disabled={idx === 0}
+                            style={{ padding: '4px', border: 'none', background: 'none' }}
+                          >
+                            <ChevronUp size={15} color={idx === 0 ? '#cbd5e1' : '#475569'} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveItem('slides', 'hero', idx, 1)}
+                            disabled={idx === (formData.hero.slides || []).length - 1}
+                            style={{ padding: '4px', border: 'none', background: 'none' }}
+                          >
+                            <ChevronDown size={15} color={idx === (formData.hero.slides || []).length - 1 ? '#cbd5e1' : '#475569'} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => removeItem('slides', 'hero', idx)}
+                            style={{ padding: '4px', border: 'none', background: 'none', color: '#ef4444' }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Slide Badge / Subtitle</label>
+                          <input
+                            type="text"
+                            className="admin-input-control"
+                            value={slide.badge || ''}
+                            onChange={(e) => {
+                              setDirty(true);
+                              const list = [...(formData.hero.slides || [])];
+                              list[idx] = { ...list[idx], badge: e.target.value };
+                              updateSection('hero', { slides: list });
+                            }}
+                          />
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Slide Main Title</label>
+                          <input
+                            type="text"
+                            className="admin-input-control"
+                            value={slide.title || ''}
+                            onChange={(e) => {
+                              setDirty(true);
+                              const list = [...(formData.hero.slides || [])];
+                              list[idx] = { ...list[idx], title: e.target.value };
+                              updateSection('hero', { slides: list });
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Slide Description</label>
+                        <textarea
+                          rows={2}
+                          className="admin-textarea-control"
+                          value={slide.desc || ''}
+                          onChange={(e) => {
+                            setDirty(true);
+                            const list = [...(formData.hero.slides || [])];
+                            list[idx] = { ...list[idx], desc: e.target.value };
+                            updateSection('hero', { slides: list });
+                          }}
+                        />
+                      </div>
+
+                      <CmsImageUploader
+                        label="Slide Background Image"
+                        value={slide.image || slide.src || slide.url || ''}
+                        onChange={(url) => {
+                          setDirty(true);
+                          const list = [...(formData.hero.slides || [])];
+                          list[idx] = { ...list[idx], image: url, src: url, url: url };
+                          updateSection('hero', { slides: list });
+                        }}
+                        maxSizeMB={5}
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1134,10 +1342,50 @@ export default function HomepageCmsPage() {
                 </div>
               </div>
 
-              {/* Media Grid Manager */}
+              {/* Media Grid & Bulk Upload Manager */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <label className="admin-label" style={{ margin: 0 }}>
+                {/* Bulk Image Uploader Dropzone */}
+                <div
+                  style={{
+                    padding: '24px 20px',
+                    backgroundColor: '#f8fafc',
+                    border: '2px dashed #93c5fd',
+                    borderRadius: '12px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    marginBottom: '20px',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+                  }}
+                  onClick={() => bulkGalleryInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                      handleBulkGalleryUpload({ target: { files: e.dataTransfer.files } });
+                    }
+                  }}
+                >
+                  <input
+                    ref={bulkGalleryInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleBulkGalleryUpload}
+                  />
+                  <UploadCloud size={36} color="#0284c7" style={{ margin: '0 auto 10px', display: 'block' }} />
+                  <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>
+                    {bulkProcessing ? 'Processing & Optimizing Photos...' : 'Bulk Upload Multiple Photos (Drag & Drop or Click to Browse)'}
+                  </div>
+                  <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '6px' }}>
+                    Select multiple JPG, PNG, or WebP images to automatically upload and add them to this section.
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <label className="admin-label" style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>
                     Gallery Photos ({formData.gallery.images.length})
                   </label>
                   <button
@@ -1150,104 +1398,121 @@ export default function HomepageCmsPage() {
                         ...prev,
                         gallery: {
                           ...prev.gallery,
-                          images: [...prev.gallery.images, { id: newId, src: '/images/img_17.jpg', title: 'New Photo', status: 'published' }]
+                          images: [
+                            ...prev.gallery.images,
+                            { id: newId, src: '/images/img_17.jpg', url: '/images/img_17.jpg', title: 'New Photo', status: 'published' }
+                          ]
                         }
                       }));
                     }}
-                    style={{ padding: '4px 10px', fontSize: '12px' }}
+                    style={{ padding: '6px 12px', fontSize: '12px' }}
                   >
-                    <Plus size={13} /> Add Photo
+                    <Plus size={14} /> Add Single Photo Card
                   </button>
                 </div>
 
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-                  gap: '14px'
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                  gap: '16px'
                 }}>
                   {formData.gallery.images.map((img, idx) => (
                     <div
-                      key={img.id}
+                      key={img.id || idx}
                       style={{
-                        padding: '12px',
+                        padding: '14px',
                         backgroundColor: '#f8fafc',
                         border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
+                        borderRadius: '10px',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '8px'
+                        gap: '10px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
                       }}
                     >
-                      <div style={{
-                        height: '110px',
-                        borderRadius: '6px',
-                        overflow: 'hidden',
-                        backgroundColor: '#e2e8f0'
-                      }}>
-                        <img
-                          src={img.src}
-                          alt={img.title}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      </div>
-
-                      <input
-                        type="text"
-                        value={img.title}
-                        onChange={(e) => {
-                          setDirty(true);
-                          const list = [...formData.gallery.images];
-                          list[idx].title = e.target.value;
-                          updateSection('gallery', { images: list });
-                        }}
-                        placeholder="Photo Title"
-                        className="admin-input-control"
-                        style={{ fontSize: '12px', padding: '5px 8px' }}
-                      />
-
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <button
-                          type="button"
-                          onClick={() => toggleStatus('images', 'gallery', idx)}
-                          style={{
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            fontSize: '10.5px',
-                            fontWeight: '700',
-                            border: 'none',
-                            cursor: 'pointer',
-                            backgroundColor: img.status === 'published' ? '#ecfdf5' : '#f1f5f9',
-                            color: img.status === 'published' ? '#059669' : '#64748b'
-                          }}
-                        >
-                          {img.status === 'published' ? 'Published' : 'Draft'}
-                        </button>
+                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b' }}>
+                          Photo #{idx + 1}
+                        </span>
 
-                        <div style={{ display: 'flex', gap: '4px' }}>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => toggleStatus('images', 'gallery', idx)}
+                            style={{
+                              padding: '3px 8px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: '700',
+                              border: 'none',
+                              cursor: 'pointer',
+                              backgroundColor: img.status === 'published' ? '#ecfdf5' : '#f1f5f9',
+                              color: img.status === 'published' ? '#059669' : '#64748b'
+                            }}
+                          >
+                            {img.status === 'published' ? 'Published' : 'Draft'}
+                          </button>
+
                           <button
                             type="button"
                             onClick={() => moveItem('images', 'gallery', idx, -1)}
                             disabled={idx === 0}
                             style={{ padding: '2px', border: 'none', background: 'none' }}
+                            title="Move Left/Up"
                           >
-                            <ChevronUp size={14} color={idx === 0 ? '#cbd5e1' : '#475569'} />
+                            <ChevronUp size={15} color={idx === 0 ? '#cbd5e1' : '#475569'} />
                           </button>
                           <button
                             type="button"
                             onClick={() => moveItem('images', 'gallery', idx, 1)}
                             disabled={idx === formData.gallery.images.length - 1}
                             style={{ padding: '2px', border: 'none', background: 'none' }}
+                            title="Move Right/Down"
                           >
-                            <ChevronDown size={14} color={idx === formData.gallery.images.length - 1 ? '#cbd5e1' : '#475569'} />
+                            <ChevronDown size={15} color={idx === formData.gallery.images.length - 1 ? '#cbd5e1' : '#475569'} />
                           </button>
                           <button
                             type="button"
                             onClick={() => removeItem('images', 'gallery', idx)}
                             style={{ padding: '2px', border: 'none', background: 'none', color: '#ef4444' }}
+                            title="Delete Photo"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={15} />
                           </button>
                         </div>
+                      </div>
+
+                      {/* Photo Image Uploader with Preview & Replace */}
+                      <CmsImageUploader
+                        label="Photo Image"
+                        value={img.src || img.url}
+                        onChange={(url) => {
+                          setDirty(true);
+                          const list = [...formData.gallery.images];
+                          list[idx].src = url;
+                          list[idx].url = url;
+                          updateSection('gallery', { images: list });
+                        }}
+                        maxSizeMB={5}
+                      />
+
+                      <div className="admin-form-group" style={{ margin: 0 }}>
+                        <label className="admin-label" style={{ fontSize: '11.5px', marginBottom: '3px' }}>
+                          Photo Title / Description
+                        </label>
+                        <input
+                          type="text"
+                          value={img.title || ''}
+                          onChange={(e) => {
+                            setDirty(true);
+                            const list = [...formData.gallery.images];
+                            list[idx].title = e.target.value;
+                            updateSection('gallery', { images: list });
+                          }}
+                          placeholder="Photo Title"
+                          className="admin-input-control"
+                          style={{ fontSize: '12.5px', padding: '6px 10px' }}
+                        />
                       </div>
                     </div>
                   ))}
