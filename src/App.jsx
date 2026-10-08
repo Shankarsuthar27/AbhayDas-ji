@@ -108,13 +108,20 @@ export default function App() {
         return '/gallery';
       }
       if (
+        path === '/admin' ||
+        path.startsWith('/admin/') ||
+        path.startsWith('/admin') ||
         path === '/wp-admin' ||
         path.startsWith('/wp-admin/') ||
         path.startsWith('/wp-admin') ||
+        hash === '#/admin' ||
+        hash.startsWith('#/admin') ||
+        hash === '#admin' ||
+        hash.startsWith('#admin') ||
         hash === '#/wp-admin' ||
         hash.startsWith('#/wp-admin')
       ) {
-        return path || '/wp-admin';
+        return path || '/admin';
       }
       if (
         path === '/news' ||
@@ -137,13 +144,20 @@ export default function App() {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
       if (
+        path === '/admin' ||
+        path.startsWith('/admin/') ||
+        path.startsWith('/admin') ||
         path === '/wp-admin' ||
         path.startsWith('/wp-admin/') ||
         path.startsWith('/wp-admin') ||
+        hash === '#/admin' ||
+        hash.startsWith('#/admin') ||
+        hash === '#admin' ||
+        hash.startsWith('#admin') ||
         hash === '#/wp-admin' ||
         hash.startsWith('#/wp-admin')
       ) {
-        setCurrentRoute(path || '/wp-admin');
+        setCurrentRoute(path || '/admin');
       } else if (path === '/about' || path.startsWith('/about/') || hash === '#/about' || hash === '#about') {
         setCurrentRoute('/about');
       } else if (
@@ -238,22 +252,24 @@ export default function App() {
     setLightboxState({ images, index });
   };
 
-  // ── Standalone Admin Portal Routing (/wp-admin) ──
-  if (currentRoute.startsWith('/wp-admin')) {
+  // ── Standalone Admin Portal Routing (/admin and legacy /wp-admin) ──
+  const isAdminPortal = currentRoute.startsWith('/admin') || currentRoute.startsWith('/wp-admin');
+  if (isAdminPortal) {
+    const isLoginView = currentRoute === '/admin' || currentRoute === '/wp-admin';
     return (
       <AdminAuthProvider>
         <CmsProvider>
-          {currentRoute === '/wp-admin' ? (
+          {isLoginView ? (
             <LoginPage onNavigate={navigateTo} />
           ) : (
             <AdminLayout currentAdminRoute={currentRoute} onNavigate={navigateTo}>
-              {currentRoute === '/wp-admin/homepage' ? (
+              {currentRoute.includes('/homepage') ? (
                 <HomepageCmsPage onNavigate={navigateTo} />
-              ) : currentRoute === '/wp-admin/news' ? (
+              ) : currentRoute.includes('/news') ? (
                 <NewsAdminPage onNavigate={navigateTo} />
-              ) : currentRoute === '/wp-admin/events' ? (
+              ) : currentRoute.includes('/events') ? (
                 <EventsAdminPage onNavigate={navigateTo} />
-              ) : currentRoute === '/wp-admin/gallery' ? (
+              ) : currentRoute.includes('/gallery') ? (
                 <GalleryAdminPage onNavigate={navigateTo} />
               ) : (
                 <DashboardPage onNavigate={navigateTo} />

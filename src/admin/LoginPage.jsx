@@ -16,9 +16,9 @@ export default function LoginPage({ onNavigate }) {
   useEffect(() => {
     if (isAuthenticated) {
       if (onNavigate) {
-        onNavigate('/wp-admin/dashboard');
+        onNavigate('/admin/dashboard');
       } else {
-        window.history.pushState({}, '', '/wp-admin/dashboard');
+        window.history.pushState({}, '', '/admin/dashboard');
         window.dispatchEvent(new Event('popstate'));
       }
     }
@@ -34,9 +34,9 @@ export default function LoginPage({ onNavigate }) {
       await login(username, password);
       // Navigate to dashboard
       if (onNavigate) {
-        onNavigate('/wp-admin/dashboard');
+        onNavigate('/admin/dashboard');
       } else {
-        window.history.pushState({}, '', '/wp-admin/dashboard');
+        window.history.pushState({}, '', '/admin/dashboard');
         window.dispatchEvent(new Event('popstate'));
       }
     } catch (err) {

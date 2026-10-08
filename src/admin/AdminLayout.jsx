@@ -19,13 +19,13 @@ export default function AdminLayout({ children, currentAdminRoute, onNavigate })
   const { currentUser, isAuthenticated, loading, logout } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Strict route protection: redirect unauthenticated users to /wp-admin
+  // Strict route protection: redirect unauthenticated users to /admin
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       if (onNavigate) {
-        onNavigate('/wp-admin');
+        onNavigate('/admin');
       } else {
-        window.history.pushState({}, '', '/wp-admin');
+        window.history.pushState({}, '', '/admin');
         window.dispatchEvent(new Event('popstate'));
       }
     }
@@ -49,35 +49,35 @@ export default function AdminLayout({ children, currentAdminRoute, onNavigate })
       id: 'dashboard',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      path: '/wp-admin/dashboard',
+      path: '/admin/dashboard',
       desc: 'Overview & statistics'
     },
     {
       id: 'homepage-cms',
       label: 'Homepage CMS',
       icon: Sliders,
-      path: '/wp-admin/homepage',
+      path: '/admin/homepage',
       desc: 'Manage all 11 homepage sections'
     },
     {
       id: 'news',
       label: 'News & Press',
       icon: Newspaper,
-      path: '/wp-admin/news',
+      path: '/admin/news',
       desc: 'Manage press & articles'
     },
     {
       id: 'events',
       label: 'Events & Yatras',
       icon: Calendar,
-      path: '/wp-admin/events',
+      path: '/admin/events',
       desc: 'Schedules & yatras'
     },
     {
       id: 'gallery',
       label: 'Photo Gallery',
       icon: ImageIcon,
-      path: '/wp-admin/gallery',
+      path: '/admin/gallery',
       desc: 'Upload & remove photos'
     }
   ];
@@ -95,9 +95,9 @@ export default function AdminLayout({ children, currentAdminRoute, onNavigate })
   const handleLogout = async () => {
     await logout();
     if (onNavigate) {
-      onNavigate('/wp-admin');
+      onNavigate('/admin');
     } else {
-      window.history.pushState({}, '', '/wp-admin');
+      window.history.pushState({}, '', '/admin');
       window.dispatchEvent(new Event('popstate'));
     }
   };
@@ -132,7 +132,7 @@ export default function AdminLayout({ children, currentAdminRoute, onNavigate })
             const Icon = item.icon;
             const isActive =
               currentAdminRoute === item.path ||
-              (item.id === 'dashboard' && currentAdminRoute === '/wp-admin');
+              (item.id === 'dashboard' && (currentAdminRoute === '/admin' || currentAdminRoute === '/wp-admin'));
             return (
               <button
                 key={item.id}

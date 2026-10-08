@@ -79,7 +79,7 @@ export default function DashboardPage({ onNavigate }) {
       {/* Minimal Metric Cards */}
       <div className="admin-metrics-grid">
         {/* News Card */}
-        <div className="admin-metric-card" onClick={() => handleGo('/wp-admin/news')}>
+        <div className="admin-metric-card" onClick={() => handleGo('/admin/news')}>
           <div className="admin-metric-top">
             <div className="admin-metric-icon-box">
               <Newspaper size={18} />
@@ -97,7 +97,7 @@ export default function DashboardPage({ onNavigate }) {
         </div>
 
         {/* Events Card */}
-        <div className="admin-metric-card" onClick={() => handleGo('/wp-admin/events')}>
+        <div className="admin-metric-card" onClick={() => handleGo('/admin/events')}>
           <div className="admin-metric-top">
             <div className="admin-metric-icon-box">
               <Calendar size={18} />
@@ -115,7 +115,7 @@ export default function DashboardPage({ onNavigate }) {
         </div>
 
         {/* Gallery Card */}
-        <div className="admin-metric-card" onClick={() => handleGo('/wp-admin/gallery')}>
+        <div className="admin-metric-card" onClick={() => handleGo('/admin/gallery')}>
           <div className="admin-metric-top">
             <div className="admin-metric-icon-box">
               <ImageIcon size={18} />
@@ -143,7 +143,7 @@ export default function DashboardPage({ onNavigate }) {
             <button
               type="button"
               className="admin-shortcut-btn"
-              onClick={() => handleGo('/wp-admin/homepage')}
+              onClick={() => handleGo('/admin/homepage')}
               style={{ borderLeft: '4px solid #f97316' }}
             >
               <div className="admin-shortcut-icon-box" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>
@@ -159,7 +159,7 @@ export default function DashboardPage({ onNavigate }) {
             <button
               type="button"
               className="admin-shortcut-btn"
-              onClick={() => handleGo('/wp-admin/news')}
+              onClick={() => handleGo('/admin/news')}
             >
               <div className="admin-shortcut-icon-box">
                 <PenLine size={17} />
@@ -174,7 +174,7 @@ export default function DashboardPage({ onNavigate }) {
             <button
               type="button"
               className="admin-shortcut-btn"
-              onClick={() => handleGo('/wp-admin/events')}
+              onClick={() => handleGo('/admin/events')}
             >
               <div className="admin-shortcut-icon-box">
                 <CalendarPlus size={17} />
@@ -189,7 +189,7 @@ export default function DashboardPage({ onNavigate }) {
             <button
               type="button"
               className="admin-shortcut-btn"
-              onClick={() => handleGo('/wp-admin/gallery')}
+              onClick={() => handleGo('/admin/gallery')}
             >
               <div className="admin-shortcut-icon-box">
                 <UploadCloud size={17} />
