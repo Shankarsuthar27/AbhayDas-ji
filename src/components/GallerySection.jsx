@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useCms } from '../context/CmsContext';
 
 export default function GallerySection({ onOpenLightbox, onNavigate }) {
-  const galleryItems = [
+  const { cms } = useCms();
+  const galleryData = cms?.gallery || {};
+
+  const defaultItems = [
     {
       id: 1,
       src: "/images/img_17.jpg",
@@ -39,6 +43,17 @@ export default function GallerySection({ onOpenLightbox, onNavigate }) {
       alt: "Takhatgarh Assembly"
     }
   ];
+
+  const galleryItems = (galleryData.images && galleryData.images.length > 0)
+    ? galleryData.images
+        .filter(img => img.status !== 'draft')
+        .map((img, idx) => ({
+          id: img.id || idx + 1,
+          src: img.url || '/images/img_17.jpg',
+          title: img.title || `Sacred Moment ${idx + 1}`,
+          alt: img.title || 'Sacred Photo'
+        }))
+    : defaultItems;
 
   // Tripled items for infinite seamless looping
   const displayItems = [...galleryItems, ...galleryItems, ...galleryItems];
@@ -435,6 +450,22 @@ export default function GallerySection({ onOpenLightbox, onNavigate }) {
         }
       `}</style>
 
+      {/* Center-aligned Heading */}
+      {galleryData.heading && (
+        <div style={{ textAlign: 'center', marginBottom: '26px' }}>
+          <h2 style={{
+            fontSize: 'clamp(28px, 3.4vw, 38px)',
+            fontWeight: '800',
+            color: '#17342f',
+            margin: 0,
+            letterSpacing: '-0.3px',
+            fontFamily: "'Plus Jakarta Sans', sans-serif"
+          }}>
+            {galleryData.heading}
+          </h2>
+        </div>
+      )}
+
       <div
         className="gva-gallery-carousel swiper-slider-wrapper style-1 max-w-[1340px] mx-auto relative group"
         style={{ maxWidth: '1340px', margin: '0 auto', position: 'relative' }}
@@ -602,10 +633,13 @@ export default function GallerySection({ onOpenLightbox, onNavigate }) {
             <button
               type="button"
               onClick={() => {
-                if (onNavigate) {
-                  onNavigate('/gallery');
+                const targetUrl = galleryData.actionButtonUrl || '/gallery';
+                if (targetUrl.startsWith('http')) {
+                  window.open(targetUrl, '_blank');
+                } else if (onNavigate) {
+                  onNavigate(targetUrl);
                 } else {
-                  window.history.pushState({}, '', '/gallery');
+                  window.history.pushState({}, '', targetUrl);
                   window.dispatchEvent(new Event('popstate'));
                 }
               }}
@@ -635,7 +669,7 @@ export default function GallerySection({ onOpenLightbox, onNavigate }) {
                 e.currentTarget.style.boxShadow = '0 8px 22px rgba(252, 121, 26, 0.35)';
               }}
             >
-              <span>Explore Full Gallery (171 Moments)</span>
+              <span>{galleryData.actionButtonText || 'View More Gallery'}</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>

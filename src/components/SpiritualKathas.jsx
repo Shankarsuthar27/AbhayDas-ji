@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useCms } from '../context/CmsContext';
 
 export default function SpiritualKathas({ onOpenVideo, onNavigate }) {
+  const { cms } = useCms();
+  const kathaData = cms?.spiritualKathas || {};
   const [hoveredCard, setHoveredCard] = useState(null);
 
-  const kathaCards = [
+  const defaultCards = [
     {
       id: "bhagwat",
       title: "Shrimad Bhagwad Katha",
@@ -30,12 +33,31 @@ export default function SpiritualKathas({ onOpenVideo, onNavigate }) {
     }
   ];
 
+  const kathaCards = (kathaData.items && kathaData.items.length > 0)
+    ? kathaData.items
+        .filter(card => card.status !== 'draft')
+        .map((card, idx) => ({
+          id: card.id || `katha-${idx}`,
+          title: card.title,
+          image: card.image || '/images/img_11.jpg',
+          videoId: card.videoId || 'X0UPcFj_ZNQ',
+          link: card.destinationLink || card.link || '/kathas',
+          isCenter: idx === 1 // center styling on second item
+        }))
+    : defaultCards;
+
+  const subheading = kathaData.subheading || "What We do";
+  const mainTitle = kathaData.title || "Spiritual katha'";
+
   const handleCardClick = (card) => {
-    if (card.link) {
-      if (onNavigate) {
-        onNavigate(card.link);
+    const target = card.link || card.destinationLink;
+    if (target) {
+      if (onNavigate && !target.startsWith('http')) {
+        onNavigate(target);
+      } else if (target.startsWith('http')) {
+        window.open(target, '_blank');
       } else {
-        window.history.pushState({}, '', card.link);
+        window.history.pushState({}, '', target);
         window.dispatchEvent(new Event('popstate'));
       }
     } else if (onOpenVideo) {
@@ -128,7 +150,7 @@ export default function SpiritualKathas({ onOpenVideo, onNavigate }) {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="#FC791A">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
-            <span>What We do</span>
+            <span>{subheading}</span>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="#FC791A">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
@@ -146,7 +168,7 @@ export default function SpiritualKathas({ onOpenVideo, onNavigate }) {
               fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif"
             }}
           >
-            Spiritual katha'
+            {mainTitle}
           </h2>
         </div>
 

@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
 import { websiteData } from '../data/websiteData';
+import { useCms } from '../context/CmsContext';
 
 export default function AboutSection({ onOpenDonate, onOpenVideo }) {
+  const { cms } = useCms();
+  const aboutData = cms?.about || {};
+
   const [showFullBio, setShowFullBio] = useState(false);
   const { about } = websiteData;
 
-  const briefIntroText = "Pujya Abhaydas Ji Maharaj Shri is a spiritual guru, religious preacher, and social reformer who embraced the path of dharma and humanitarian service from early childhood. At the tender age of four, he received spiritual initiation (Diksha) from the pujya Acharya Shri Nirbhaydas Ji Maharaj Shri. Since then, he has been wholly dedicated to the promotion of spirituality, moral values, Indian culture, and spiritual awakening. He is presently seated as the fifth Acharya (heir apparent) of the 150-year-old Sadguru Trikam Das Ji Dham tradition located in Takhatgarh, Pali district, Rajasthan, and continues to carry forward its sacred spiritual legacy";
+  const defaultIntroText = "Pujya Abhaydas Ji Maharaj Shri is a spiritual guru, religious preacher, and social reformer who embraced the path of dharma and humanitarian service from early childhood. At the tender age of four, he received spiritual initiation (Diksha) from the pujya Acharya Shri Nirbhaydas Ji Maharaj Shri. Since then, he has been wholly dedicated to the promotion of spirituality, moral values, Indian culture, and spiritual awakening. He is presently seated as the fifth Acharya (heir apparent) of the 150-year-old Sadguru Trikam Das Ji Dham tradition located in Takhatgarh, Pali district, Rajasthan, and continues to carry forward its sacred spiritual legacy";
+
+  const sectionLabel = aboutData.sectionLabel || "About Us";
+  const sectionHeading = aboutData.heading || "Brief Introduction";
+  const briefIntroText = aboutData.paragraph || defaultIntroText;
+  const artworkImg = aboutData.artworkImage || "/images/img_9.jpg";
+  const portraitImg = aboutData.portraitImage || "/images/img_10.jpg";
+  const buttonLabel = aboutData.buttonText || "Read More";
+  const buttonUrl = aboutData.buttonUrl || "/about";
 
   return (
     <section id="about" style={{
@@ -50,7 +62,7 @@ export default function AboutSection({ onOpenDonate, onOpenVideo }) {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="#fc791a">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </svg>
-              <span>About Us</span>
+              <span>{sectionLabel}</span>
               {/* Orange Heart Icon Right */}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="#fc791a">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -67,7 +79,7 @@ export default function AboutSection({ onOpenDonate, onOpenVideo }) {
               margin: '0 0 24px 0',
               letterSpacing: '-0.4px'
             }}>
-              Brief Introduction
+              {sectionHeading}
             </h2>
 
             {/* Paragraph Text (Exact Match to Reference Image) */}
@@ -147,7 +159,7 @@ export default function AboutSection({ onOpenDonate, onOpenVideo }) {
                     <polyline points="13 17 18 12 13 7"></polyline>
                   </svg>
                 </span>
-                <span>{showFullBio ? 'Show Less' : 'About More'}</span>
+                <span>{showFullBio ? 'Show Less' : buttonLabel}</span>
               </button>
             </div>
 
@@ -162,7 +174,7 @@ export default function AboutSection({ onOpenDonate, onOpenVideo }) {
             position: 'relative'
           }}>
 
-            {/* Image 1: Maharaj Ji at Podium with Krishna Backdrop (img_9.jpg) */}
+            {/* Image 1: Artwork / Podium Image */}
             <div className="about-img-box" style={{
               position: 'relative',
               borderRadius: '26px',
@@ -176,7 +188,7 @@ export default function AboutSection({ onOpenDonate, onOpenVideo }) {
                 boxShadow: '0 14px 38px rgba(0,0,0,0.12)'
               }}>
                 <img
-                  src="/images/img_9.jpg"
+                  src={artworkImg}
                   alt="Pujya Maharaj Ji with Krishna Bhagwan"
                   style={{
                     width: '100%',
@@ -281,7 +293,7 @@ export default function AboutSection({ onOpenDonate, onOpenVideo }) {
               boxShadow: '0 14px 38px rgba(0,0,0,0.12)'
             }}>
               <img
-                src="/images/img_10.jpg"
+                src={portraitImg}
                 alt="Pujya Swami Shri Abhaydas Ji Maharaj"
                 style={{
                   width: '100%',

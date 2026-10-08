@@ -1,17 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useCms } from '../context/CmsContext';
 
 export default function CampaignsSection({ onOpenDonate }) {
+  const { cms } = useCms();
+  const donationsData = cms?.donations || {};
   const sliderRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const donationCards = [
+  const defaultCards = [
     {
       id: "better-life",
       title: "Your small help can bring a Better Life to Everyone",
       image: "/images/img_14.avif",
       percent: 0,
       raisedText: "₹0",
-      goalText: "₹50,000.00"
+      goalText: "₹50,000.00",
+      donateUrl: "#donate"
     },
     {
       id: "water-food",
@@ -19,7 +23,8 @@ export default function CampaignsSection({ onOpenDonate }) {
       image: "/images/img_15.jpg",
       percent: 37,
       raisedText: "₹18,500.00",
-      goalText: "₹50,000.00"
+      goalText: "₹50,000.00",
+      donateUrl: "#donate"
     },
     {
       id: "gurukulam",
@@ -27,7 +32,8 @@ export default function CampaignsSection({ onOpenDonate }) {
       image: "/images/img_16.jpg",
       percent: 46,
       raisedText: "₹35,000.00",
-      goalText: "₹75,000.00"
+      goalText: "₹75,000.00",
+      donateUrl: "#donate"
     },
     {
       id: "gau-seva",
@@ -35,9 +41,32 @@ export default function CampaignsSection({ onOpenDonate }) {
       image: "/images/img_17.jpg",
       percent: 0,
       raisedText: "₹0",
-      goalText: "₹50,000.00"
+      goalText: "₹50,000.00",
+      donateUrl: "#donate"
     }
   ];
+
+  const donationCards = (donationsData.campaigns && donationsData.campaigns.length > 0)
+    ? donationsData.campaigns
+        .filter(c => c.status !== 'draft')
+        .map((c, idx) => {
+          const target = Number(c.targetGoal) || 1;
+          const raised = Number(c.raisedAmount) || 0;
+          const pct = Math.min(100, Math.round((raised / target) * 100));
+          return {
+            id: c.id || `campaign-${idx}`,
+            title: c.title,
+            image: c.image || '/images/img_14.avif',
+            percent: pct,
+            raisedText: `₹${raised.toLocaleString('en-IN')}`,
+            goalText: `₹${target.toLocaleString('en-IN')}`,
+            donateUrl: c.donateUrl || '#donate'
+          };
+        })
+    : defaultCards;
+
+  const subheading = donationsData.subheading || "Urgent Causes";
+  const mainTitle = donationsData.title || "Donation";
 
   // Scroll carousel left or right
   const scroll = (direction) => {
@@ -151,7 +180,7 @@ export default function CampaignsSection({ onOpenDonate }) {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="#fc791a">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
-            <span>Urgent Causes</span>
+            <span>{subheading}</span>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="#fc791a">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
@@ -166,7 +195,7 @@ export default function CampaignsSection({ onOpenDonate }) {
               fontFamily: "'Plus Jakarta Sans', sans-serif"
             }}
           >
-            Donation
+            {mainTitle}
           </h2>
         </div>
 
@@ -417,7 +446,13 @@ export default function CampaignsSection({ onOpenDonate }) {
 
                   {/* Pill-shaped Button aligned to left (bg-blue-600 with white circle icon container) */}
                   <button
-                    onClick={() => onOpenDonate && onOpenDonate(card.id)}
+                    onClick={() => {
+                      if (card.donateUrl && card.donateUrl !== '#donate' && !card.donateUrl.startsWith('#')) {
+                        window.open(card.donateUrl, '_blank');
+                      } else if (onOpenDonate) {
+                        onOpenDonate(card.id);
+                      }
+                    }}
                     className="self-start rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm inline-flex items-center py-2.5 px-5 shadow-sm transition-colors duration-200 cursor-pointer"
                     style={{
                       alignSelf: 'flex-start',

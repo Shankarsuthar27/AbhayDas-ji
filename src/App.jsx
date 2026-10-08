@@ -37,6 +37,8 @@ import DashboardPage from './admin/DashboardPage';
 import NewsAdminPage from './admin/NewsAdminPage';
 import EventsAdminPage from './admin/EventsAdminPage';
 import GalleryAdminPage from './admin/GalleryAdminPage';
+import HomepageCmsPage from './admin/HomepageCmsPage';
+import { CmsProvider } from './context/CmsContext';
 
 export default function App() {
   const [donateModalOpen, setDonateModalOpen] = useState(false);
@@ -240,27 +242,32 @@ export default function App() {
   if (currentRoute.startsWith('/wp-admin')) {
     return (
       <AdminAuthProvider>
-        {currentRoute === '/wp-admin' ? (
-          <LoginPage onNavigate={navigateTo} />
-        ) : (
-          <AdminLayout currentAdminRoute={currentRoute} onNavigate={navigateTo}>
-            {currentRoute === '/wp-admin/news' ? (
-              <NewsAdminPage onNavigate={navigateTo} />
-            ) : currentRoute === '/wp-admin/events' ? (
-              <EventsAdminPage onNavigate={navigateTo} />
-            ) : currentRoute === '/wp-admin/gallery' ? (
-              <GalleryAdminPage onNavigate={navigateTo} />
-            ) : (
-              <DashboardPage onNavigate={navigateTo} />
-            )}
-          </AdminLayout>
-        )}
+        <CmsProvider>
+          {currentRoute === '/wp-admin' ? (
+            <LoginPage onNavigate={navigateTo} />
+          ) : (
+            <AdminLayout currentAdminRoute={currentRoute} onNavigate={navigateTo}>
+              {currentRoute === '/wp-admin/homepage' ? (
+                <HomepageCmsPage onNavigate={navigateTo} />
+              ) : currentRoute === '/wp-admin/news' ? (
+                <NewsAdminPage onNavigate={navigateTo} />
+              ) : currentRoute === '/wp-admin/events' ? (
+                <EventsAdminPage onNavigate={navigateTo} />
+              ) : currentRoute === '/wp-admin/gallery' ? (
+                <GalleryAdminPage onNavigate={navigateTo} />
+              ) : (
+                <DashboardPage onNavigate={navigateTo} />
+              )}
+            </AdminLayout>
+          )}
+        </CmsProvider>
       </AdminAuthProvider>
     );
   }
 
   return (
-    <div className="wrapper-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+    <CmsProvider>
+      <div className="wrapper-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
       
       {/* 1. Header with Dark Green Topbar & Orange Logo Curved Tab */}
       <Header
@@ -419,5 +426,6 @@ export default function App() {
       />
 
     </div>
+    </CmsProvider>
   );
 }

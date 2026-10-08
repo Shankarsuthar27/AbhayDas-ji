@@ -11,7 +11,8 @@ import {
   ArrowRight,
   Database,
   ShieldCheck,
-  HardDrive
+  HardDrive,
+  Sliders
 } from 'lucide-react';
 import './Admin.css';
 
@@ -139,6 +140,22 @@ export default function DashboardPage({ onNavigate }) {
           <h3 className="admin-panel-title">Quick Actions</h3>
           <p className="admin-panel-subtitle">Create and manage content with one click</p>
           <div className="admin-shortcuts-list">
+            <button
+              type="button"
+              className="admin-shortcut-btn"
+              onClick={() => handleGo('/wp-admin/homepage')}
+              style={{ borderLeft: '4px solid #f97316' }}
+            >
+              <div className="admin-shortcut-icon-box" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>
+                <Sliders size={17} />
+              </div>
+              <div className="admin-shortcut-info">
+                <strong>Homepage CMS (All 12 Sections)</strong>
+                <span>Edit hero, kathas, donations, gallery, footer & more</span>
+              </div>
+              <ArrowRight size={15} className="admin-shortcut-arrow" />
+            </button>
+
             <button
               type="button"
               className="admin-shortcut-btn"

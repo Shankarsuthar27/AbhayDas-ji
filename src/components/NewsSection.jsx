@@ -1,21 +1,50 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { newsArticles } from '../data/newsData';
 import { subscribeNews } from '../services/contentService';
+import { useCms } from '../context/CmsContext';
 
 export default function NewsSection({ onNavigate }) {
+  const { cms } = useCms();
+  const newsCms = cms?.news || {};
+  const sectionTitle = newsCms.sectionTitle || 'Latest News And Articles';
+  const viewAllUrl = newsCms.viewAllUrl || '/news';
+
   const [articles, setArticles] = useState(newsArticles);
   const [activeArticle, setActiveArticle] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
+    if (newsCms.cards && newsCms.cards.length > 0) {
+      const parsedCards = newsCms.cards
+        .filter(c => c.status !== 'draft')
+        .map(c => {
+          const parts = (c.date || '24 OCT').split(' ');
+          return {
+            id: c.id,
+            title: c.title,
+            date: c.date || '24 OCT 2026',
+            day: parts[0] || '24',
+            month: parts[1] || 'OCT',
+            image: c.image || '/images/img_26.jpg',
+            author: 'Admin',
+            comments: '2 Comments',
+            slug: c.id,
+            link: c.link || `/news/${c.id}`,
+            fullContent: c.excerpt || c.title
+          };
+        });
+      setArticles(parsedCards);
+      return;
+    }
+
     const unsub = subscribeNews((updated) => {
       if (updated && updated.length > 0) {
         setArticles(updated);
       }
     });
     return () => unsub();
-  }, []);
+  }, [newsCms]);
 
   // Quick responsive scroll navigation
   const scroll = (direction) => {
@@ -28,7 +57,18 @@ export default function NewsSection({ onNavigate }) {
   };
 
   const handleSelectArticle = (item) => {
-    if (onNavigate) {
+    if (item.link && !item.link.startsWith('#')) {
+      if (item.link.startsWith('http')) {
+        window.open(item.link, '_blank');
+      } else if (onNavigate) {
+        onNavigate(item.link);
+      } else {
+        window.history.pushState({}, '', item.link);
+        window.dispatchEvent(new Event('popstate'));
+      }
+    } else if (item.fullContent && item.fullContent.length > 100) {
+      setActiveArticle(item);
+    } else if (onNavigate) {
       onNavigate(`/news/${item.slug}`);
     } else {
       window.history.pushState({}, '', `/news/${item.slug}`);
@@ -75,7 +115,7 @@ export default function NewsSection({ onNavigate }) {
               margin: 0,
               lineHeight: 1.2
             }}>
-              Latest News And Articles
+              {sectionTitle}
             </h2>
           </div>
 
@@ -84,10 +124,12 @@ export default function NewsSection({ onNavigate }) {
             <button
               type="button"
               onClick={() => {
-                if (onNavigate) {
-                  onNavigate('/news');
+                if (viewAllUrl.startsWith('http')) {
+                  window.open(viewAllUrl, '_blank');
+                } else if (onNavigate) {
+                  onNavigate(viewAllUrl);
                 } else {
-                  window.history.pushState({}, '', '/news');
+                  window.history.pushState({}, '', viewAllUrl);
                   window.dispatchEvent(new Event('popstate'));
                 }
               }}

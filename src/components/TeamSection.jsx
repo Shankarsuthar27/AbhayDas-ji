@@ -1,23 +1,47 @@
 import React from 'react';
+import { useCms } from '../context/CmsContext';
 
 export default function TeamSection() {
-  const teamMembers = [
+  const { cms } = useCms();
+  const testData = cms?.testimonials || {};
+
+  const defaultMembers = [
     {
       id: 2,
       name: "Sachin Sharma",
-      role: "General Manager"
+      role: "General Manager",
+      reviewText: "",
+      avatar: ""
     },
     {
       id: 1,
       name: "Vijay Raj Chouhan",
-      role: "PS"
+      role: "PS",
+      reviewText: "",
+      avatar: ""
     },
     {
       id: 3,
       name: "Bhanwar Suthar",
-      role: "IT Head"
+      role: "IT Head",
+      reviewText: "",
+      avatar: ""
     }
   ];
+
+  const teamMembers = (testData.items && testData.items.length > 0)
+    ? testData.items
+        .filter(item => item.status !== 'draft')
+        .map((item, idx) => ({
+          id: item.id || idx,
+          name: item.name,
+          role: item.role,
+          reviewText: item.reviewText || '',
+          avatar: item.avatar || ''
+        }))
+    : defaultMembers;
+
+  const sectionTitle = testData.sectionTitle || "Meet the team behind their success story";
 
   return (
     <section id="team" style={{
@@ -27,7 +51,7 @@ export default function TeamSection() {
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
         
         {/* Section Header */}
-        <div style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 50px' }}>
+        <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 50px' }}>
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -48,9 +72,11 @@ export default function TeamSection() {
             fontSize: 'clamp(28px, 3.5vw, 40px)',
             fontWeight: '800',
             color: '#111827',
-            margin: 0
+            margin: 0,
+            lineHeight: 1.25,
+            whiteSpace: 'pre-line'
           }}>
-            Meet the team behind<br />their success story
+            {sectionTitle}
           </h2>
         </div>
 
@@ -110,12 +136,46 @@ export default function TeamSection() {
                 🔗
               </div>
 
+              {/* Optional Avatar */}
+              {member.avatar && (
+                <div style={{
+                  width: '74px',
+                  height: '74px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  marginBottom: '14px',
+                  border: '3px solid #10b981',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
+                }}>
+                  <img
+                    src={member.avatar}
+                    alt={member.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+              )}
+
               <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#111827', margin: '4px 0 6px 0' }}>
                 {member.name}
               </h3>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: '#6b7280' }}>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: '#6b7280', marginBottom: member.reviewText ? '12px' : '0' }}>
                 {member.role}
               </div>
+
+              {/* Optional Review Text / Quote */}
+              {member.reviewText && (
+                <p style={{
+                  fontSize: '13.5px',
+                  lineHeight: '1.6',
+                  color: '#4b5563',
+                  fontStyle: 'italic',
+                  margin: '10px 0 0 0',
+                  paddingTop: '10px',
+                  borderTop: '1px dashed #e5e7eb'
+                }}>
+                  "{member.reviewText}"
+                </p>
+              )}
             </div>
           ))}
         </div>

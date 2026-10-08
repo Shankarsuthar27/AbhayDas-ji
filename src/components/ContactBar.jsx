@@ -1,8 +1,14 @@
 import React from 'react';
 import { MapPin, Mail, Phone } from 'lucide-react';
 import { websiteData } from '../data/websiteData';
+import { useCms } from '../context/CmsContext';
 
 export default function ContactBar() {
+  const { cms } = useCms();
+  const banner = cms?.contactBanner || {};
+  const phone = banner.phone || '+91 8696298489, +919509587824';
+  const email = banner.email || websiteData.general.email || 'info@shreeabhaydas.com';
+  const location = banner.location || 'Takhatgarh Dham, Rajasthan, India';
   return (
     <div style={{ backgroundColor: '#ffffff', padding: '0 0 40px' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
@@ -45,7 +51,7 @@ export default function ContactBar() {
                 Address
               </div>
               <div style={{ fontSize: '15.5px', fontWeight: '800', lineHeight: '1.3' }}>
-                Takhatgarh Dham, Rajasthan, India
+                {location}
               </div>
             </div>
           </div>
@@ -72,10 +78,10 @@ export default function ContactBar() {
                 Send Email
               </div>
               <a
-                href={`mailto:${websiteData.general.email}`}
+                href={`mailto:${email}`}
                 style={{ fontSize: '15.5px', fontWeight: '800', color: '#ffffff', textDecoration: 'none', lineHeight: '1.3' }}
               >
-                {websiteData.general.email}
+                {email}
               </a>
             </div>
           </div>
@@ -103,16 +109,10 @@ export default function ContactBar() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
                 <a
-                  href="tel:+918696298489"
+                  href={`tel:${phone.replace(/[^0-9+]/g, '')}`}
                   style={{ fontSize: '15.5px', fontWeight: '800', color: '#ffffff', textDecoration: 'none', lineHeight: '1.3' }}
                 >
-                  +91 8696298489
-                </a>
-                <a
-                  href="tel:+919509587824"
-                  style={{ fontSize: '15.5px', fontWeight: '800', color: '#ffffff', textDecoration: 'none', lineHeight: '1.3' }}
-                >
-                  +919509587824
+                  {phone}
                 </a>
               </div>
             </div>

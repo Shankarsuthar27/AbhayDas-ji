@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useCms } from '../context/CmsContext';
 
 // Default source URLs including newly added links from user
 const DEFAULT_VIDEO_URLS = [
@@ -62,13 +63,39 @@ export function extractYouTubeId(url) {
 }
 
 export default function VideoSection({ videoUrls = DEFAULT_VIDEO_URLS, onOpenVideo }) {
+  const { cms } = useCms();
+  const recentKathaData = cms?.recentKatha || {};
+  const sectionTitle = recentKathaData.sectionTitle || 'Recent Katha';
+  const viewAllUrl = recentKathaData.viewAllUrl || 'https://www.youtube.com/@shreeabhaydas';
+
   const [displayVideos, setDisplayVideos] = useState([]);
   const [playingVideoId, setPlayingVideoId] = useState(null);
   const [hoveredCardKey, setHoveredCardKey] = useState(null);
   const sliderRef = useRef(null);
 
-  // Randomize video order on mount/render and include all parsed items for sliding
   useEffect(() => {
+    if (recentKathaData.cards && recentKathaData.cards.length > 0) {
+      const parsed = recentKathaData.cards
+        .filter(c => c.status !== 'draft')
+        .map((card, index) => {
+          const id = extractYouTubeId(card.mediaUrl);
+          return {
+            uniqueKey: card.id || `card-${index}`,
+            id,
+            url: card.mediaUrl,
+            title: card.title,
+            channel: "Shree Abhaydas",
+            duration: card.metadataText || "Katha Satsang",
+            timestamp: card.metadataText || "0:00 / 15:00",
+            fallbackThumb: card.thumbnail || "/images/img_25.jpg",
+            hqThumb: card.thumbnail || (id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "/images/img_25.jpg"),
+            maxThumb: card.thumbnail || (id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : "/images/img_25.jpg")
+          };
+        });
+      setDisplayVideos(parsed);
+      return;
+    }
+
     const urlsToUse = (videoUrls && videoUrls.length > 0) ? videoUrls : DEFAULT_VIDEO_URLS;
     
     const parsedVideos = urlsToUse.map((url, index) => {
@@ -102,7 +129,7 @@ export default function VideoSection({ videoUrls = DEFAULT_VIDEO_URLS, onOpenVid
     }
 
     setDisplayVideos(shuffled);
-  }, [videoUrls]);
+  }, [videoUrls, recentKathaData]);
 
   // Smooth slide to the left
   const handleSlideLeft = () => {
@@ -424,7 +451,7 @@ export default function VideoSection({ videoUrls = DEFAULT_VIDEO_URLS, onOpenVid
                 fontFamily: "var(--donatm-heading-font-family, 'Quicksand', sans-serif)"
               }}
             >
-              Recent Katha
+              {sectionTitle}
             </h2>
 
             {/* Expanded Decorative Dual-Color Accent Underline (Orange + Green) */}
@@ -458,7 +485,7 @@ export default function VideoSection({ videoUrls = DEFAULT_VIDEO_URLS, onOpenVid
 
           {/* Prominent Larger Red 'Watch More' Button on the Right Side */}
           <a
-            href="https://www.youtube.com/@shreeabhaydas"
+            href={viewAllUrl}
             target="_blank"
             rel="noreferrer"
             className="katha-header-watch-more-btn"

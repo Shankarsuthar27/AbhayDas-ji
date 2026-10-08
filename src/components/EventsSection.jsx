@@ -1,22 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { websiteData } from '../data/websiteData';
 import { subscribeEvents } from '../services/contentService';
+import { useCms } from '../context/CmsContext';
 
 export default function EventsSection({ onOpenVolunteer, onNavigate }) {
+  const { cms } = useCms();
+  const eventsCms = cms?.events || {};
+  const sectionTitle = eventsCms.sectionTitle || 'Upcoming Event Schedule';
+  const viewAllUrl = eventsCms.viewAllUrl || '/events';
+
   const [events, setEvents] = useState(websiteData.events);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [rsvpSuccess, setRsvpSuccess] = useState(false
-    
-  );
+  const [rsvpSuccess, setRsvpSuccess] = useState(false);
 
   useEffect(() => {
+    if (eventsCms.cards && eventsCms.cards.length > 0) {
+      const activeCards = eventsCms.cards.filter(c => c.status !== 'draft');
+      setEvents(activeCards);
+      return;
+    }
+
     const unsub = subscribeEvents((liveList) => {
       if (liveList && liveList.length > 0) {
         setEvents(liveList);
       }
     });
     return () => unsub();
-  }, []);
+  }, [eventsCms]);
 
   const handleRSVP = (e) => {
     e.preventDefault();
@@ -81,16 +91,19 @@ export default function EventsSection({ onOpenVolunteer, onNavigate }) {
               color: '#ffffff',
               margin: 0
             }}>
-              Upcoming Event Schedule
+              {sectionTitle}
             </h2>
           </div>
 
           {/* Green Pill Button matching screenshot: "Events All" */}
           <button
             onClick={() => {
-              if (onNavigate) onNavigate('/events');
-              else {
-                window.history.pushState({}, '', '/events');
+              if (viewAllUrl.startsWith('http')) {
+                window.open(viewAllUrl, '_blank');
+              } else if (onNavigate) {
+                onNavigate(viewAllUrl);
+              } else {
+                window.history.pushState({}, '', viewAllUrl);
                 window.dispatchEvent(new Event('popstate'));
               }
             }}
@@ -193,7 +206,17 @@ export default function EventsSection({ onOpenVolunteer, onNavigate }) {
                 </span>
 
                 <button
-                  onClick={() => setSelectedEvent(evt)}
+                  onClick={() => {
+                    if (evt.detailsUrl && !evt.detailsUrl.startsWith('#')) {
+                      if (evt.detailsUrl.startsWith('http')) {
+                        window.open(evt.detailsUrl, '_blank');
+                      } else if (onNavigate) {
+                        onNavigate(evt.detailsUrl);
+                      }
+                    } else {
+                      setSelectedEvent(evt);
+                    }
+                  }}
                   style={{
                     backgroundColor: '#ffffff',
                     color: '#0b231c',
@@ -214,7 +237,7 @@ export default function EventsSection({ onOpenVolunteer, onNavigate }) {
                     e.currentTarget.style.color = '#0b231c';
                   }}
                 >
-                  Join Event →
+                  View Details →
                 </button>
               </div>
 

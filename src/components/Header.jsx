@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Plus, Minus, ChevronDown } from 'lucide-react';
 import { websiteData } from '../data/websiteData';
+import { useCms } from '../context/CmsContext';
 
 /* =========================================================================
    CRISP BRAND SOCIAL ICONS (White SVGs matching reference image exactly)
@@ -140,10 +141,31 @@ export default function Header({
   currentRoute = '/',
   onNavigate,
 }) {
+  const { cms } = useCms();
+  const headerData = cms?.header || {};
+  const logoSrc = headerData.logo || '/images/img_1.png';
+  const actionButtonText = headerData.actionButtonText || 'Donate Now';
+  const actionButtonUrl = headerData.actionButtonUrl || '#donate';
+
   const [isSticky, setIsSticky] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileAccordion, setMobileAccordion] = useState(null);
+
+  // Derive nav items from CMS if available (published only), else use NAV_ITEMS
+  const activeNavList = (headerData.menuItems && headerData.menuItems.length > 0)
+    ? headerData.menuItems
+        .filter(item => item.status !== 'draft')
+        .map(item => {
+          const matched = NAV_ITEMS.find(n => n.label.toLowerCase() === item.label.toLowerCase() || n.href === item.url);
+          return {
+            id: item.id || (matched ? matched.id : item.label.toLowerCase().replace(/\s+/g, '-')),
+            label: item.label,
+            href: item.url || (matched ? matched.href : '/'),
+            dropdown: matched ? matched.dropdown : null
+          };
+        })
+    : NAV_ITEMS;
 
   // Active navigation highlighting based on currentRoute
   const getActiveId = () => {
@@ -303,7 +325,7 @@ export default function Header({
             title="HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj"
           >
             <img
-              src="/images/img_1.png"
+              src={logoSrc}
               alt="HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj"
               style={{
                 maxHeight: isSticky ? '44px' : '52px',
@@ -577,7 +599,7 @@ export default function Header({
                 height: '100%',
               }}
             >
-              {NAV_ITEMS.map((item) => {
+              {activeNavList.map((item) => {
                 const hasDropdown = Boolean(item.dropdown);
                 const isActive = activeNavId === item.id;
                 const isOpen = openDropdown === item.id;
@@ -723,92 +745,132 @@ export default function Header({
                 <Search size={19} strokeWidth={2.1} />
               </button>
 
-              {/* Desktop Notice Box ("The form is not published.") */}
-              <div
-                onClick={() => onOpenDonate && onOpenDonate()}
-                title="Click to Donate"
-                className="d-none d-xl-flex"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  height: '38px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #eef2f6',
-                  borderRadius: '4px',
-                  paddingRight: '16px',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#ffba00';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 186, 0, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#eef2f6';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.03)';
-                }}
-              >
-                {/* Left Vertical Amber Accent Line with Warning Triangle Badge */}
+              {/* Dynamic Desktop Action Button or Notice Box */}
+              {actionButtonText === 'The form is not published.' ? (
                 <div
+                  onClick={() => onOpenDonate && onOpenDonate()}
+                  title="Click to Donate"
+                  className="d-none d-xl-flex"
                   style={{
-                    position: 'relative',
-                    height: '100%',
-                    width: '28px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
+                    height: '38px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #eef2f6',
+                    borderRadius: '4px',
+                    paddingRight: '16px',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#ffba00';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 186, 0, 0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#eef2f6';
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.03)';
                   }}
                 >
-                  {/* Vertical Amber Line */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      bottom: 0,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: '2.5px',
-                      backgroundColor: '#ffba00',
-                    }}
-                  />
-
-                  {/* Golden Yellow Circle Badge with White Warning Triangle */}
+                  {/* Left Vertical Amber Accent Line with Warning Triangle Badge */}
                   <div
                     style={{
                       position: 'relative',
-                      zIndex: 2,
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      backgroundColor: '#ffba00',
-                      color: '#ffffff',
+                      height: '100%',
+                      width: '28px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      boxShadow: '0 1px 4px rgba(255, 186, 0, 0.35)',
+                      flexShrink: 0,
                     }}
                   >
-                    <WarningTriangleIcon size={11} />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        bottom: 0,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '2.5px',
+                        backgroundColor: '#ffba00',
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'relative',
+                        zIndex: 2,
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffba00',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 1px 4px rgba(255, 186, 0, 0.35)',
+                      }}
+                    >
+                      <WarningTriangleIcon size={11} />
+                    </div>
                   </div>
+                  <span
+                    style={{
+                      color: '#556372',
+                      fontSize: '13.5px',
+                      fontWeight: '500',
+                      marginLeft: '7px',
+                      whiteSpace: 'nowrap',
+                      letterSpacing: '0.1px',
+                    }}
+                  >
+                    The form is not published.
+                  </span>
                 </div>
-
-                {/* Text: The form is not published. */}
-                <span
+              ) : (
+                <a
+                  href={actionButtonUrl}
+                  onClick={(e) => {
+                    if (actionButtonUrl.includes('donate')) {
+                      e.preventDefault();
+                      onOpenDonate && onOpenDonate();
+                    } else if (actionButtonUrl.startsWith('#')) {
+                      e.preventDefault();
+                      const el = document.querySelector(actionButtonUrl);
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    } else if (onNavigate && !actionButtonUrl.startsWith('http')) {
+                      e.preventDefault();
+                      onNavigate(actionButtonUrl);
+                    }
+                  }}
+                  className="d-none d-xl-flex"
                   style={{
-                    color: '#556372',
-                    fontSize: '13.5px',
-                    fontWeight: '500',
-                    marginLeft: '7px',
-                    whiteSpace: 'nowrap',
-                    letterSpacing: '0.1px',
+                    backgroundColor: '#fc791a',
+                    color: '#ffffff',
+                    height: '38px',
+                    padding: '0 20px',
+                    borderRadius: '4px',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    textDecoration: 'none',
+                    boxShadow: '0 2px 8px rgba(252, 121, 26, 0.28)',
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#e0600a';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#fc791a';
+                    e.currentTarget.style.transform = 'none';
                   }}
                 >
-                  The form is not published.
-                </span>
-              </div>
+                  {actionButtonText}
+                </a>
+              )}
 
               {/* Mobile / Tablet Hamburger Button (3 Emerald Green Bars inside light grey button) */}
               <button
@@ -936,7 +998,7 @@ export default function Header({
                   }}
                 >
                   <img
-                    src="/images/img_1.png"
+                    src={logoSrc}
                     alt="Logo"
                     style={{ maxHeight: '38px', width: 'auto', display: 'block' }}
                   />
@@ -966,7 +1028,7 @@ export default function Header({
 
               {/* Navigation Items (Stacked with accordion dropdowns) */}
               <div style={{ flex: 1, padding: '8px 0' }}>
-                {NAV_ITEMS.map((item) => {
+                {activeNavList.map((item) => {
                   const hasDropdown = Boolean(item.dropdown);
                   const isExpanded = mobileAccordion === item.id;
                   const isActive = activeNavId === item.id;
@@ -1056,44 +1118,80 @@ export default function Header({
                   marginTop: 'auto',
                 }}
               >
-                {/* Mobile Notice CTA Box */}
-                <div
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    if (onOpenDonate) onOpenDonate();
-                  }}
-                  style={{
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    padding: '10px 14px',
-                    backgroundColor: '#ffffff',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    marginBottom: '16px',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                  }}
-                >
+                {/* Dynamic Mobile Action Button / Notice Box */}
+                {actionButtonText === 'The form is not published.' ? (
                   <div
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      if (onOpenDonate) onOpenDonate();
+                    }}
                     style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      backgroundColor: '#ffba00',
-                      color: '#fff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      padding: '10px 14px',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      marginBottom: '16px',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffba00',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <WarningTriangleIcon size={11} />
+                    </div>
+                    <span style={{ fontSize: '13px', color: '#475569', fontWeight: '500' }}>
+                      The form is not published.
+                    </span>
+                  </div>
+                ) : (
+                  <a
+                    href={actionButtonUrl}
+                    onClick={(e) => {
+                      setMobileMenuOpen(false);
+                      if (actionButtonUrl.includes('donate')) {
+                        e.preventDefault();
+                        onOpenDonate && onOpenDonate();
+                      } else if (actionButtonUrl.startsWith('#')) {
+                        e.preventDefault();
+                        const el = document.querySelector(actionButtonUrl);
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      } else if (onNavigate && !actionButtonUrl.startsWith('http')) {
+                        e.preventDefault();
+                        onNavigate(actionButtonUrl);
+                      }
+                    }}
+                    style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      flexShrink: 0,
+                      backgroundColor: '#fc791a',
+                      color: '#ffffff',
+                      padding: '12px 20px',
+                      borderRadius: '6px',
+                      fontWeight: '700',
+                      fontSize: '15px',
+                      textDecoration: 'none',
+                      marginBottom: '16px',
+                      boxShadow: '0 2px 8px rgba(252, 121, 26, 0.3)',
                     }}
                   >
-                    <WarningTriangleIcon size={11} />
-                  </div>
-                  <span style={{ fontSize: '13px', color: '#475569', fontWeight: '500' }}>
-                    The form is not published.
-                  </span>
-                </div>
+                    {actionButtonText}
+                  </a>
+                )}
 
                 {/* Helpline info */}
                 <div style={{ fontSize: '12.5px', color: '#64748b', textAlign: 'center', lineHeight: '1.8' }}>

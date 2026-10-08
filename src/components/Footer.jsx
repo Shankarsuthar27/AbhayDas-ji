@@ -2,10 +2,25 @@ import React from 'react';
 import { Mail, Phone, Calendar } from 'lucide-react';
 import { websiteData } from '../data/websiteData';
 import { newsArticles } from '../data/newsData';
+import { useCms } from '../context/CmsContext';
 
 export default function Footer({ currentRoute = '/', onNavigate }) {
+  const { cms } = useCms();
+  const footerData = cms?.footer || {};
+  const footerLogo = footerData.logo || '/images/img_1.png';
+  const footerDesc = footerData.description || 'Discover the life, teachings, discourses, spiritual lineage, seva initiatives, and mission of HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj.';
+  const showNewsWidget = footerData.showLatestNewsWidget !== false;
+  const copyrightText = footerData.copyright || `Shree Abhay Das Ji Maharaj © ${new Date().getFullYear()} Copyrights | All Rights Reserved & Developed By AsthaSoftIndia`;
+
+  const socialUrls = {
+    facebook: footerData.socialLinks?.facebook || websiteData.general.socialLinks.facebook,
+    twitter: footerData.socialLinks?.twitter || websiteData.general.socialLinks.twitter || '#',
+    instagram: footerData.socialLinks?.instagram || websiteData.general.socialLinks.instagram,
+    youtube: footerData.socialLinks?.youtube || websiteData.general.socialLinks.youtube
+  };
 
   const handleFooterLinkClick = (e, href, label) => {
+    if (!href) return;
     if (label === 'About Us' || href === '/about') {
       e.preventDefault();
       if (onNavigate) onNavigate('/about');
@@ -42,6 +57,9 @@ export default function Footer({ currentRoute = '/', onNavigate }) {
       else { window.history.pushState({}, '', '/'); window.dispatchEvent(new Event('popstate')); }
       return;
     }
+    if (href.startsWith('http')) {
+      return; // allow normal link click
+    }
     if (currentRoute !== '/') {
       e.preventDefault();
       if (onNavigate) onNavigate('/');
@@ -53,13 +71,30 @@ export default function Footer({ currentRoute = '/', onNavigate }) {
     }
   };
 
-  const quickLinks = [
+  const defaultQuickLinks = [
     { label: 'Upcoming Events', href: '/events' },
     { label: 'Volunteers',      href: '#team' },
     { label: 'Photo Gallery',   href: '/gallery' },
     { label: 'About Us',        href: '/about' },
     { label: 'Contact Us',      href: '#contact' },
   ];
+
+  const quickLinks = (footerData.quickLinks && footerData.quickLinks.length > 0)
+    ? footerData.quickLinks
+        .filter(l => l.status !== 'draft')
+        .map(l => ({ label: l.label, href: l.url || '/' }))
+    : defaultQuickLinks;
+
+  const ourServices = (footerData.ourServices && footerData.ourServices.length > 0)
+    ? footerData.ourServices
+        .filter(s => s.status !== 'draft')
+        .map(s => ({ label: s.label, href: s.url || '#campaigns' }))
+    : [
+        { label: 'Gau Seva & Gaushala', href: '#campaigns' },
+        { label: 'Gurukulam Education', href: '#campaigns' },
+        { label: 'Food & Nutrition Seva', href: '#campaigns' },
+        { label: 'Daily Satsang & Katha', href: '/kathas' }
+      ];
 
   const recentNewsItems = [
     {
@@ -137,10 +172,10 @@ export default function Footer({ currentRoute = '/', onNavigate }) {
 
           {/* ── COL 1: Logo + Tagline + Socials ── */}
           <div style={{ maxWidth: '340px' }}>
-            {/* White Logo matching Image 1 */}
+            {/* Logo image from CMS */}
             <div style={{ marginBottom: '22px' }}>
               <img
-                src="/images/img_1.png"
+                src={footerLogo}
                 alt="HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj"
                 style={{
                   maxHeight: '76px',
@@ -154,31 +189,31 @@ export default function Footer({ currentRoute = '/', onNavigate }) {
               />
             </div>
 
-            {/* Description matching screenshot */}
+            {/* Description matching CMS */}
             <p style={{ fontSize: '14px', lineHeight: '1.8', color: '#9db4ae', margin: '0 0 26px 0' }}>
-              Discover the life, teachings, discourses, spiritual lineage, seva initiatives, and mission of HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj.
+              {footerDesc}
             </p>
 
             {/* Social Icons row */}
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              {socialBtn(websiteData.general.socialLinks.facebook, 'Facebook',
+              {socialBtn(socialUrls.facebook, 'Facebook',
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 8H6v4h3v12h5V12h3.64L18 8h-4V6.33C14 5.37 14.5 5 15.6 5H18V0h-3.8C10.6 0 9 1.58 9 4.62V8z"/>
                 </svg>
               )}
-              {socialBtn(websiteData.general.socialLinks.twitter || '#', 'X (Twitter)',
+              {socialBtn(socialUrls.twitter, 'X (Twitter)',
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
               )}
-              {socialBtn(websiteData.general.socialLinks.instagram, 'Instagram',
+              {socialBtn(socialUrls.instagram, 'Instagram',
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
                 </svg>
               )}
-              {socialBtn(websiteData.general.socialLinks.youtube, 'YouTube',
+              {socialBtn(socialUrls.youtube, 'YouTube',
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.13C4.5 20.45 12 20.45 12 20.45s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.13C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/>
                 </svg>
@@ -220,66 +255,113 @@ export default function Footer({ currentRoute = '/', onNavigate }) {
             </ul>
           </div>
 
-          {/* ── COL 3: Recent News (Matching Image 3) ── */}
-          <div>
-            <h3 style={{ fontSize: '24px', fontWeight: '800', color: '#ffffff', margin: 0 }}>
-              Recent News
-            </h3>
-            <DualColorUnderline />
+          {/* ── COL 3: Our Services (Matching CMS) ── */}
+          {ourServices.length > 0 && (
+            <div>
+              <h3 style={{ fontSize: '24px', fontWeight: '800', color: '#ffffff', margin: 0 }}>
+                Our Services
+              </h3>
+              <DualColorUnderline />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
-              {recentNewsItems.map(n => (
-                <a
-                  key={n.id}
-                  href={`/news/${n.slug}`}
-                  onClick={e => handleFooterLinkClick(e, `/news/${n.slug}`, 'News')}
-                  style={{ display: 'flex', gap: '14px', textDecoration: 'none', alignItems: 'flex-start' }}
-                >
-                  {/* Square Thumbnail */}
-                  <img
-                    src={n.image}
-                    alt={n.title}
-                    style={{
-                      width: '74px',
-                      height: '74px',
-                      borderRadius: '8px',
-                      objectFit: 'cover',
-                      flexShrink: 0,
-                    }}
-                    onError={e => { e.target.src = '/images/img_35.png'; }}
-                  />
-
-                  {/* Text Details */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                      <Calendar size={13} color="#9db4ae" />
-                      <span style={{ fontSize: '12px', color: '#9db4ae', fontWeight: '600' }}>{n.date}</span>
-                    </div>
-                    <p
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {ourServices.map((service, i) => (
+                  <li key={i}>
+                    <a
+                      href={service.href}
+                      onClick={e => handleFooterLinkClick(e, service.href, service.label)}
                       style={{
-                        margin: 0,
-                        fontSize: '13.5px',
-                        fontWeight: '700',
                         color: '#ffffff',
-                        lineHeight: '1.45',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
+                        textDecoration: 'none',
+                        fontSize: '15.5px',
+                        fontWeight: '600',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '10px',
                         transition: 'color 0.2s',
                       }}
                       onMouseEnter={e => e.currentTarget.style.color = '#fc791a'}
                       onMouseLeave={e => e.currentTarget.style.color = '#ffffff'}
                     >
-                      {n.title}
-                    </p>
-                  </div>
-                </a>
-              ))}
+                      <span style={{ color: '#ffffff', fontWeight: '800', fontSize: '18px', lineHeight: 1 }}>»</span>
+                      <span>{service.label}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
+          )}
 
-          {/* ── COL 4: Contact Us (Matching Image 3) ── */}
+          {/* ── COL 4: Recent News (Controlled by CMS toggle) ── */}
+          {showNewsWidget && (
+            <div>
+              <h3 style={{ fontSize: '24px', fontWeight: '800', color: '#ffffff', margin: 0 }}>
+                Recent News
+              </h3>
+              <DualColorUnderline />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+                {((cms?.news?.articles && cms.news.articles.length > 0)
+                  ? cms.news.articles.filter(a => a.status !== 'draft').slice(0, 2).map((a, i) => ({
+                      id: a.id || i,
+                      title: a.title,
+                      date: a.date,
+                      image: a.featuredImage || '/images/img_35.png',
+                      href: a.readMoreUrl || '/news'
+                    }))
+                  : recentNewsItems.map(n => ({ ...n, href: `/news/${n.slug}` }))
+                ).map(n => (
+                  <a
+                    key={n.id}
+                    href={n.href}
+                    onClick={e => handleFooterLinkClick(e, n.href, 'News')}
+                    style={{ display: 'flex', gap: '14px', textDecoration: 'none', alignItems: 'flex-start' }}
+                  >
+                    {/* Square Thumbnail */}
+                    <img
+                      src={n.image}
+                      alt={n.title}
+                      style={{
+                        width: '74px',
+                        height: '74px',
+                        borderRadius: '8px',
+                        objectFit: 'cover',
+                        flexShrink: 0,
+                      }}
+                      onError={e => { e.target.src = '/images/img_35.png'; }}
+                    />
+
+                    {/* Text Details */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                        <Calendar size={13} color="#9db4ae" />
+                        <span style={{ fontSize: '12px', color: '#9db4ae', fontWeight: '600' }}>{n.date}</span>
+                      </div>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: '13.5px',
+                          fontWeight: '700',
+                          color: '#ffffff',
+                          lineHeight: '1.45',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          transition: 'color 0.2s',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.color = '#fc791a'}
+                        onMouseLeave={e => e.currentTarget.style.color = '#ffffff'}
+                      >
+                        {n.title}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── COL 5: Contact Us ── */}
           <div>
             <h3 style={{ fontSize: '24px', fontWeight: '800', color: '#ffffff', margin: 0 }}>
               Contact Us
@@ -316,7 +398,7 @@ export default function Footer({ currentRoute = '/', onNavigate }) {
         </div>
       </div>
 
-      {/* ── BOTTOM COPYRIGHT BAR (Matching Image 3) ── */}
+      {/* ── BOTTOM COPYRIGHT BAR ── */}
       <div style={{
         borderTop: '1px solid rgba(255,255,255,0.08)',
         padding: '20px 24px',
@@ -325,7 +407,7 @@ export default function Footer({ currentRoute = '/', onNavigate }) {
         margin: '0 auto',
       }}>
         <div style={{ fontSize: '13px', color: '#8ca19b', lineHeight: '1.6' }}>
-          Shree Abhay Das Ji Maharaj © {new Date().getFullYear()} Copyrights | All Rights Reserved &amp; Developed By <span style={{ color: '#ffffff', fontWeight: '600' }}>AsthaSoftIndia</span>
+          {copyrightText}
         </div>
       </div>
 

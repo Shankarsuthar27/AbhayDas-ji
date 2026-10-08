@@ -10,7 +10,8 @@ import {
   Menu, 
   User,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Sliders
 } from 'lucide-react';
 import './Admin.css';
 
@@ -50,6 +51,13 @@ export default function AdminLayout({ children, currentAdminRoute, onNavigate })
       icon: LayoutDashboard,
       path: '/wp-admin/dashboard',
       desc: 'Overview & statistics'
+    },
+    {
+      id: 'homepage-cms',
+      label: 'Homepage CMS',
+      icon: Sliders,
+      path: '/wp-admin/homepage',
+      desc: 'Manage all 12 homepage sections'
     },
     {
       id: 'news',

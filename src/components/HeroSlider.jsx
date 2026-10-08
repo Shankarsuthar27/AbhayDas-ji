@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useCms } from '../context/CmsContext';
 
 export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
+  const { cms } = useCms();
+  const heroData = cms?.hero || {};
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState(null);
   const [direction, setDirection] = useState('next'); // 'next' | 'prev'
@@ -13,14 +17,14 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
   const timerRef = useRef(null);
   const animTimeoutRef = useRef(null);
 
-  const slides = [
+  const defaultSlides = [
     {
       id: 0,
-      badge: "A Journey of Devotion, Dharma & Divine Guidance",
-      titleLine1: "Swami Shri",
-      titleLine2: "Abhaydas Ji Maharaj",
-      desc: "Welcome to the official spiritual platform of HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj, dedicated to Sanatan values, sacred discourses, seva, and cultural awakening.",
-      image: "/images/img_4.jpg",
+      badge: heroData.badge || "A Journey of Devotion, Dharma & Divine Guidance",
+      titleLine1: heroData.headingLine1 || "Swami Shri",
+      titleLine2: heroData.headingLine2 || "Abhaydas Ji Maharaj",
+      desc: heroData.paragraph || "Welcome to the official spiritual platform of HH Pujya Acharya Swami Shri Abhaydas Ji Maharaj, dedicated to Sanatan values, sacred discourses, seva, and cultural awakening.",
+      image: heroData.backgroundMedia || "/images/img_4.jpg",
       objectPosition: "center 32%"
     },
     {
@@ -42,6 +46,20 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
       objectPosition: "center 28%"
     }
   ];
+
+  const slides = (heroData.slides && heroData.slides.length > 0)
+    ? heroData.slides
+        .filter(s => s.status !== 'draft')
+        .map((s, idx) => ({
+          id: s.id || idx,
+          badge: s.badge || heroData.badge || "Sanatan Parampara",
+          titleLine1: s.title || heroData.headingLine1 || "Preserving Heritage,",
+          titleLine2: s.titleLine2 || (s.title ? '' : (heroData.headingLine2 || "Inspiring Generations")),
+          desc: s.desc || heroData.paragraph || "",
+          image: s.image || heroData.backgroundMedia || "/images/img_4.jpg",
+          objectPosition: "center 30%"
+        }))
+    : defaultSlides;
 
   useEffect(() => {
     currentSlideRef.current = currentSlide;
@@ -293,84 +311,128 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
               animation: 'textFadeSlideUp 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both'
             }}>
               {/* Notice Box / CTA with Yellow Vertical Bar & Alert Icon */}
-              <div
-                onClick={onOpenDonate}
-                title="Click to Donate"
-                className="hero-slider-notice-box"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '4px',
-                  height: '38px',
-                  paddingRight: '16px',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-                  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-                  border: 'none',
-                  overflow: 'hidden'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
-                }}
-              >
-                {/* Vertical yellow line with circular badge centered */}
-                <div style={{
-                  position: 'relative',
-                  height: '100%',
-                  width: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    width: '2.5px',
-                    backgroundColor: '#f59e0b'
-                  }} />
+              {/* Dynamic Primary Button */}
+              {heroData.primaryBtnText === 'The form is not published.' ? (
+                <div
+                  onClick={onOpenDonate}
+                  title="Click to Donate"
+                  className="hero-slider-notice-box"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '4px',
+                    height: '38px',
+                    paddingRight: '16px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                    transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+                    border: 'none',
+                    overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
+                  }}
+                >
                   <div style={{
                     position: 'relative',
-                    zIndex: 2,
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    backgroundColor: '#f59e0b',
-                    color: '#ffffff',
+                    height: '100%',
+                    width: '32px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: '800'
+                    flexShrink: 0
                   }}>
-                    !
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: '2.5px',
+                      backgroundColor: '#f59e0b'
+                    }} />
+                    <div style={{
+                      position: 'relative',
+                      zIndex: 2,
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: '#f59e0b',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: '800'
+                    }}>
+                      !
+                    </div>
                   </div>
+
+                  <span style={{
+                    color: '#475569',
+                    fontSize: '13.5px',
+                    fontWeight: '600',
+                    letterSpacing: '-0.1px',
+                    whiteSpace: 'nowrap',
+                    marginLeft: '6px'
+                  }}>
+                    The form is not published.
+                  </span>
                 </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    if (heroData.primaryBtnUrl && heroData.primaryBtnUrl !== '#donate' && !heroData.primaryBtnUrl.startsWith('#')) {
+                      window.location.href = heroData.primaryBtnUrl;
+                    } else if (onOpenDonate) {
+                      onOpenDonate();
+                    }
+                  }}
+                  className="hero-slider-notice-box"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    backgroundColor: '#fc791a',
+                    color: '#ffffff',
+                    borderRadius: '4px',
+                    height: '38px',
+                    padding: '0 22px',
+                    cursor: 'pointer',
+                    fontSize: '14.5px',
+                    fontWeight: '700',
+                    border: 'none',
+                    boxShadow: '0 4px 16px rgba(252, 121, 26, 0.4)',
+                    transition: 'all 0.25s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#ea580c';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#fc791a';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  {heroData.primaryBtnText || 'Donate Now'}
+                </button>
+              )}
 
-                <span style={{
-                  color: '#475569',
-                  fontSize: '13.5px',
-                  fontWeight: '600',
-                  letterSpacing: '-0.1px',
-                  whiteSpace: 'nowrap',
-                  marginLeft: '6px'
-                }}>
-                  The form is not published.
-                </span>
-              </div>
-
-              {/* "Become a Volunteer" link */}
+              {/* Dynamic Secondary Action (Watch Video / Volunteer) */}
               <button
-                onClick={onOpenVolunteer}
+                onClick={() => {
+                  if (heroData.watchVideoUrl) {
+                    window.open(heroData.watchVideoUrl, '_blank');
+                  } else if (onOpenVolunteer) {
+                    onOpenVolunteer();
+                  }
+                }}
                 className="hero-slider-volunteer-btn"
                 style={{
                   background: 'transparent',
@@ -394,7 +456,7 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
                   e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
-                Become a Volunteer
+                {heroData.watchVideoText || 'Become a Volunteer'}
               </button>
             </div>
           </div>
