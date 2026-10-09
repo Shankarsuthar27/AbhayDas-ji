@@ -234,7 +234,7 @@ export default function AdminLayout({ children, currentAdminRoute, onNavigate })
         <header className="topbar">
           <button
             type="button"
-            className="icon-button"
+            className="icon-button mobile-menu-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label="Toggle navigation"
           >

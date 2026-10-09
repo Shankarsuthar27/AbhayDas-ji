@@ -2476,6 +2476,17 @@
   border-color: #cbd5e1;
 }
 
+/* Mobile menu hamburger toggle - hidden on desktop view */
+.mobile-menu-toggle {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: grid !important;
+  }
+}
+
 .brand-lockup {
   display: flex;
   min-width: 0;
@@ -2545,6 +2556,12 @@
 @keyframes slide-in {
   from {
     transform: translateX(-100%);
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu {
+    display: none !important;
   }
 }
 
