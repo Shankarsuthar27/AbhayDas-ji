@@ -489,10 +489,24 @@ export const NewsEditor = ({ editId = null, onBack, onSaved }) => {
         const docRef = doc(db, 'news', editId);
         await updateDoc(docRef, articlePayload);
         toast.success('Article updated successfully in Firestore!');
+
+        try {
+          const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
+          const updatedCache = cached.map((item) => (item.id === editId ? { ...item, ...articlePayload } : item));
+          localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(updatedCache));
+          window.dispatchEvent(new CustomEvent('shreeabhaydas-news-updated', { detail: updatedCache }));
+        } catch (e) {}
       } else {
         articlePayload.createdAt = new Date().toISOString();
         const docRef = await addDoc(collection(db, 'news'), articlePayload);
         toast.success(`Article published to Firestore! (ID: ${docRef.id.slice(0, 6)}...)`);
+
+        try {
+          const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
+          const updatedCache = [{ id: docRef.id, ...articlePayload }, ...cached.filter((item) => item.id !== docRef.id)];
+          localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(updatedCache));
+          window.dispatchEvent(new CustomEvent('shreeabhaydas-news-updated', { detail: updatedCache }));
+        } catch (e) {}
       }
 
       if (onSaved) onSaved();

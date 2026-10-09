@@ -286,6 +286,14 @@ export default function EventsAdminPage() {
       const docRef = await addDoc(collection(db, 'events'), newDoc);
       showToast('success', `Event created in Firestore! (ID: ${docRef.id.slice(0, 6)}...)`);
 
+      // Immediately cache and broadcast so homepage updates instantly
+      try {
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_events_cache') || '[]');
+        const updatedCache = [{ id: docRef.id, ...newDoc }, ...cached.filter((item) => item.id !== docRef.id)];
+        localStorage.setItem('shreeabhaydas_events_cache', JSON.stringify(updatedCache));
+        window.dispatchEvent(new CustomEvent('shreeabhaydas-events-updated', { detail: updatedCache }));
+      } catch (cacheErr) {}
+
       // Reset form
       setEventName('');
       setLocation('');
@@ -314,6 +322,14 @@ export default function EventsAdminPage() {
       await deleteDoc(doc(db, 'events', id));
       showToast('success', 'Event removed from Firestore.');
       setEventsList((prev) => prev.filter((item) => item.id !== id));
+
+      // Remove from cache and broadcast
+      try {
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_events_cache') || '[]');
+        const updatedCache = cached.filter((item) => item.id !== id);
+        localStorage.setItem('shreeabhaydas_events_cache', JSON.stringify(updatedCache));
+        window.dispatchEvent(new CustomEvent('shreeabhaydas-events-updated', { detail: updatedCache }));
+      } catch (cacheErr) {}
     } catch (err) {
       console.error('Error deleting event:', err);
       showToast('error', `Failed to delete event: ${err.message}`);

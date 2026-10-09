@@ -82,6 +82,13 @@ export default function NewsAdminPage({ onNavigate }) {
       await deleteDoc(doc(db, 'news', id));
       toast.success('News article removed from Firestore.');
       setNewsList((prev) => prev.filter((item) => item.id !== id));
+
+      try {
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
+        const updatedCache = cached.filter((item) => item.id !== id);
+        localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(updatedCache));
+        window.dispatchEvent(new CustomEvent('shreeabhaydas-news-updated', { detail: updatedCache }));
+      } catch (e) {}
     } catch (err) {
       console.error('Error deleting news:', err);
       toast.error(`Failed to delete: ${err.message}`);

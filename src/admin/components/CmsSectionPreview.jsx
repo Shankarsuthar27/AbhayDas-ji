@@ -9,6 +9,8 @@ import RecentKathaVisualEditor from './visual/RecentKathaVisualEditor';
 import TestimonialsVisualEditor from './visual/TestimonialsVisualEditor';
 import ContactVisualEditor from './visual/ContactVisualEditor';
 import FooterVisualEditor from './visual/FooterVisualEditor';
+import EventsSection from '../../components/EventsSection';
+import NewsSection from '../../components/NewsSection';
 
 // Safe Error Boundary to prevent admin crash on invalid input during typing
 class PreviewErrorBoundary extends Component {
@@ -197,6 +199,10 @@ export default function CmsSectionPreview({
             onNotify={onNotify}
           />
         );
+      case 'events':
+        return <EventsSection />;
+      case 'news':
+        return <NewsSection />;
       case 'all':
         return (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -236,6 +242,8 @@ export default function CmsSectionPreview({
               viewport={viewport}
               onNotify={onNotify}
             />
+            <EventsSection />
+            <NewsSection />
             <TestimonialsVisualEditor
               formData={formData}
               updateSection={updateSection}

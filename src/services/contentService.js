@@ -76,19 +76,21 @@ export function formatFirestoreNews(id, data) {
   // Extract clean paragraphs if content is HTML
   const content = data.content || `<p>${data.description || ''}</p>`;
   const plainText = cleanExcerpt || content.replace(/<[^>]*>/g, ' ').trim();
+  const slug = data.slug || cleanTitle.toLowerCase().replace(/[^\w\u0900-\u097F\-]+/g, '-').replace(/^-+|-+$/g, '');
 
   return {
     id: id,
     title: cleanTitle,
-    slug: data.slug || cleanTitle.toLowerCase().replace(/[^\w\u0900-\u097F\-]+/g, '-').replace(/^-+|-+$/g, ''),
+    slug: slug,
     date: data.date ? dateInfo.formatted : (data.createdAt ? dateInfo.formatted : 'Recent'),
     day: dateInfo.day,
     month: dateInfo.month,
     year: dateInfo.year,
-    author: data.author || 'Shree Abhay Das Ji Maharaj',
+    author: data.author || 'Shree Abhaydas',
     category: data.category || 'General News',
     commentsCount: '0 Comments',
-    image: data.featuredImage || data.url || data.imageUrl || '/images/img_30.png',
+    comments: '0 Comments',
+    image: data.featuredImage || data.url || data.imageUrl || data.image || '/images/img_30.png',
     secondaryImage: data.secondaryImage || null,
     galleryImages: Array.isArray(data.galleryImages) ? data.galleryImages : (Array.isArray(data.additionalImages) ? data.additionalImages : (data.secondaryImage ? [data.secondaryImage] : [])),
     additionalImages: Array.isArray(data.additionalImages) ? data.additionalImages : (Array.isArray(data.galleryImages) ? data.galleryImages : (data.secondaryImage ? [data.secondaryImage] : [])),
@@ -96,6 +98,7 @@ export function formatFirestoreNews(id, data) {
     description: data.description || plainText,
     content: content,
     fullContent: plainText,
+    link: `/news/${slug}`,
     sections: data.sections || null,
     featured: Boolean(data.featured),
     status: data.status || 'published',
@@ -112,16 +115,18 @@ export function formatFirestoreEvent(id, data) {
   const dateInfo = parseDateParts(data.date || data.createdAt);
   const cleanTitle = data.name || data.title || 'Upcoming Event';
   const cleanVenue = data.location || data.venue || 'Sadguru Trikam Das Ji Dham, Takhatgarh';
+  const slug = data.slug || cleanTitle.toLowerCase().replace(/[^\w\u0900-\u097F\-]+/g, '-').replace(/^-+|-+$/g, '');
 
   return {
     id: id,
-    slug: data.slug || cleanTitle.toLowerCase().replace(/[^\w\u0900-\u097F\-]+/g, '-').replace(/^-+|-+$/g, ''),
+    slug: slug,
     title: cleanTitle,
+    name: cleanTitle,
     day: dateInfo.day,
     month: dateInfo.month,
     year: dateInfo.year,
     time: data.time || '8:00 PM Onwards',
-    timeStr: dateInfo.timeStr,
+    timeStr: data.time || dateInfo.timeStr,
     dateFormatted: dateInfo.formatted,
     venue: cleanVenue,
     location: cleanVenue,
@@ -139,6 +144,8 @@ export function formatFirestoreEvent(id, data) {
       { time: '11:00 PM', activity: 'महाआरती एवं प्रसादी वितरण' }
     ],
     status: data.status || 'Upcoming',
+    badge: data.badge || (data.status === 'published' ? 'Upcoming' : (data.status || 'Upcoming')),
+    detailsUrl: data.detailsUrl || `/events/${slug}`,
     entry: 'निःशुल्क (Free Entry - All Devotees Welcome)',
     contactPhone: data.contactPhone || '+91 8696298489',
     contactEmail: 'info@shreeabhaydas.com',
@@ -148,123 +155,204 @@ export function formatFirestoreEvent(id, data) {
 }
 
 /**
- * Subscribe to real-time News updates with static fallback merge
+ * Local cache helpers for instant local sync
+ */
+function getCachedNews() {
+  try {
+    const raw = localStorage.getItem('shreeabhaydas_news_cache');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => formatFirestoreNews(item.id, item));
+      }
+    }
+  } catch (e) {}
+  return [];
+}
+
+function getCachedEvents() {
+  try {
+    const raw = localStorage.getItem('shreeabhaydas_events_cache');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => formatFirestoreEvent(item.id, item));
+      }
+    }
+  } catch (e) {}
+  return [];
+}
+
+/**
+ * Subscribe to real-time News updates with cache and static fallback merge
  */
 export function subscribeNews(onUpdate) {
   let unsubscribe = null;
+  let latestLive = [];
 
-  if (!db) {
-    onUpdate(staticNews);
-    return () => {};
-  }
+  const emitMerged = (liveItems = latestLive) => {
+    latestLive = liveItems;
+    const cachedItems = getCachedNews();
 
-  try {
-    const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
-    unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const firestoreItems = snapshot.docs.map((docSnap) =>
-          formatFirestoreNews(docSnap.id, docSnap.data())
-        );
+    // Combine live Firestore items + cached items (deduplicated)
+    const allDynamic = [...liveItems];
+    for (const c of cachedItems) {
+      if (!allDynamic.some((d) => d.id === c.id || (d.slug && d.slug === c.slug))) {
+        allDynamic.push(c);
+      }
+    }
 
-        // Merge: Firestore dynamic items first, then static articles that don't collide
-        const firestoreSlugs = new Set(
-          firestoreItems
-            .map((item) => (item?.slug ? item.slug.toLowerCase() : ''))
-            .filter(Boolean)
-        );
-        const remainingStatic = staticNews.filter(
-          (s) =>
-            !firestoreSlugs.has((s?.slug ? s.slug.toLowerCase() : '')) &&
-            !firestoreItems.some((f) => f.id === s.id)
-        );
+    // Sort dynamic items: newest first
+    allDynamic.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.date || 0).getTime();
+      const dateB = new Date(b.createdAt || b.date || 0).getTime();
+      return dateB - dateA;
+    });
 
-        const merged = [...firestoreItems, ...remainingStatic];
-        onUpdate(merged);
-      },
-      (err) => {
-        console.warn('Firestore onSnapshot news note:', err.message);
-        if (db) {
-          getDocs(collection(db, 'news'))
+    const dynamicSlugs = new Set(allDynamic.map((item) => item?.slug?.toLowerCase()).filter(Boolean));
+    const dynamicIds = new Set(allDynamic.map((item) => item?.id).filter(Boolean));
+
+    const remainingStatic = staticNews.filter(
+      (s) => !dynamicSlugs.has(s?.slug?.toLowerCase()) && !dynamicIds.has(s?.id)
+    );
+
+    const merged = [...allDynamic, ...remainingStatic];
+    onUpdate(merged);
+  };
+
+  // 1. Immediately emit cached + static so the page is never blank
+  emitMerged([]);
+
+  // 2. Listen to local window events triggered when an admin saves an article
+  const handleLocalUpdate = () => {
+    emitMerged();
+  };
+  window.addEventListener('shreeabhaydas-news-updated', handleLocalUpdate);
+
+  // 3. Subscribe to Firestore collection
+  if (db) {
+    try {
+      const newsCol = collection(db, 'news');
+      unsubscribe = onSnapshot(
+        newsCol,
+        (snapshot) => {
+          const firestoreItems = snapshot.docs.map((docSnap) =>
+            formatFirestoreNews(docSnap.id, docSnap.data())
+          );
+          // Update cache with fresh firestore items
+          try {
+            localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(firestoreItems));
+          } catch (e) {}
+
+          emitMerged(firestoreItems);
+        },
+        (err) => {
+          console.warn('Firestore onSnapshot news note:', err.message);
+          getDocs(newsCol)
             .then((snap) => {
               const firestoreItems = snap.docs.map((d) => formatFirestoreNews(d.id, d.data()));
-              onUpdate([...firestoreItems, ...staticNews]);
+              emitMerged(firestoreItems);
             })
             .catch(() => {
-              onUpdate(staticNews);
+              emitMerged();
             });
-        } else {
-          onUpdate(staticNews);
         }
-      }
-    );
-  } catch (err) {
-    console.warn('subscribeNews error:', err);
-    onUpdate(staticNews);
+      );
+    } catch (err) {
+      console.warn('subscribeNews error:', err);
+      emitMerged();
+    }
   }
 
   return () => {
     if (typeof unsubscribe === 'function') unsubscribe();
+    window.removeEventListener('shreeabhaydas-news-updated', handleLocalUpdate);
   };
 }
 
 /**
- * Subscribe to real-time Events updates with static fallback merge
+ * Subscribe to real-time Events updates with cache and static fallback merge
  */
 export function subscribeEvents(onUpdate) {
   let unsubscribe = null;
+  let latestLive = [];
 
-  if (!db) {
-    onUpdate(staticEvents);
-    return () => {};
-  }
+  const emitMerged = (liveItems = latestLive) => {
+    latestLive = liveItems;
+    const cachedItems = getCachedEvents();
 
-  try {
-    const q = query(collection(db, 'events'), orderBy('createdAt', 'desc'));
-    unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const firestoreItems = snapshot.docs.map((docSnap) =>
-          formatFirestoreEvent(docSnap.id, docSnap.data())
-        );
+    // Combine live Firestore items + cached items (deduplicated)
+    const allDynamic = [...liveItems];
+    for (const c of cachedItems) {
+      if (!allDynamic.some((d) => d.id === c.id || (d.slug && d.slug === c.slug))) {
+        allDynamic.push(c);
+      }
+    }
 
-        // Merge: Firestore dynamic items first, then static events
-        const firestoreSlugs = new Set(
-          firestoreItems
-            .map((item) => (item?.slug ? item.slug.toLowerCase() : ''))
-            .filter(Boolean)
-        );
-        const remainingStatic = staticEvents.filter(
-          (s) =>
-            !firestoreSlugs.has((s?.slug ? s.slug.toLowerCase() : '')) &&
-            !firestoreItems.some((f) => f.id === s.id)
-        );
+    // Sort dynamic items: newest created or latest event date first
+    allDynamic.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.date || 0).getTime();
+      const dateB = new Date(b.createdAt || b.date || 0).getTime();
+      return dateB - dateA;
+    });
 
-        const merged = [...firestoreItems, ...remainingStatic];
-        onUpdate(merged);
-      },
-      (err) => {
-        console.warn('Firestore onSnapshot events note:', err.message);
-        if (db) {
-          getDocs(collection(db, 'events'))
+    const dynamicSlugs = new Set(allDynamic.map((item) => item?.slug?.toLowerCase()).filter(Boolean));
+    const dynamicIds = new Set(allDynamic.map((item) => item?.id).filter(Boolean));
+
+    const remainingStatic = staticEvents.filter(
+      (s) => !dynamicSlugs.has(s?.slug?.toLowerCase()) && !dynamicIds.has(s?.id)
+    );
+
+    const merged = [...allDynamic, ...remainingStatic];
+    onUpdate(merged);
+  };
+
+  // 1. Immediately emit cached + static so the page is never blank
+  emitMerged([]);
+
+  // 2. Listen to local window events triggered when an admin creates an event
+  const handleLocalUpdate = () => {
+    emitMerged();
+  };
+  window.addEventListener('shreeabhaydas-events-updated', handleLocalUpdate);
+
+  // 3. Subscribe to Firestore collection
+  if (db) {
+    try {
+      const eventsCol = collection(db, 'events');
+      unsubscribe = onSnapshot(
+        eventsCol,
+        (snapshot) => {
+          const firestoreItems = snapshot.docs.map((docSnap) =>
+            formatFirestoreEvent(docSnap.id, docSnap.data())
+          );
+          // Update cache with fresh firestore items
+          try {
+            localStorage.setItem('shreeabhaydas_events_cache', JSON.stringify(firestoreItems));
+          } catch (e) {}
+
+          emitMerged(firestoreItems);
+        },
+        (err) => {
+          console.warn('Firestore onSnapshot events note:', err.message);
+          getDocs(eventsCol)
             .then((snap) => {
               const firestoreItems = snap.docs.map((d) => formatFirestoreEvent(d.id, d.data()));
-              onUpdate([...firestoreItems, ...staticEvents]);
+              emitMerged(firestoreItems);
             })
             .catch(() => {
-              onUpdate(staticEvents);
+              emitMerged();
             });
-        } else {
-          onUpdate(staticEvents);
         }
-      }
-    );
-  } catch (err) {
-    console.warn('subscribeEvents error:', err);
-    onUpdate(staticEvents);
+      );
+    } catch (err) {
+      console.warn('subscribeEvents error:', err);
+      emitMerged();
+    }
   }
 
   return () => {
     if (typeof unsubscribe === 'function') unsubscribe();
+    window.removeEventListener('shreeabhaydas-events-updated', handleLocalUpdate);
   };
 }

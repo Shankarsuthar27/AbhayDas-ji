@@ -15,38 +15,15 @@ export default function NewsSection({ onNavigate }) {
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
-    const rawArticles = newsCms.articles || newsCms.cards || [];
-    if (rawArticles && rawArticles.length > 0) {
-      const parsedCards = rawArticles
-        .filter(c => c.status !== 'draft')
-        .map(c => {
-          const dateStr = c.date || '24 OCT';
-          const parts = dateStr.includes(' ') ? dateStr.split(' ') : ['24', dateStr];
-          return {
-            id: c.id,
-            title: c.title,
-            date: c.date || '24 OCT 2026',
-            day: parts[0] || '24',
-            month: parts[1] || 'OCT',
-            image: c.featuredImage || c.image || c.src || c.url || '/images/img_30.png',
-            author: c.author || 'Shree Abhaydas',
-            comments: '2 Comments',
-            slug: c.id,
-            link: c.readMoreUrl || c.link || `/news/${c.id}`,
-            fullContent: c.excerpt || c.title
-          };
-        });
-      setArticles(parsedCards);
-      return;
-    }
-
+    // Always subscribe to real-time News updates so any added article appears immediately on homepage
     const unsub = subscribeNews((updated) => {
       if (updated && updated.length > 0) {
-        setArticles(updated);
+        const publishedCards = updated.filter((c) => c.status !== 'draft');
+        setArticles(publishedCards);
       }
     });
     return () => unsub();
-  }, [newsCms]);
+  }, []);
 
   // Quick responsive scroll navigation
   const scroll = (direction) => {

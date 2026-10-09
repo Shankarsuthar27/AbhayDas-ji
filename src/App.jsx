@@ -62,7 +62,10 @@ function resolveRoute(rawPath = '/', rawHash = '') {
       hash === '#/wp-admin' ||
       hash.startsWith('#/wp-admin')
     ) {
-      return path || '/admin';
+      if (path && path !== '/') {
+        return path;
+      }
+      return hash.includes('wp-admin') ? '/wp-admin' : '/admin';
     }
 
     if (
@@ -108,7 +111,7 @@ function resolveRoute(rawPath = '/', rawHash = '') {
       hash.startsWith('#/events') ||
       hash.startsWith('#events')
     ) {
-      return path || '/events';
+      return (path && path !== '/') ? path : '/events';
     }
 
     if (
@@ -141,7 +144,7 @@ function resolveRoute(rawPath = '/', rawHash = '') {
       hash === '#/blog' ||
       hash === '#blog'
     ) {
-      return path || '/news';
+      return (path && path !== '/') ? path : '/news';
     }
 
     return '/';

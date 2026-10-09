@@ -14,20 +14,15 @@ export default function EventsSection({ onOpenVolunteer, onNavigate }) {
   const [rsvpSuccess, setRsvpSuccess] = useState(false);
 
   useEffect(() => {
-    const rawEvents = eventsCms.items || eventsCms.cards || [];
-    if (rawEvents && rawEvents.length > 0) {
-      const activeCards = rawEvents.filter(c => c.status !== 'draft');
-      setEvents(activeCards);
-      return;
-    }
-
+    // Always subscribe to real-time Events updates so any added event appears immediately on homepage
     const unsub = subscribeEvents((liveList) => {
       if (liveList && liveList.length > 0) {
-        setEvents(liveList);
+        const publishedEvents = liveList.filter((e) => e.status !== 'draft');
+        setEvents(publishedEvents);
       }
     });
     return () => unsub();
-  }, [eventsCms]);
+  }, []);
 
   const handleRSVP = (e) => {
     e.preventDefault();
