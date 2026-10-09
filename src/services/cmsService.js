@@ -68,8 +68,8 @@ export const DEFAULT_HOMEPAGE_CMS = {
     sectionLabel: 'About Us',
     mainHeading: 'Brief Introduction',
     paragraph: 'Pujya Abhaydas Ji Maharaj Shri is a spiritual guru, religious preacher, and social reformer who embraced the path of dharma and humanitarian service from early childhood. At the tender age of four, he received spiritual initiation (Diksha) from the pujya Acharya Shri Nirbhaydas Ji Maharaj Shri. Since then, he has been wholly dedicated to the promotion of spirituality, moral values, Indian culture, and spiritual awakening. He is presently seated as the fifth Acharya (heir apparent) of the 150-year-old Sadguru Trikam Das Ji Dham tradition located in Takhatgarh, Pali district, Rajasthan, and continues to carry forward its sacred spiritual legacy.',
-    artworkImage: '/images/img_10.jpg',
-    portraitImage: '/images/img_11.jpg',
+    artworkImage: '/images/img_9.jpg',
+    portraitImage: '/images/img_10.jpg',
     readMoreButtonText: 'Read More',
     readMoreButtonUrl: '/about',
     videoUrl: 'https://www.youtube.com/live/X0UPcFj_ZNQ?si=4ePCh00jF7hwtkOp'

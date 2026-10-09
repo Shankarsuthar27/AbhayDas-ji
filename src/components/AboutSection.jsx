@@ -20,8 +20,12 @@ export default function AboutSection({ onOpenDonate, onOpenVideo, onNavigate }) 
   const sectionLabel = aboutData.sectionLabel || "About Us";
   const sectionHeading = aboutData.mainHeading || aboutData.heading || "Brief Introduction";
   const briefIntroText = aboutData.paragraph || defaultIntroText;
-  const artworkImg = aboutData.artworkImage || aboutData.artworkImg || "/images/img_10.jpg";
-  const portraitImg = aboutData.portraitImage || aboutData.portraitImg || "/images/img_11.jpg";
+  const artworkImg = (aboutData.artworkImage && aboutData.artworkImage !== '/images/img_10.jpg')
+    ? aboutData.artworkImage
+    : (aboutData.artworkImg || "/images/img_9.jpg");
+  const portraitImg = (aboutData.portraitImage && aboutData.portraitImage !== '/images/img_11.jpg')
+    ? aboutData.portraitImage
+    : (aboutData.portraitImg || "/images/img_10.jpg");
   const buttonLabel = aboutData.readMoreButtonText || aboutData.buttonText || "Read More";
   const buttonUrl = aboutData.readMoreButtonUrl || aboutData.buttonUrl || "/about";
   const videoId = extractYtId(aboutData.videoUrl);

@@ -183,7 +183,7 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
           {/* 1. Static Diagonal Overlay Layers (Angled color blocks remaining fixed over images) */}
           {/* Top-Left Diagonal Overlay Layer (layer-1.png) */}
           <div
-            className="absolute top-0 left-0 w-[clamp(480px,52vw,820px)] h-[clamp(500px,56vw,880px)] pointer-events-none z-10 opacity-95 bg-no-repeat bg-contain"
+            className="hero-layer-top-left absolute top-0 left-0 w-[clamp(480px,52vw,820px)] h-[clamp(500px,56vw,880px)] pointer-events-none z-10 opacity-95 bg-no-repeat bg-contain"
             style={{
               backgroundImage: 'url(/images/layer-1.png)',
               backgroundPosition: 'top left'
@@ -192,7 +192,7 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
 
           {/* Bottom-Right Diagonal Overlay Layer (layer-2.png) */}
           <div
-            className="absolute bottom-0 right-0 w-[clamp(400px,44vw,680px)] h-[clamp(420px,48vw,720px)] pointer-events-none z-10 opacity-95 bg-no-repeat bg-contain"
+            className="hero-layer-bottom-right absolute bottom-0 right-0 w-[clamp(400px,44vw,680px)] h-[clamp(420px,48vw,720px)] pointer-events-none z-10 opacity-95 bg-no-repeat bg-contain"
             style={{
               backgroundImage: 'url(/images/layer-2.png)',
               backgroundPosition: 'bottom right'
@@ -254,7 +254,7 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
                     style={{ objectPosition: slides[prevIndex].objectPosition }}
                   />
                   {/* High Contrast Dark Vignette Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0b231c]/95 via-[#0b231c]/80 via-48% to-transparent pointer-events-none" />
+                  <div className="hero-vignette-overlay absolute inset-0 bg-gradient-to-r from-[#0b231c]/95 via-[#0b231c]/80 via-48% to-transparent pointer-events-none" />
                 </div>
               )}
             </div>
@@ -274,7 +274,7 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
                     style={{ objectPosition: slides[currentSlide].objectPosition }}
                   />
                   {/* High Contrast Dark Vignette Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0b231c]/95 via-[#0b231c]/80 via-48% to-transparent pointer-events-none" />
+                  <div className="hero-vignette-overlay absolute inset-0 bg-gradient-to-r from-[#0b231c]/95 via-[#0b231c]/80 via-48% to-transparent pointer-events-none" />
                 </div>
               )}
             </div>
@@ -294,7 +294,7 @@ export default function HeroSlider({ onOpenDonate, onOpenVolunteer }) {
                     style={{ objectPosition: slides[nextIndex].objectPosition }}
                   />
                   {/* High Contrast Dark Vignette Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0b231c]/95 via-[#0b231c]/80 via-48% to-transparent pointer-events-none" />
+                  <div className="hero-vignette-overlay absolute inset-0 bg-gradient-to-r from-[#0b231c]/95 via-[#0b231c]/80 via-48% to-transparent pointer-events-none" />
                 </div>
               )}
             </div>

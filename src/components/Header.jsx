@@ -909,7 +909,7 @@ export default function Header({
                 </a>
               )}
 
-              {/* Mobile Blue Search Button (Far right of the navbar) */}
+              {/* Mobile Search Button (Dark Slate matching reference screenshot) */}
               <button
                 type="button"
                 onClick={onOpenSearch}
@@ -918,7 +918,7 @@ export default function Header({
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: '#0284c7',
+                  color: '#374151',
                   cursor: 'pointer',
                   padding: '6px',
                   display: 'flex',
@@ -929,7 +929,7 @@ export default function Header({
                   transition: 'opacity 0.2s',
                 }}
               >
-                <Search size={21} strokeWidth={2.2} color="#0284c7" />
+                <Search size={20} strokeWidth={2} color="#374151" />
               </button>
             </div>
           </div>

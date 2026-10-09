@@ -14,8 +14,8 @@ export default function AboutVisualEditor({
   const sectionLabel = aboutData.sectionLabel || 'About Us';
   const mainHeading = aboutData.mainHeading || 'Brief Introduction';
   const paragraph = aboutData.paragraph || 'Pujya Abhaydas Ji Maharaj Shri is a spiritual guru, religious preacher, and social reformer who embraced the path of dharma and humanitarian service from early childhood...';
-  const artworkImage = aboutData.artworkImage || '/images/img_10.jpg';
-  const portraitImage = aboutData.portraitImage || '/images/img_11.jpg';
+  const artworkImage = (aboutData.artworkImage && aboutData.artworkImage !== '/images/img_10.jpg') ? aboutData.artworkImage : '/images/img_9.jpg';
+  const portraitImage = (aboutData.portraitImage && aboutData.portraitImage !== '/images/img_11.jpg') ? aboutData.portraitImage : '/images/img_10.jpg';
   const readMoreButtonText = aboutData.readMoreButtonText || 'Read More';
   const readMoreButtonUrl = aboutData.readMoreButtonUrl || '/about';
   const videoUrl = aboutData.videoUrl || 'https://www.youtube.com/live/X0UPcFj_ZNQ';
