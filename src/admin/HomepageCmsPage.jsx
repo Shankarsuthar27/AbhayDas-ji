@@ -42,8 +42,6 @@ const CMS_SECTIONS = [
   { id: 'donations', label: 'Donation Section', icon: Heart, badge: 'Campaigns' },
   { id: 'gallery', label: 'Gallery Section', icon: ImageIcon, badge: 'Photos' },
   { id: 'recentKatha', label: 'Recent Katha (Videos)', icon: Video, badge: 'Media Cards' },
-  { id: 'events', label: 'Upcoming Events', icon: Calendar, badge: 'Schedules' },
-  { id: 'news', label: 'Latest News & Articles', icon: Newspaper, badge: 'Blog Posts' },
   { id: 'testimonials', label: 'Testimonials / Team', icon: Users, badge: 'Reviews' },
   { id: 'contact', label: 'Contact CTA Banner', icon: PhoneCall, badge: 'Orange Strip' },
   { id: 'footer', label: 'Footer Settings', icon: Layout, badge: 'Links & Social' }
@@ -56,7 +54,7 @@ export default function HomepageCmsPage() {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [dirty, setDirty] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('preview'); // Default full-width visual canvas editor (same to same like Hero)
   const [viewport, setViewport] = useState('desktop'); // 'desktop' | 'tablet' | 'mobile'
   const [fullPagePreviewOpen, setFullPagePreviewOpen] = useState(false);
 
@@ -381,9 +379,36 @@ export default function HomepageCmsPage() {
           {/* Top Live Preview View Mode Bar */}
           <div className="cms-view-mode-bar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <div className="cms-mode-tabs">
+                  <button
+                    type="button"
+                    className={`cms-mode-tab ${viewMode === 'preview' ? 'active' : ''}`}
+                    onClick={() => setViewMode('preview')}
+                    title="Full visual canvas editor (same to same editable preview)"
+                  >
+                    <Eye size={13} /> Visual Canvas (Editable)
+                  </button>
+                  <button
+                    type="button"
+                    className={`cms-mode-tab ${viewMode === 'split' ? 'active' : ''}`}
+                    onClick={() => setViewMode('split')}
+                    title="Side-by-side editing form and visual canvas"
+                  >
+                    <Layout size={13} /> Split View
+                  </button>
+                  <button
+                    type="button"
+                    className={`cms-mode-tab ${viewMode === 'edit' ? 'active' : ''}`}
+                    onClick={() => setViewMode('edit')}
+                    title="Editor form only"
+                  >
+                    <Sliders size={13} /> Form Inputs
+                  </button>
+                </div>
+
               <div className="cms-live-indicator" style={{ color: '#16a34a' }}>
                 <span className="cms-live-pulse-dot" />
-                <span style={{ fontSize: '12px' }}>Real-Time Live Draft Sync Active</span>
+                <span style={{ fontSize: '12px' }}>Real-Time Preview</span>
               </div>
             </div>
 
@@ -420,174 +445,34 @@ export default function HomepageCmsPage() {
                 className="admin-btn-secondary"
                 onClick={() => setFullPagePreviewOpen(true)}
                 style={{ padding: '5px 12px', fontSize: '11px', fontWeight: '600' }}
-                title="Preview all 11 homepage sections composed together"
+                title="Preview all 9 homepage sections composed together"
               >
                 <Sparkles size={12} /> Full Page Preview
               </button>
             </div>
           </div>
 
-          {/* Main Content Layout Container - Pure Full Width Live Preview Display for All Sections */}
-          <div style={{ width: '100%', minWidth: 0 }}>
-            {/* Live Preview Container (Rendered for all 11 sections in real-time!) */}
-            <div
-              className="cms-live-preview-card"
-              style={{
-                width: '100%',
-                minWidth: 0,
-                marginTop: 0
-              }}
-            >
-              <div className="cms-preview-header">
-                <div className="cms-live-indicator">
-                  <span className="cms-live-pulse-dot" />
-                  <span>Live Preview: {currentSecMeta?.label}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                  <span className="cms-preview-badge">Live Draft Sync</span>
-
-                  {/* Section Content Customizer Drawer Trigger for sections 2 to 11 */}
-                  {activeSection !== 'hero' && (
-                    <button
-                      type="button"
-                      className="admin-btn-secondary"
-                      onClick={() => setDrawerOpen(true)}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 14px',
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        backgroundColor: '#334155',
-                        color: '#ffffff',
-                        borderColor: '#475569',
-                        borderRadius: '6px'
-                      }}
-                    >
-                      <Sliders size={13} color="#38bdf8" />
-                      <span>Edit {currentSecMeta?.label}</span>
-                    </button>
-                  )}
-
-                  {/* Dedicated Save & Sync Status for ALL sections */}
-                  <span style={{ fontSize: '12px', color: dirty ? '#d97706' : '#16a34a', fontWeight: '600' }}>
-                    {dirty ? '⚠️ Unsaved changes' : '✓ All changes in sync.'}
-                  </span>
-                  <button
-                    type="button"
-                    className="admin-btn-primary"
-                    onClick={handleSave}
-                    disabled={saving}
-                    style={{
-                      backgroundColor: '#0284c7',
-                      borderColor: '#0284c7',
-                      padding: '6px 16px',
-                      fontSize: '12px',
-                      borderRadius: '6px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Save size={13} /> {saving ? 'Saving...' : 'Save All Changes'}
-                  </button>
-                </div>
-              </div>
-
-              <CmsSectionPreview
-                sectionId={activeSection}
-                formData={formData}
-                updateSection={updateSection}
-                viewport={viewport}
-                onNotify={(msg) => showToast('info', msg)}
-                onOpenEditor={() => setDrawerOpen(true)}
-              />
-            </div>
-          </div>
-
-          {/* Slide-Over Content Customizer Drawer (for Sections 2 to 11) */}
-          {drawerOpen && activeSection !== 'hero' && (
-            <>
-              {/* Semi-transparent Backdrop */}
+          {/* Main Content Layout Container */}
+          <div
+            className={viewMode === 'split' && activeSection !== 'hero' ? 'cms-split-grid' : ''}
+            style={{
+              display: viewMode === 'split' && activeSection !== 'hero' ? 'grid' : 'flex',
+              flexDirection: 'column',
+              gap: '24px',
+              alignItems: 'start'
+            }}
+          >
+            {/* Form Column - Hidden for Hero section since it uses the full interactive visual canvas */}
+            {activeSection !== 'hero' && (
               <div
-                onClick={() => setDrawerOpen(false)}
                 style={{
-                  position: 'fixed',
-                  inset: 0,
-                  backgroundColor: 'rgba(15, 23, 42, 0.45)',
-                  backdropFilter: 'blur(3px)',
-                  zIndex: 9998,
-                  transition: 'opacity 0.2s ease'
-                }}
-              />
-
-              {/* Drawer Container */}
-              <div
-                className="cms-customizer-drawer"
-                style={{
-                  position: 'fixed',
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  width: 'min(580px, 94vw)',
-                  backgroundColor: '#ffffff',
-                  boxShadow: '-10px 0 30px rgba(0, 0, 0, 0.25)',
-                  zIndex: 9999,
-                  display: 'flex',
+                  display: viewMode === 'preview' ? 'none' : 'flex',
                   flexDirection: 'column',
-                  overflow: 'hidden'
+                  gap: '20px',
+                  minWidth: 0,
+                  width: '100%'
                 }}
               >
-                {/* Drawer Header */}
-                <div style={{
-                  padding: '16px 20px',
-                  backgroundColor: '#0f172a',
-                  color: '#ffffff',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  borderBottom: '1px solid #1e293b'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Sliders size={18} color="#38bdf8" />
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff' }}>
-                        Edit {currentSecMeta?.label}
-                      </div>
-                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                        Real-time Live Sync active
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setDrawerOpen(false)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#cbd5e1',
-                      cursor: 'pointer',
-                      padding: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      borderRadius: '4px'
-                    }}
-                    title="Close Drawer"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-
-                {/* Drawer Scrollable Content */}
-                <div style={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  padding: '20px 24px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px'
-                }}>
 
           {/* ========================================================================= */}
           {/* SECTION 2: BRIEF INTRODUCTION SECTION                                     */}
@@ -1501,447 +1386,14 @@ export default function HomepageCmsPage() {
             </div>
           )}
 
-          {/* ========================================================================= */}
-          {/* SECTION 7: UPCOMING EVENT SCHEDULE                                        */}
-          {/* ========================================================================= */}
-          {activeSection === 'events' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div>
-                <h2 className="admin-card-title">7. Upcoming Event Schedule Section</h2>
-                <p className="admin-page-desc">Manage upcoming gatherings, katha dates, venues, and event details.</p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div className="admin-form-group">
-                  <label className="admin-label">Section Title</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.events.title}
-                    onChange={(e) => updateSection('events', { title: e.target.value })}
-                    placeholder="Upcoming Event Schedule"
-                  />
-                </div>
-                <div className="admin-form-group">
-                  <label className="admin-label">"View All" Button Destination</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.events.viewAllUrl}
-                    onChange={(e) => updateSection('events', { viewAllUrl: e.target.value })}
-                    placeholder="/events"
-                  />
-                </div>
-              </div>
-
-              {/* Repeatable Event Cards Manager */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <label className="admin-label" style={{ margin: 0 }}>
-                    Event Schedule Cards ({formData.events.items.length})
-                  </label>
-                  <button
-                    type="button"
-                    className="admin-btn-secondary"
-                    onClick={() => {
-                      setDirty(true);
-                      const newId = `ev_${Date.now()}`;
-                      setFormData((prev) => ({
-                        ...prev,
-                        events: {
-                          ...prev.events,
-                          items: [
-                            ...prev.events.items,
-                            {
-                              id: newId,
-                              day: '10',
-                              month: 'MAY',
-                              title: 'New Spiritual Gathering',
-                              time: '7:30 PM Onwards',
-                              location: 'Sadguru Dham',
-                              detailsUrl: '/events',
-                              status: 'published'
-                            }
-                          ]
-                        }
-                      }));
-                    }}
-                    style={{ padding: '4px 10px', fontSize: '12px' }}
-                  >
-                    <Plus size={13} /> Add Event Card
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {formData.events.items.map((ev, idx) => (
-                    <div
-                      key={ev.id}
-                      style={{
-                        padding: '16px',
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '12px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>
-                          Event #{idx + 1}: {ev.title}
-                        </span>
-
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <button
-                            type="button"
-                            onClick={() => toggleStatus('items', 'events', idx)}
-                            style={{
-                              padding: '4px 10px',
-                              borderRadius: '6px',
-                              fontSize: '11px',
-                              fontWeight: '700',
-                              border: 'none',
-                              cursor: 'pointer',
-                              backgroundColor: ev.status === 'published' ? '#ecfdf5' : '#f1f5f9',
-                              color: ev.status === 'published' ? '#059669' : '#64748b'
-                            }}
-                          >
-                            {ev.status === 'published' ? 'Published' : 'Draft'}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => moveItem('items', 'events', idx, -1)}
-                            disabled={idx === 0}
-                            style={{ padding: '4px', border: 'none', background: 'none' }}
-                          >
-                            <ChevronUp size={15} color={idx === 0 ? '#cbd5e1' : '#475569'} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => moveItem('items', 'events', idx, 1)}
-                            disabled={idx === formData.events.items.length - 1}
-                            style={{ padding: '4px', border: 'none', background: 'none' }}
-                          >
-                            <ChevronDown size={15} color={idx === formData.events.items.length - 1 ? '#cbd5e1' : '#475569'} />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => removeItem('items', 'events', idx)}
-                            style={{ padding: '4px', border: 'none', background: 'none', color: '#ef4444' }}
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '80px 100px 1fr', gap: '10px' }}>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Day</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={ev.day}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...formData.events.items];
-                              list[idx].day = e.target.value;
-                              updateSection('events', { items: list });
-                            }}
-                            placeholder="28"
-                          />
-                        </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Month</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={ev.month}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...formData.events.items];
-                              list[idx].month = e.target.value;
-                              updateSection('events', { items: list });
-                            }}
-                            placeholder="MAR"
-                          />
-                        </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Event Title</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={ev.title}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...formData.events.items];
-                              list[idx].title = e.target.value;
-                              updateSection('events', { items: list });
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Time</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={ev.time}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...formData.events.items];
-                              list[idx].time = e.target.value;
-                              updateSection('events', { items: list });
-                            }}
-                            placeholder="8:00 PM Onwards"
-                          />
-                        </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Location / Venue</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={ev.location}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...formData.events.items];
-                              list[idx].location = e.target.value;
-                              updateSection('events', { items: list });
-                            }}
-                            placeholder="Takhatgarh Dham"
-                          />
-                        </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">"View Details" URL</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={ev.detailsUrl}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...formData.events.items];
-                              list[idx].detailsUrl = e.target.value;
-                              updateSection('events', { items: list });
-                            }}
-                            placeholder="/events"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* ========================================================================= */}
-          {/* SECTION 8: LATEST NEWS AND ARTICLES                                       */}
-          {/* ========================================================================= */}
-          {activeSection === 'news' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div>
-                <h2 className="admin-card-title">8. Latest News &amp; Articles Section</h2>
-                <p className="admin-page-desc">Configure the press &amp; news cards on the homepage.</p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div className="admin-form-group">
-                  <label className="admin-label">Section Title</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.news.title}
-                    onChange={(e) => updateSection('news', { title: e.target.value })}
-                    placeholder="Latest News And Articles"
-                  />
-                </div>
-                <div className="admin-form-group">
-                  <label className="admin-label">"View All" Button Destination</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.news.viewAllUrl}
-                    onChange={(e) => updateSection('news', { viewAllUrl: e.target.value })}
-                    placeholder="/news"
-                  />
-                </div>
-              </div>
-
-              {/* Repeatable Articles Manager */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <label className="admin-label" style={{ margin: 0 }}>
-                    Blog &amp; News Cards ({formData.news.articles.length})
-                  </label>
-                  <button
-                    type="button"
-                    className="admin-btn-secondary"
-                    onClick={() => {
-                      setDirty(true);
-                      const newId = `n_${Date.now()}`;
-                      setFormData((prev) => ({
-                        ...prev,
-                        news: {
-                          ...prev.news,
-                          articles: [
-                            ...prev.news.articles,
-                            {
-                              id: newId,
-                              title: 'New Ashram Announcement',
-                              featuredImage: '/images/img_30.png',
-                              date: 'Recent',
-                              author: 'Shree Abhaydas',
-                              readMoreUrl: '/news',
-                              status: 'published'
-                            }
-                          ]
-                        }
-                      }));
-                    }}
-                    style={{ padding: '4px 10px', fontSize: '12px' }}
-                  >
-                    <Plus size={13} /> Add News Card
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {formData.news.articles.map((art, idx) => (
-                    <div
-                      key={art.id}
-                      style={{
-                        padding: '16px',
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '12px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>
-                          Article #{idx + 1}: {art.title}
-                        </span>
-
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <button
-                            type="button"
-                            onClick={() => toggleStatus('articles', 'news', idx)}
-                            style={{
-                              padding: '4px 10px',
-                              borderRadius: '6px',
-                              fontSize: '11px',
-                              fontWeight: '700',
-                              border: 'none',
-                              cursor: 'pointer',
-                              backgroundColor: art.status === 'published' ? '#ecfdf5' : '#f1f5f9',
-                              color: art.status === 'published' ? '#059669' : '#64748b'
-                            }}
-                          >
-                            {art.status === 'published' ? 'Published' : 'Draft'}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => moveItem('articles', 'news', idx, -1)}
-                            disabled={idx === 0}
-                            style={{ padding: '4px', border: 'none', background: 'none' }}
-                          >
-                            <ChevronUp size={15} color={idx === 0 ? '#cbd5e1' : '#475569'} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => moveItem('articles', 'news', idx, 1)}
-                            disabled={idx === formData.news.articles.length - 1}
-                            style={{ padding: '4px', border: 'none', background: 'none' }}
-                          >
-                            <ChevronDown size={15} color={idx === formData.news.articles.length - 1 ? '#cbd5e1' : '#475569'} />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => removeItem('articles', 'news', idx)}
-                            style={{ padding: '4px', border: 'none', background: 'none', color: '#ef4444' }}
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="admin-form-group">
-                        <label className="admin-label">Article Headline</label>
-                        <input
-                          type="text"
-                          className="admin-input-control"
-                          value={art.title}
-                          onChange={(e) => {
-                            setDirty(true);
-                            const list = [...formData.news.articles];
-                            list[idx].title = e.target.value;
-                            updateSection('news', { articles: list });
-                          }}
-                        />
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Date</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={art.date}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...formData.news.articles];
-                              list[idx].date = e.target.value;
-                              updateSection('news', { articles: list });
-                            }}
-                          />
-                        </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">"Read More" URL Destination</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={art.readMoreUrl}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...formData.news.articles];
-                              list[idx].readMoreUrl = e.target.value;
-                              updateSection('news', { articles: list });
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <CmsImageUploader
-                        label="Featured Article Image"
-                        value={art.featuredImage}
-                        onChange={(url) => {
-                          setDirty(true);
-                          const list = [...formData.news.articles];
-                          list[idx].featuredImage = url;
-                          updateSection('news', { articles: list });
-                        }}
-                        maxSizeMB={5}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* SECTION 9: TESTIMONIALS / SUCCESS STORIES                                */}
+          {/* SECTION 7: TESTIMONIALS / SUCCESS STORIES                                */}
           {/* ========================================================================= */}
           {activeSection === 'testimonials' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">9. Testimonials / Success Stories Section</h2>
+                <h2 className="admin-card-title">7. Testimonials / Success Stories Section</h2>
                 <p className="admin-page-desc">Manage reviews and management team stories behind Maharaj Ji's mission.</p>
               </div>
 
@@ -2121,12 +1573,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 10: CONTACT CTA BANNER                                            */}
+          {/* SECTION 8: CONTACT CTA BANNER                                            */}
           {/* ========================================================================= */}
           {activeSection === 'contact' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">10. Contact CTA Banner (Orange Ribbon)</h2>
+                <h2 className="admin-card-title">8. Contact CTA Banner (Orange Ribbon)</h2>
                 <p className="admin-page-desc">Configure the details shown in the prominent orange contact strip.</p>
               </div>
 
@@ -2167,12 +1619,12 @@ export default function HomepageCmsPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* SECTION 11: FOOTER SETTINGS                                               */}
+          {/* SECTION 9: FOOTER SETTINGS                                               */}
           {/* ========================================================================= */}
           {activeSection === 'footer' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <h2 className="admin-card-title">11. Footer Settings</h2>
+                <h2 className="admin-card-title">9. Footer Settings</h2>
                 <p className="admin-page-desc">
                   Manage footer brand logo, description, link columns, social profiles, and news widget toggle.
                 </p>
@@ -2552,56 +2004,89 @@ export default function HomepageCmsPage() {
             </div>
           )}
 
-                </div>
+          {/* Bottom Sticky Action Bar */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: '16px',
+            borderTop: '1px solid #e2e8f0',
+            marginTop: '10px'
+          }}>
+            <span style={{ fontSize: '12px', color: '#64748b' }}>
+              {dirty ? '⚠️ You have unsaved changes.' : '✓ All changes in sync.'}
+            </span>
 
-                {/* Drawer Footer */}
-                <div style={{
-                  padding: '14px 20px',
-                  backgroundColor: '#f8fafc',
-                  borderTop: '1px solid #e2e8f0',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <span style={{ fontSize: '12px', color: dirty ? '#d97706' : '#16a34a', fontWeight: '600' }}>
-                    {dirty ? '⚠️ Unsaved changes' : '✓ All changes in sync.'}
-                  </span>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      type="button"
-                      className="admin-btn-secondary"
-                      onClick={() => setDrawerOpen(false)}
-                      style={{ padding: '8px 16px', fontSize: '12px' }}
-                    >
-                      Done
-                    </button>
-                    <button
-                      type="button"
-                      className="admin-btn-primary"
-                      onClick={handleSave}
-                      disabled={saving}
-                      style={{
-                        backgroundColor: '#0284c7',
-                        borderColor: '#0284c7',
-                        padding: '8px 18px',
-                        fontSize: '12px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      <Save size={13} /> {saving ? 'Saving...' : 'Save All Changes'}
-                    </button>
-                  </div>
-                </div>
+            <button
+              type="button"
+              className="admin-btn-primary"
+              onClick={handleSave}
+              disabled={saving}
+              style={{ backgroundColor: '#0284c7', borderColor: '#0284c7', padding: '10px 24px' }}
+            >
+              <Save size={15} /> {saving ? 'Saving...' : 'Save All Changes'}
+            </button>
+          </div>
+        </div>
+      )}
+
+        {/* Live Preview Container (Rendered for all 9 sections in real-time!) */}
+        <div
+          className={viewMode === 'split' && activeSection !== 'hero' ? 'cms-sticky-preview' : 'cms-live-preview-card'}
+          style={{
+            width: '100%',
+            minWidth: 0,
+            marginTop: viewMode === 'edit' && activeSection !== 'hero' ? '12px' : 0
+          }}
+        >
+          <div className="cms-preview-header">
+            <div className="cms-live-indicator">
+              <span className="cms-live-pulse-dot" />
+              <span>Live Preview: {currentSecMeta?.label}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <span className="cms-preview-badge">Live Draft Sync</span>
+
+              {/* Dedicated Save & Sync Status for Visual Canvas across all 9 sections */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '12px', color: dirty ? '#d97706' : '#16a34a', fontWeight: '600' }}>
+                  {dirty ? '⚠️ Unsaved changes' : '✓ All changes in sync.'}
+                </span>
+                <button
+                  type="button"
+                  className="admin-btn-primary"
+                  onClick={handleSave}
+                  disabled={saving}
+                  style={{
+                    backgroundColor: '#0284c7',
+                    borderColor: '#0284c7',
+                    padding: '6px 16px',
+                    fontSize: '12px',
+                    borderRadius: '6px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Save size={13} /> {saving ? 'Saving...' : 'Save All Changes'}
+                </button>
               </div>
-            </>
-          )}
+            </div>
+          </div>
+          <CmsSectionPreview
+            sectionId={activeSection}
+            formData={formData}
+            updateSection={updateSection}
+            viewport={viewport}
+            onNotify={(msg) => showToast('info', msg)}
+          />
+        </div>
+      </div>
 
     </section>
   </div>
 
-  {/* Full Page Live Preview Modal (All 11 Sections) */}
+  {/* Full Page Live Preview Modal (All 9 Sections) */}
   {fullPagePreviewOpen && (
     <div style={{
       position: 'fixed',
@@ -2626,7 +2111,7 @@ export default function HomepageCmsPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span className="cms-live-pulse-dot" />
           <span style={{ fontSize: '15px', fontWeight: '700' }}>
-            Full Homepage Live Preview (All 11 Sections)
+            Full Homepage Live Preview (All 9 Sections)
           </span>
           <span className="cms-preview-badge">Live Draft Sync</span>
         </div>

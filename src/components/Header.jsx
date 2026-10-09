@@ -449,7 +449,7 @@ export default function Header({
               >
                 {/* Desktop: Orange Pill with Layered Outer Rim */}
                 <div
-                  className="d-none d-sm-flex"
+                  className="d-none d-xl-flex"
                   style={{
                     position: 'relative',
                     alignItems: 'center',
@@ -548,25 +548,25 @@ export default function Header({
                   </div>
                 </div>
 
-                {/* Mobile: Pure White Social Icons on Dark Bar */}
+                {/* Mobile & Tablet: Pure White Social Icons on Dark Bar */}
                 <div
-                  className="d-flex d-sm-none"
+                  className="d-flex d-xl-none"
                   style={{
                     alignItems: 'center',
-                    gap: '12px',
-                    paddingRight: '14px',
+                    gap: '14px',
+                    paddingRight: '6px',
                   }}
                 >
-                  <a href={socialLinks.facebook} target="_blank" rel="noreferrer" style={{ color: '#ffffff' }}>
+                  <a href={socialLinks.facebook} target="_blank" rel="noreferrer" title="Facebook" style={{ color: '#ffffff', display: 'flex', alignItems: 'center' }}>
                     <FacebookIcon size={13} />
                   </a>
-                  <a href={socialLinks.twitter} target="_blank" rel="noreferrer" style={{ color: '#ffffff' }}>
+                  <a href={socialLinks.twitter} target="_blank" rel="noreferrer" title="Twitter" style={{ color: '#ffffff', display: 'flex', alignItems: 'center' }}>
                     <TwitterBirdIcon size={13} />
                   </a>
-                  <a href={socialLinks.instagram} target="_blank" rel="noreferrer" style={{ color: '#ffffff' }}>
+                  <a href={socialLinks.instagram} target="_blank" rel="noreferrer" title="Instagram" style={{ color: '#ffffff', display: 'flex', alignItems: 'center' }}>
                     <InstagramIcon size={13} />
                   </a>
-                  <a href={socialLinks.youtube} target="_blank" rel="noreferrer" style={{ color: '#ffffff' }}>
+                  <a href={socialLinks.youtube} target="_blank" rel="noreferrer" title="YouTube" style={{ color: '#ffffff', display: 'flex', alignItems: 'center' }}>
                     <YouTubeIcon size={14} />
                   </a>
                 </div>
@@ -607,6 +607,31 @@ export default function Header({
               paddingRight: '24px',
             }}
           >
+            {/* Mobile / Tablet Green Hamburger Button (Directly beside the orange logo tab) */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open mobile navigation"
+              className="header-mobile-hamburger-btn d-flex d-xl-none"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: '6px 2px',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                justifyContent: 'center',
+                gap: '4.8px',
+                outline: 'none',
+                boxShadow: 'none',
+              }}
+            >
+              <span style={{ width: '25px', height: '2.8px', backgroundColor: '#02A95C', borderRadius: '3px', display: 'block' }} />
+              <span style={{ width: '25px', height: '2.8px', backgroundColor: '#02A95C', borderRadius: '3px', display: 'block' }} />
+              <span style={{ width: '25px', height: '2.8px', backgroundColor: '#02A95C', borderRadius: '3px', display: 'block' }} />
+            </button>
+
             {/* Desktop Navigation Links (>= 1150px) */}
             <nav
               className="d-none d-xl-flex"
@@ -884,33 +909,7 @@ export default function Header({
                 </a>
               )}
 
-              {/* Mobile / Tablet Hamburger Button (3 Emerald Green Bars inside light grey button) */}
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Open mobile navigation"
-                className="header-mobile-hamburger-btn d-flex d-xl-none"
-                style={{
-                  backgroundColor: '#f3f4f6',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '10px',
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4.5px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                  transition: 'background-color 0.2s',
-                }}
-              >
-                <span style={{ width: '23px', height: '2.5px', backgroundColor: '#02A95C', borderRadius: '3px', display: 'block' }} />
-                <span style={{ width: '23px', height: '2.5px', backgroundColor: '#02A95C', borderRadius: '3px', display: 'block' }} />
-                <span style={{ width: '23px', height: '2.5px', backgroundColor: '#02A95C', borderRadius: '3px', display: 'block' }} />
-              </button>
-
-              {/* Mobile Search Button */}
+              {/* Mobile Blue Search Button (Far right of the navbar) */}
               <button
                 type="button"
                 onClick={onOpenSearch}
@@ -919,17 +918,18 @@ export default function Header({
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: '#1f2937',
+                  color: '#0284c7',
                   cursor: 'pointer',
                   padding: '6px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  outline: 'none',
                   borderRadius: '50%',
-                  transition: 'color 0.2s',
+                  transition: 'opacity 0.2s',
                 }}
               >
-                <Search size={22} strokeWidth={2.2} />
+                <Search size={21} strokeWidth={2.2} color="#0284c7" />
               </button>
             </div>
           </div>

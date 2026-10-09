@@ -27,152 +27,229 @@
   height: 112px;
 }
 
-@media (max-width: 768px) {
-  /* --------------------------------------------------
-     1. Header & Navigation (Mobile Reference Precision)
-     -------------------------------------------------- */
+/* ==========================================================================
+   1. Mobile & Tablet Header (Reference Image Exact Match <= 1199.98px)
+   ========================================================================== */
+@media (max-width: 1199.98px) {
   .site-header {
     width: 100% !important;
     background-color: #ffffff !important;
   }
 
-  /* Non-Sticky State (Top of page: 38px top bar + 62px navbar = 100px total) */
+  /* Unstuck State */
   .site-header:not(.is-sticky) {
     position: relative !important;
   }
 
   .site-header:not(.is-sticky) .header-top-bar {
-    height: 38px !important;
-    background-color: #0b231c !important;
+    height: 34px !important;
+    background-color: #0c2621 !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     display: flex !important;
     align-items: center !important;
-    padding: 0 16px !important;
-  }
-
-  .site-header:not(.is-sticky) .header-main-navbar {
-    height: 62px !important;
-    background-color: #ffffff !important;
-    position: relative !important;
+    padding: 0 !important;
     width: 100% !important;
+    position: relative !important;
+    z-index: 30 !important;
   }
 
-  .site-header:not(.is-sticky) .header-orange-logo-tab,
-  .site-header:not(.is-sticky) .region-logo-two {
-    position: absolute !important;
-    top: -38px !important;
-    left: 0 !important;
-    width: 175px !important;
-    height: 100px !important; /* Spans across top bar and navbar */
-    background-color: #fc791a !important;
-    border-radius: 0 0 32px 0 !important;
+  .header-top-bar-inner {
+    padding-left: 16px !important;
+    padding-right: 18px !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
-    padding: 8px 16px !important;
-    z-index: 1001 !important;
-    box-shadow: 0 4px 15px rgba(252, 121, 26, 0.35) !important;
-    text-decoration: none !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+    height: 100% !important;
   }
 
-  .site-header:not(.is-sticky) .header-orange-logo-tab img {
-    max-height: 44px !important;
+  /* Logo Tab Wrapper on Mobile */
+  .site-header:not(.is-sticky) .header-logo-tab-wrapper {
+    position: absolute !important;
+    top: 34px !important;
+    left: 0 !important;
+    bottom: auto !important;
+    height: 60px !important;
+    z-index: 40 !important;
+    display: flex !important;
+    align-items: center !important;
+    pointer-events: none !important;
+  }
+
+  .site-header.is-sticky .header-logo-tab-wrapper {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: auto !important;
+    height: 60px !important;
+    z-index: 40 !important;
+    display: flex !important;
+    align-items: center !important;
+    pointer-events: none !important;
+  }
+
+  /* Outer Translucent Orange Crescent Rim */
+  .header-logo-rim {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 168px !important;
+    height: 100% !important;
+    background-color: #fc791a !important;
+    opacity: 0.36 !important;
+    border-radius: 0 50px 50px 0 !important;
+    pointer-events: none !important;
+    display: block !important;
+  }
+
+  /* Inner Solid Orange Pill Shape */
+  .site-header .header-orange-logo-tab,
+  .site-header:not(.is-sticky) .header-orange-logo-tab,
+  .site-header.is-sticky .header-orange-logo-tab {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 156px !important;
+    height: 100% !important;
+    background-color: #fc791a !important;
+    border-radius: 0 50px 50px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justifyContent: center !important;
+    padding-left: 10px !important;
+    padding-right: 18px !important;
+    box-shadow: 0 4px 14px rgba(252, 121, 26, 0.25) !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    text-decoration: none !important;
+    z-index: 2 !important;
+  }
+
+  .site-header .header-orange-logo-tab img,
+  .site-header:not(.is-sticky) .header-orange-logo-tab img,
+  .site-header.is-sticky .header-orange-logo-tab img {
+    max-height: 36px !important;
     max-width: 88% !important;
     width: auto !important;
     object-fit: contain !important;
-    margin-top: 6px !important;
+    display: block !important;
+    margin: 0 !important;
   }
 
-  /* Sticky State (When scrolled down: 60px solid navbar pinned to top) */
-  .site-header.is-sticky {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 1000 !important;
-    background-color: #ffffff !important;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08) !important;
-  }
-
+  /* Main Navbar on Mobile */
+  .header-main-navbar,
+  .site-header:not(.is-sticky) .header-main-navbar,
   .site-header.is-sticky .header-main-navbar {
     height: 60px !important;
     background-color: #ffffff !important;
     position: relative !important;
     width: 100% !important;
-  }
-
-  .site-header.is-sticky .header-orange-logo-tab,
-  .site-header.is-sticky .region-logo-two {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 170px !important;
-    height: 60px !important; /* Exactly matches 60px sticky navbar */
-    background-color: #fc791a !important;
-    border-radius: 0 0 28px 0 !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
-    padding: 6px 14px !important;
-    z-index: 1001 !important;
-    box-shadow: 0 3px 12px rgba(252, 121, 26, 0.3) !important;
-    text-decoration: none !important;
   }
 
-  .site-header.is-sticky .header-orange-logo-tab img {
-    max-height: 40px !important;
-    max-width: 88% !important;
-    width: auto !important;
-    object-fit: contain !important;
-    margin-top: 0 !important;
-  }
-
-  /* Inner Navbar Flex Container on Mobile */
+  /* Inner Navbar Container */
   .header-main-navbar-inner {
     height: 100% !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-end !important;
-    padding: 0 16px 0 0 !important;
+    justify-content: space-between !important;
+    padding: 0 18px 0 186px !important; /* 168px rim + 18px space to hamburger */
+    width: 100% !important;
   }
 
-  /* Right Controls: Hamburger + Search */
-  .header-right-group {
-    display: flex !important;
-    align-items: center !important;
-    gap: 20px !important;
-    margin-left: auto !important;
-  }
-
+  /* Mobile Green Hamburger Button (3 emerald green bars directly on white navbar) */
   .header-mobile-hamburger-btn {
-    background-color: #f3f4f6 !important;
-    border: 1px solid #e5e7eb !important;
-    border-radius: 9px !important;
-    padding: 7px 11px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 6px 2px !important;
     cursor: pointer !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: center !important;
-    gap: 4px !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    gap: 4.8px !important;
+    box-shadow: none !important;
+    outline: none !important;
   }
 
+  .header-mobile-hamburger-btn span {
+    width: 25px !important;
+    height: 2.8px !important;
+    background-color: #02A95C !important;
+    border-radius: 3px !important;
+    display: block !important;
+  }
+
+  /* Mobile Right Group */
+  .header-right-group {
+    display: flex !important;
+    align-items: center !important;
+    margin-left: auto !important;
+    gap: 0 !important;
+  }
+
+  /* Mobile Blue Search Button */
   .header-mobile-search-btn {
     background: transparent !important;
     border: none !important;
-    color: #1f2937 !important;
-    cursor: pointer !important;
+    box-shadow: none !important;
     padding: 6px !important;
+    cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    outline: none !important;
+    color: #0284c7 !important;
   }
 
-  /* Spacer to prevent ANY content jump when switching to sticky */
-  .header-sticky-spacer {
-    height: 100px !important;
+  .header-mobile-search-btn svg {
+    width: 21px !important;
+    height: 21px !important;
+    stroke: #0284c7 !important;
+    color: #0284c7 !important;
   }
+
+  /* Sticky Spacer */
+  .header-sticky-spacer {
+    height: 60px !important;
+  }
+}
+
+/* Compact Mobile Devices (<= 380px) */
+@media (max-width: 380px) {
+  .header-logo-rim {
+    width: 146px !important;
+  }
+
+  .site-header .header-orange-logo-tab,
+  .site-header:not(.is-sticky) .header-orange-logo-tab,
+  .site-header.is-sticky .header-orange-logo-tab {
+    width: 136px !important;
+    padding-left: 6px !important;
+    padding-right: 14px !important;
+  }
+
+  .site-header .header-orange-logo-tab img,
+  .site-header:not(.is-sticky) .header-orange-logo-tab img,
+  .site-header.is-sticky .header-orange-logo-tab img {
+    max-height: 31px !important;
+  }
+
+  .header-main-navbar-inner {
+    padding: 0 12px 0 162px !important;
+  }
+
+  .header-mobile-hamburger-btn span {
+    width: 22px !important;
+  }
+}
+
+@media (max-width: 768px) {
 
   /* --------------------------------------------------
      2. Hero Section

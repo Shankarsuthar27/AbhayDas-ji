@@ -57,7 +57,7 @@ export default function AdminLayout({ children, currentAdminRoute, onNavigate })
       label: 'Homepage CMS',
       icon: Sliders,
       path: '/admin/homepage',
-      desc: 'Manage all 11 homepage sections'
+      desc: 'Manage all 9 homepage sections'
     },
     {
       id: 'news',
