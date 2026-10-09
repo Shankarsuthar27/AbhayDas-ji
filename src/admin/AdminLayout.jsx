@@ -8,16 +8,19 @@ import {
   Globe, 
   LogOut, 
   Menu, 
+  X,
   User,
   ChevronRight,
   ShieldCheck,
-  Sliders
+  Sliders,
+  MoreHorizontal
 } from 'lucide-react';
 import './Admin.css';
 
 export default function AdminLayout({ children, currentAdminRoute, onNavigate }) {
   const { currentUser, isAuthenticated, loading, logout } = useAdminAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Strict route protection: redirect unauthenticated users to /admin
   useEffect(() => {
@@ -175,40 +178,133 @@ export default function AdminLayout({ children, currentAdminRoute, onNavigate })
         </div>
       </aside>
 
+      {/* Mobile Drawer Menu matching template */}
+      {sidebarOpen && (
+        <>
+          <div
+            className="admin-sidebar-backdrop"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className="mobile-menu">
+            <div className="menu-label">Navigation</div>
+            {navItems.map((item) => {
+              const isActive =
+                currentAdminRoute === item.path ||
+                (item.id === 'dashboard' && (currentAdminRoute === '/admin' || currentAdminRoute === '/wp-admin'));
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`menu-item ${isActive ? 'active' : ''}`}
+                  onClick={() => handleNavClick(item.path)}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+            <div style={{ marginTop: '20px', borderTop: '1px solid var(--line)', paddingTop: '12px' }}>
+              <button
+                type="button"
+                className="menu-item"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                onClick={() => {
+                  setSidebarOpen(false);
+                  if (onNavigate) onNavigate('/');
+                  else window.open('/', '_blank');
+                }}
+              >
+                <Globe size={15} /> Public Website
+              </button>
+              <button
+                type="button"
+                className="menu-item"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444' }}
+                onClick={handleLogout}
+              >
+                <LogOut size={15} /> Sign Out
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Main Content Area */}
       <div className="admin-main-wrapper">
-        {/* Clean Minimal Topbar */}
-        <header className="admin-topbar">
-          <div className="admin-topbar-left">
-            <button
-              type="button"
-              className="admin-hamburger-btn"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              aria-label="Toggle navigation menu"
-            >
-              <Menu size={20} />
-            </button>
-            <div className="admin-topbar-breadcrumb">
-              <span className="admin-crumb-home">Admin</span>
-              <ChevronRight size={14} className="admin-crumb-sep" />
-              <span className="admin-crumb-current">
-                {currentItem?.label || 'Dashboard'}
-              </span>
+        {/* Exact Topbar from Screenshot */}
+        <header className="topbar">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Toggle navigation"
+          >
+            {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+
+          <div className="brand-lockup">
+            <div className="brand-mark">SA</div>
+            <div>
+              <div className="brand-name">Shree Abhayadas</div>
+              <div className="brand-meta">Admin portal</div>
             </div>
           </div>
 
-          <div className="admin-topbar-right">
-            <div className="admin-status-pill">
-              <span className="admin-status-dot" />
-              <span>Connected</span>
-            </div>
+          <div className="status-dot" title="Connected" />
 
-            <div className="admin-user-pill">
-              <span className="admin-user-avatar">
-                <User size={13} />
-              </span>
-              <span className="admin-user-name">{currentUser?.username || 'admin2233'}</span>
-            </div>
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              className="icon-button"
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              aria-label="More options"
+            >
+              <MoreHorizontal size={18} />
+            </button>
+
+            {userMenuOpen && (
+              <div
+                className="topbar-dropdown"
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '46px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid var(--line)',
+                  borderRadius: '12px',
+                  boxShadow: '0 12px 30px rgba(17, 27, 49, 0.15)',
+                  minWidth: '170px',
+                  padding: '6px',
+                  zIndex: 90,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px'
+                }}
+              >
+                <button
+                  type="button"
+                  className="menu-item"
+                  style={{ padding: '8px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    if (onNavigate) onNavigate('/');
+                    else window.open('/', '_blank');
+                  }}
+                >
+                  <Globe size={14} /> Public Website
+                </button>
+                <button
+                  type="button"
+                  className="menu-item"
+                  style={{ padding: '8px 12px', fontSize: '12px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    handleLogout();
+                  }}
+                >
+                  <LogOut size={14} /> Sign Out
+                </button>
+              </div>
+            )}
           </div>
         </header>
 

@@ -36,15 +36,15 @@ import './Admin.css';
 
 // Section Navigation Tab Definitions
 const CMS_SECTIONS = [
-  { id: 'hero', label: 'Hero Section', icon: Sliders, badge: 'Main Banner' },
-  { id: 'about', label: 'Brief Introduction', icon: Layout, badge: 'About Us' },
-  { id: 'kathas', label: 'Spiritual Katha', icon: Sparkles, badge: 'Katha Cards' },
-  { id: 'donations', label: 'Donation Section', icon: Heart, badge: 'Campaigns' },
-  { id: 'gallery', label: 'Gallery Section', icon: ImageIcon, badge: 'Photos' },
-  { id: 'recentKatha', label: 'Recent Katha (Videos)', icon: Video, badge: 'Media Cards' },
-  { id: 'testimonials', label: 'Testimonials / Team', icon: Users, badge: 'Reviews' },
-  { id: 'contact', label: 'Contact CTA Banner', icon: PhoneCall, badge: 'Orange Strip' },
-  { id: 'footer', label: 'Footer Settings', icon: Layout, badge: 'Links & Social' }
+  { id: 'hero', label: 'Hero Section', shortLabel: 'Hero', icon: Sliders, badge: 'Main Banner' },
+  { id: 'about', label: 'Brief Introduction', shortLabel: 'Introduction', icon: Layout, badge: 'About Us' },
+  { id: 'kathas', label: 'Spiritual Katha', shortLabel: 'Spiritual Katha', icon: Sparkles, badge: 'Katha Cards' },
+  { id: 'donations', label: 'Donation Section', shortLabel: 'Donation', icon: Heart, badge: 'Campaigns' },
+  { id: 'gallery', label: 'Gallery Section', shortLabel: 'Gallery', icon: ImageIcon, badge: 'Photos' },
+  { id: 'recentKatha', label: 'Recent Katha (Videos)', shortLabel: 'Recent Katha', icon: Video, badge: 'Media Cards' },
+  { id: 'testimonials', label: 'Testimonials / Team', shortLabel: 'Testimonials', icon: Users, badge: 'Reviews' },
+  { id: 'contact', label: 'Contact CTA Banner', shortLabel: 'Contact', icon: PhoneCall, badge: 'Orange Strip' },
+  { id: 'footer', label: 'Footer Settings', shortLabel: 'Footer', icon: Layout, badge: 'Links & Social' }
 ];
 
 export default function HomepageCmsPage() {
@@ -52,6 +52,8 @@ export default function HomepageCmsPage() {
   const [activeSection, setActiveSection] = useState('hero');
   const [formData, setFormData] = useState(cms);
   const [saving, setSaving] = useState(false);
+  const [published, setPublished] = useState(false);
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [dirty, setDirty] = useState(false);
   const [viewMode, setViewMode] = useState('preview'); // Default full-width visual canvas editor (same to same like Hero)
@@ -59,6 +61,22 @@ export default function HomepageCmsPage() {
   const [fullPagePreviewOpen, setFullPagePreviewOpen] = useState(false);
 
   const currentSecMeta = CMS_SECTIONS.find(s => s.id === activeSection) || CMS_SECTIONS[0];
+
+  const handleAddHeroSlide = () => {
+    setDirty(true);
+    const existingSlides = formData.hero?.slides || [];
+    const newSlide = {
+      id: `hs_${Date.now()}`,
+      title: 'Preserving Heritage, Inspiring Generations',
+      badge: 'Divine guidance · Dharma',
+      desc: 'Celebrating timeless wisdom, culture, and community for generations to come.',
+      image: '/images/img_4.jpg',
+      status: 'published'
+    };
+    updateSection('hero', { slides: [...existingSlides, newSlide] });
+    setActiveHeroSlide(existingSlides.length);
+    showToast('success', `Added Slide #${existingSlides.length + 1}`);
+  };
 
   // Sync formData with incoming CMS data on load or external sync
   useEffect(() => {
@@ -134,6 +152,8 @@ export default function HomepageCmsPage() {
     try {
       await saveCms(formData);
       setDirty(false);
+      setPublished(true);
+      setTimeout(() => setPublished(false), 2400);
       showToast('success', 'All homepage changes saved and published live!');
     } catch (err) {
       console.error('Save failed:', err);
@@ -225,232 +245,138 @@ export default function HomepageCmsPage() {
   }
 
   return (
-    <div className="admin-page-container">
-      {/* Top Banner & Action Controls */}
-      <div className="admin-header-row" style={{ alignItems: 'center' }}>
-        <div>
-          <h1 className="admin-page-heading" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>Homepage CMS &amp; Live Editor</span>
-            {dirty && (
-              <span style={{
-                fontSize: '11px',
-                fontWeight: '700',
-                backgroundColor: '#fef3c7',
-                color: '#d97706',
-                padding: '2px 8px',
-                borderRadius: '12px'
-              }}>
-                Unsaved Changes
-              </span>
-            )}
-          </h1>
-          <p className="admin-page-desc">
-            Dynamically configure and edit every element, media asset, navigation link, and card on your homepage.
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+    <div className="admin-page-container" style={{ paddingBottom: '96px' }}>
+      {/* Exact Page Head from Screenshot */}
+      <section className="page-head">
+        <div className="eyebrow">HOMEPAGE CMS</div>
+        <div className="title-row">
+          <div>
+            <h1>Live Editor</h1>
+            <p>Configure every element on your homepage.</p>
+          </div>
           <button
             type="button"
-            className="admin-btn-secondary"
-            onClick={() => window.open('/', '_blank')}
-            title="Preview Live Website"
+            className="preview-button"
+            onClick={() => setFullPagePreviewOpen(true)}
           >
-            <ExternalLink size={14} /> Preview Site
-          </button>
-
-          <button
-            type="button"
-            className="admin-btn-secondary"
-            onClick={handleReset}
-            disabled={saving}
-            title="Reset to original template"
-          >
-            <RotateCcw size={14} /> Reset Defaults
-          </button>
-
-          <button
-            type="button"
-            className="admin-btn-primary"
-            onClick={handleSave}
-            disabled={saving}
-            style={{ backgroundColor: '#0284c7', borderColor: '#0284c7' }}
-          >
-            <Save size={14} /> {saving ? 'Saving...' : 'Publish Changes'}
+            <Eye size={16} />
+            Preview
           </button>
         </div>
-      </div>
+      </section>
 
-      {/* Alert / Feedback message */}
+      {/* Exact Horizontal Section Nav from Screenshot */}
+      <nav className="section-nav" aria-label="Homepage sections">
+        {CMS_SECTIONS.map((sec, idx) => {
+          const isActive = activeSection === sec.id;
+          return (
+            <button
+              key={sec.id}
+              type="button"
+              className={`section-chip ${isActive ? 'active' : ''}`}
+              onClick={() => setActiveSection(sec.id)}
+            >
+              <span>{String(idx + 1).padStart(2, '0')}</span>
+              {sec.shortLabel || sec.label.replace(' Section', '').replace(' Settings', '')}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Feedback Alert if any */}
       {feedback.message && (
-        <div className={`admin-alert ${feedback.type}`} role="alert">
+        <div className={`admin-alert ${feedback.type}`} style={{ margin: '0 14px 14px' }} role="alert">
           {feedback.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
           <span>{feedback.message}</span>
         </div>
       )}
 
-      {/* Main CMS Layout: Left Navigation + Right Editor */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(240px, 280px) 1fr',
-        gap: '20px',
-        alignItems: 'start'
-      }}>
-        {/* Left Section Navigation Sidebar */}
-        <aside style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          padding: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
-          position: 'sticky',
-          top: '20px'
-        }}>
-          <div style={{
-            fontSize: '11px',
-            fontWeight: '800',
-            textTransform: 'uppercase',
-            color: '#64748b',
-            letterSpacing: '0.8px',
-            padding: '8px 12px 4px'
-          }}>
-            Homepage Sections ({CMS_SECTIONS.length})
+      {/* Workspace Card (Exact Match to Screenshot) */}
+      <section className="workspace">
+        <div className="workspace-top">
+          <div className="canvas-title">
+            <span className="live-pulse" />
+            Visual canvas
+          </div>
+          <div className="synced">
+            <CheckCircle2 size={13} />
+            Draft synced
+          </div>
+        </div>
+
+        <div className="mode-row">
+          <div className="device-switch">
+            <button
+              type="button"
+              className={`device-option ${viewport === 'desktop' ? 'active' : ''}`}
+              onClick={() => setViewport('desktop')}
+              title="Desktop View"
+            >
+              <Monitor size={15} />
+            </button>
+            <button
+              type="button"
+              className={`device-option ${viewport === 'mobile' ? 'active' : ''}`}
+              onClick={() => setViewport('mobile')}
+              title="Mobile View"
+            >
+              <Smartphone size={15} />
+              Mobile
+            </button>
           </div>
 
-          {CMS_SECTIONS.map((sec, idx) => {
-            const Icon = sec.icon;
-            const isActive = activeSection === sec.id;
-            return (
+          <button
+            type="button"
+            className="replace-button"
+            onClick={() => {
+              if (activeSection === 'hero') {
+                window.dispatchEvent(new CustomEvent('cms-replace-hero-image'));
+              } else {
+                showToast('info', 'Click on any image inside the canvas to edit or replace.');
+              }
+            }}
+          >
+            <ImageIcon size={15} />
+            Replace
+          </button>
+        </div>
+
+        {activeSection === 'hero' && (
+          <div className="slide-tabs">
+            <span>Slide</span>
+            {(formData.hero?.slides || [0, 1, 2, 3]).map((_, idx) => (
               <button
-                key={sec.id}
+                key={idx}
                 type="button"
-                onClick={() => setActiveSection(sec.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 12px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  backgroundColor: isActive ? '#0f172a' : 'transparent',
-                  color: isActive ? '#ffffff' : '#334155',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  fontWeight: isActive ? '700' : '500',
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease'
-                }}
+                className={`slide-tab ${activeHeroSlide === idx ? 'active' : ''}`}
+                onClick={() => setActiveHeroSlide(idx)}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Icon size={16} style={{ color: isActive ? '#38bdf8' : '#64748b' }} />
-                  <span>{sec.label}</span>
-                </div>
-                <span style={{
-                  fontSize: '10px',
-                  padding: '2px 6px',
-                  borderRadius: '10px',
-                  backgroundColor: isActive ? 'rgba(255,255,255,0.18)' : '#f1f5f9',
-                  color: isActive ? '#ffffff' : '#64748b',
-                  fontWeight: '600'
-                }}>
-                  {idx + 1}
-                </span>
+                {idx + 1}
               </button>
-            );
-          })}
-        </aside>
-
-        {/* Right Section Active Editor Panel */}
-        <section style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          padding: '24px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
-          minWidth: 0
-        }}>
-
-          {/* Top Live Preview View Mode Bar */}
-          <div className="cms-view-mode-bar">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <div className="cms-mode-tabs">
-                  <button
-                    type="button"
-                    className={`cms-mode-tab ${viewMode === 'preview' ? 'active' : ''}`}
-                    onClick={() => setViewMode('preview')}
-                    title="Full visual canvas editor (same to same editable preview)"
-                  >
-                    <Eye size={13} /> Visual Canvas (Editable)
-                  </button>
-                  <button
-                    type="button"
-                    className={`cms-mode-tab ${viewMode === 'split' ? 'active' : ''}`}
-                    onClick={() => setViewMode('split')}
-                    title="Side-by-side editing form and visual canvas"
-                  >
-                    <Layout size={13} /> Split View
-                  </button>
-                  <button
-                    type="button"
-                    className={`cms-mode-tab ${viewMode === 'edit' ? 'active' : ''}`}
-                    onClick={() => setViewMode('edit')}
-                    title="Editor form only"
-                  >
-                    <Sliders size={13} /> Form Inputs
-                  </button>
-                </div>
-
-              <div className="cms-live-indicator" style={{ color: '#16a34a' }}>
-                <span className="cms-live-pulse-dot" />
-                <span style={{ fontSize: '12px' }}>Real-Time Preview</span>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <div className="cms-viewport-group">
-                <button
-                  type="button"
-                  className={`cms-viewport-btn ${viewport === 'desktop' ? 'active' : ''}`}
-                  onClick={() => setViewport('desktop')}
-                  title="Desktop View (100%)"
-                >
-                  <Monitor size={12} /> Desktop
-                </button>
-                <button
-                  type="button"
-                  className={`cms-viewport-btn ${viewport === 'tablet' ? 'active' : ''}`}
-                  onClick={() => setViewport('tablet')}
-                  title="Tablet View (768px)"
-                >
-                  <Tablet size={12} /> Tablet
-                </button>
-                <button
-                  type="button"
-                  className={`cms-viewport-btn ${viewport === 'mobile' ? 'active' : ''}`}
-                  onClick={() => setViewport('mobile')}
-                  title="Mobile View (390px)"
-                >
-                  <Smartphone size={12} /> Mobile
-                </button>
-              </div>
-
-              <button
-                type="button"
-                className="admin-btn-secondary"
-                onClick={() => setFullPagePreviewOpen(true)}
-                style={{ padding: '5px 12px', fontSize: '11px', fontWeight: '600' }}
-                title="Preview all 9 homepage sections composed together"
-              >
-                <Sparkles size={12} /> Full Page Preview
-              </button>
-            </div>
+            ))}
+            <button
+              type="button"
+              className="add-tab"
+              onClick={handleAddHeroSlide}
+            >
+              + Add
+            </button>
           </div>
+        )}
+
+        {/* Live Interactive Visual Canvas directly in Workspace */}
+        <div className="workspace-canvas-body">
+          <CmsSectionPreview
+            sectionId={activeSection}
+            formData={formData}
+            updateSection={updateSection}
+            viewport={viewport}
+            activeSlideIdx={activeHeroSlide}
+            setActiveSlideIdx={setActiveHeroSlide}
+            onNotify={(msg) => showToast('info', msg)}
+          />
+        </div>
+      </section>
 
           {/* Main Content Layout Container */}
           <div
@@ -2029,62 +1955,7 @@ export default function HomepageCmsPage() {
           </div>
         </div>
       )}
-
-        {/* Live Preview Container (Rendered for all 9 sections in real-time!) */}
-        <div
-          className={viewMode === 'split' && activeSection !== 'hero' ? 'cms-sticky-preview' : 'cms-live-preview-card'}
-          style={{
-            width: '100%',
-            minWidth: 0,
-            marginTop: viewMode === 'edit' && activeSection !== 'hero' ? '12px' : 0
-          }}
-        >
-          <div className="cms-preview-header">
-            <div className="cms-live-indicator">
-              <span className="cms-live-pulse-dot" />
-              <span>Live Preview: {currentSecMeta?.label}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <span className="cms-preview-badge">Live Draft Sync</span>
-
-              {/* Dedicated Save & Sync Status for Visual Canvas across all 9 sections */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '12px', color: dirty ? '#d97706' : '#16a34a', fontWeight: '600' }}>
-                  {dirty ? '⚠️ Unsaved changes' : '✓ All changes in sync.'}
-                </span>
-                <button
-                  type="button"
-                  className="admin-btn-primary"
-                  onClick={handleSave}
-                  disabled={saving}
-                  style={{
-                    backgroundColor: '#0284c7',
-                    borderColor: '#0284c7',
-                    padding: '6px 16px',
-                    fontSize: '12px',
-                    borderRadius: '6px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <Save size={13} /> {saving ? 'Saving...' : 'Save All Changes'}
-                </button>
-              </div>
-            </div>
           </div>
-          <CmsSectionPreview
-            sectionId={activeSection}
-            formData={formData}
-            updateSection={updateSection}
-            viewport={viewport}
-            onNotify={(msg) => showToast('info', msg)}
-          />
-        </div>
-      </div>
-
-    </section>
-  </div>
 
   {/* Full Page Live Preview Modal (All 9 Sections) */}
   {fullPagePreviewOpen && (
@@ -2171,6 +2042,44 @@ export default function HomepageCmsPage() {
       </div>
     </div>
   )}
-</div>
+
+      {/* Fixed bottom bar (Exact match to screenshot) */}
+      <div className="bottom-bar">
+        <div>
+          <div className="changes-label">
+            {dirty ? 'Unsaved changes' : 'Draft synced'}
+          </div>
+          <div className="changes-meta">
+            {dirty ? `${currentSecMeta?.shortLabel || currentSecMeta?.label || 'Hero'} section updated` : 'Hero section updated'}
+          </div>
+        </div>
+        <button
+          type="button"
+          className="publish-button"
+          onClick={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            <>
+              <div className="admin-spinner-small" style={{ borderColor: '#ffffff', borderTopColor: 'transparent', width: '13px', height: '13px' }} />
+              <span>Publishing...</span>
+            </>
+          ) : (
+            <>
+              <Save size={16} />
+              <span>Publish</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Toast Notification */}
+      {published && (
+        <div className="toast">
+          <span>✓</span>
+          Changes published
+        </div>
+      )}
+    </div>
   );
 }

@@ -62,7 +62,9 @@ export default function CmsSectionPreview({
   formData,
   updateSection,
   viewport = 'desktop',
-  onNotify
+  onNotify,
+  activeSlideIdx,
+  setActiveSlideIdx
 }) {
   const handlePreviewClick = (e) => {
     const anchor = e.target.closest('a');
@@ -119,6 +121,8 @@ export default function CmsSectionPreview({
             updateSection={updateSection}
             viewport={viewport}
             onNotify={onNotify}
+            activeSlideIdx={activeSlideIdx}
+            setActiveSlideIdx={setActiveSlideIdx}
           />
         );
       case 'about':
@@ -264,7 +268,7 @@ export default function CmsSectionPreview({
   return (
     <div
       onClickCapture={handlePreviewClick}
-      className="cms-preview-isolation-wrap"
+      className="cms-preview-isolation-wrap cms-preview-outer-wrap"
       style={{
         width: '100%',
         backgroundColor: '#f8fafc',
@@ -272,7 +276,10 @@ export default function CmsSectionPreview({
         boxSizing: 'border-box'
       }}
     >
-      <div style={getViewportStyle()}>
+      <div
+        className={`cms-preview-frame ${viewport === 'mobile' ? 'is-mobile-frame' : ''}`}
+        style={getViewportStyle()}
+      >
         {/* Mobile speaker notch decorative bar */}
         {viewport === 'mobile' && (
           <div style={{

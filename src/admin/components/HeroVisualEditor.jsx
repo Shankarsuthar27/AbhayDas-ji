@@ -16,7 +16,9 @@ import {
   Pause,
   AlertCircle,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  MoreHorizontal,
+  ChevronDown
 } from 'lucide-react';
 import { compressImage } from '../utils/helpers';
 
@@ -33,22 +35,26 @@ export default function HeroVisualEditor({
   formData,
   updateSection,
   viewport = 'desktop',
-  onNotify
+  onNotify,
+  activeSlideIdx: propSlideIdx,
+  setActiveSlideIdx: propSetSlideIdx
 }) {
   const heroData = formData?.hero || {};
   const slides = heroData?.slides && heroData.slides.length > 0 ? heroData.slides : [
     {
       id: 'hs1',
       title: heroData.headingLine1 || 'Preserving Heritage, Inspiring Generations',
-      badge: heroData.badge || 'Seva • Sanskar • Parampara',
-      desc: heroData.paragraph || 'Rooted in sacred parampara and guided by service...',
+      badge: heroData.badge || 'Divine guidance · Dharma',
+      desc: heroData.paragraph || 'Celebrating timeless wisdom, culture, and community for generations to come.',
       image: heroData.backgroundMedia || '/images/img_4.jpg',
       status: 'published'
     }
   ];
 
-  // Active slide state
-  const [activeSlideIdx, setActiveSlideIdx] = useState(0);
+  // Active slide state (synced with parent or local)
+  const [localSlideIdx, setLocalSlideIdx] = useState(0);
+  const activeSlideIdx = propSlideIdx !== undefined ? propSlideIdx : localSlideIdx;
+  const setActiveSlideIdx = propSetSlideIdx || setLocalSlideIdx;
   const [autoPlay, setAutoPlay] = useState(false); // Default paused for comfortable visual editing
 
   // Active popover / editing modal state
@@ -61,6 +67,16 @@ export default function HeroVisualEditor({
   const [imageModalTab, setImageModalTab] = useState('upload'); // 'upload' | 'url' | 'presets'
   const [imageUploading, setImageUploading] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Listen for external trigger from workspace top bar
+  useEffect(() => {
+    const handleTriggerReplace = () => {
+      setImageModalTarget('slideImage');
+      setImageModalUrl('');
+    };
+    window.addEventListener('cms-replace-hero-image', handleTriggerReplace);
+    return () => window.removeEventListener('cms-replace-hero-image', handleTriggerReplace);
+  }, []);
 
   // Safe slide index guard
   const safeIdx = Math.min(Math.max(0, activeSlideIdx), slides.length - 1);
@@ -183,456 +199,90 @@ export default function HeroVisualEditor({
   return (
     <div className="hero-visual-editor-root" style={{ position: 'relative', width: '100%', userSelect: 'none' }}>
       
-      {/* ── WordPress / Elementor Visual Control Bar ── */}
-      <div style={{
-        backgroundColor: '#0f172a',
-        color: '#ffffff',
-        padding: '10px 16px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '12px',
-        borderBottom: '1px solid #1e293b'
-      }}>
-        {/* Left: Indicator & Carousel Slide Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: '#38bdf8',
-              display: 'inline-block'
-            }} />
-            <span style={{ fontSize: '12px', fontWeight: '800', letterSpacing: '0.5px', textTransform: 'uppercase', color: '#93c5fd' }}>
-              Visual Canvas Editor
-            </span>
-          </div>
 
-          <div style={{ width: '1px', height: '18px', backgroundColor: '#334155' }} />
 
-          {/* Slide Tabs */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600', marginRight: '4px' }}>
-              Slide:
-            </span>
-            {slides.map((s, idx) => (
-              <button
-                key={s.id || idx}
-                type="button"
-                onClick={() => setActiveSlideIdx(idx)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  fontSize: '11px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  backgroundColor: activeSlideIdx === idx ? '#0284c7' : '#1e293b',
-                  color: activeSlideIdx === idx ? '#ffffff' : '#94a3b8',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                #{idx + 1}
-              </button>
-            ))}
+      {/* ── Main Interactive Hero Canvas (Exact Match to Screenshot) ── */}
+      <article className="hero-canvas">
+        <img
+          alt="Hero background"
+          className="hero-image"
+          src={currentBgImage}
+        />
+        <div className="hero-shade" />
+        <div className="color-ribbon ribbon-one" />
+        <div className="color-ribbon ribbon-two" />
 
-            <button
-              type="button"
-              onClick={handleAddSlide}
-              title="Add a new slide"
-              style={{
-                padding: '4px 8px',
-                borderRadius: '6px',
-                border: '1px dashed #475569',
-                backgroundColor: 'transparent',
-                color: '#cbd5e1',
-                fontSize: '11px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <Plus size={11} /> Add
-            </button>
-          </div>
-        </div>
-
-        {/* Right: Quick Controls (Play/Pause, Media Replace, Hint) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button
-            type="button"
-            onClick={() => setAutoPlay(!autoPlay)}
-            title={autoPlay ? 'Pause slider rotation to edit comfortably' : 'Play auto-rotation demo'}
-            style={{
-              padding: '4px 10px',
-              borderRadius: '6px',
-              border: '1px solid #334155',
-              backgroundColor: autoPlay ? '#059669' : '#1e293b',
-              color: '#ffffff',
-              fontSize: '11px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            {autoPlay ? <Pause size={11} /> : <Play size={11} />}
-            {autoPlay ? 'Auto-Slide: ON' : 'Auto-Slide: PAUSED'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setImageModalTarget('heroBg'); setImageModalUrl(''); }}
-            style={{
-              padding: '5px 12px',
-              borderRadius: '6px',
-              border: 'none',
-              backgroundColor: '#0284c7',
-              color: '#ffffff',
-              fontSize: '11px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <ImageIcon size={12} /> Replace Hero Image
-          </button>
-
-          <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic' }}>
-            💡 Click any text or image below to edit
+        <div className="canvas-tools">
+          <span className="editing-pill">
+            <Sparkles size={13} />
+            Editing
           </span>
-        </div>
-      </div>
-
-      {/* ── Main Interactive Hero Canvas ── */}
-      <div style={{
-        position: 'relative',
-        minHeight: viewport === 'mobile' ? '680px' : '760px',
-        backgroundColor: '#0b231c',
-        backgroundImage: `url(${currentBgImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center 30%',
-        transition: 'background-image 0.4s ease',
-        overflow: 'hidden'
-      }}>
-        {/* Dark Vignette & Gradient Overlays matching original HeroSlider */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(to top, rgba(11, 35, 28, 0.96) 0%, rgba(11, 35, 28, 0.65) 45%, rgba(11, 35, 28, 0.25) 100%)',
-          zIndex: 2,
-          pointerEvents: 'none'
-        }} />
-
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 15% 75%, rgba(11, 35, 28, 0.85) 0%, rgba(11, 35, 28, 0.3) 60%, rgba(11, 35, 28, 0) 100%)',
-          zIndex: 2,
-          pointerEvents: 'none'
-        }} />
-
-        {/* Decorative corner artwork */}
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-          width: 'clamp(280px, 35vw, 550px)',
-          height: 'clamp(300px, 40vw, 600px)',
-          backgroundImage: 'url(/images/layer-2.png)',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'bottom right',
-          backgroundSize: 'contain',
-          zIndex: 3,
-          pointerEvents: 'none',
-          opacity: 0.95
-        }} />
-
-        {/* Top-Right Floating Slide Image Replacer Badge */}
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          zIndex: 10,
-          display: 'flex',
-          gap: '8px'
-        }}>
           <button
             type="button"
+            className="canvas-more"
             onClick={() => { setImageModalTarget('slideImage'); setImageModalUrl(''); }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: 'rgba(15, 23, 42, 0.85)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              color: '#ffffff',
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontSize: '11.5px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-              transition: 'all 0.15s ease'
-            }}
+            title="Slide Options / Change Image"
           >
-            <ImageIcon size={13} color="#38bdf8" />
-            <span>Change Slide #{safeIdx + 1} Image</span>
+            <MoreHorizontal size={17} />
           </button>
+        </div>
 
-          {slides.length > 1 && (
+        <div className="hero-content">
+          <button
+            type="button"
+            className="editable-kicker"
+            onClick={() => setActiveField('badge')}
+          >
+            {currentBadge || 'Divine guidance · Dharma'}
+            <Edit3 size={12} />
+          </button>
+          <h2 onClick={() => setActiveField('headingLine1')}>
+            {currentTitle1 || 'Preserving Heritage,'}
+            <br />
+            {currentTitle2 || 'Inspiring Generations'}
+          </h2>
+          <p onClick={() => setActiveField('paragraph')}>
+            {currentParagraph || 'Celebrating timeless wisdom, culture, and community for generations to come.'}
+          </p>
+          <div className="hero-actions">
             <button
               type="button"
-              onClick={() => handleRemoveSlide(safeIdx)}
-              title="Delete this slide"
-              style={{
-                backgroundColor: 'rgba(239, 68, 68, 0.85)',
-                border: 'none',
-                color: '#ffffff',
-                padding: '6px 10px',
-                borderRadius: '20px',
-                fontSize: '11px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <Trash2 size={12} /> Delete Slide
-            </button>
-          )}
-        </div>
-
-        {/* ── Visual Content Blocks (Clickable & Editable) ── */}
-        <div style={{
-          position: 'absolute',
-          bottom: 'clamp(28px, 4vw, 55px)',
-          left: 'clamp(24px, 4.5vw, 65px)',
-          zIndex: 5,
-          maxWidth: '680px',
-          paddingRight: '20px'
-        }}>
-          
-          {/* 1. BADGE / SUBTITLE */}
-          <div
-            onClick={() => setActiveField('badge')}
-            className="visual-editable-item"
-            title="Click to edit badge text"
-            style={{
-              position: 'relative',
-              display: 'inline-block',
-              cursor: 'pointer',
-              border: '1.5px solid #fc791a',
-              borderRadius: '50px',
-              padding: '7px 20px',
-              color: '#fc791a',
-              fontSize: 'clamp(12px, 1.1vw, 13.5px)',
-              fontWeight: '700',
-              letterSpacing: '0.3px',
-              marginBottom: '16px',
-              backgroundColor: 'rgba(11, 35, 28, 0.75)',
-              backdropFilter: 'blur(5px)',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              {currentBadge}
-              <Edit3 size={12} color="#fc791a" style={{ opacity: 0.7 }} />
-            </span>
-          </div>
-
-          {/* 2. MAIN HEADINGS (Line 1 & Line 2) */}
-          <div style={{ position: 'relative', margin: '0 0 16px 0' }}>
-            <h1 style={{
-              fontSize: 'clamp(32px, 3.8vw, 48px)',
-              fontWeight: '800',
-              lineHeight: '1.2',
-              color: '#ffffff',
-              margin: 0,
-              letterSpacing: '-0.3px',
-              textShadow: '0 4px 16px rgba(0,0,0,0.65)'
-            }}>
-              {/* Line 1 */}
-              <span
-                onClick={() => setActiveField('headingLine1')}
-                className="visual-editable-item"
-                title="Click to edit Heading Line 1"
-                style={{
-                  display: 'inline-block',
-                  cursor: 'pointer',
-                  borderRadius: '6px',
-                  padding: '2px 6px',
-                  margin: '-2px -6px',
-                  transition: 'background-color 0.15s ease'
-                }}
-              >
-                {currentTitle1}
-                <Edit3 size={16} color="#38bdf8" style={{ marginLeft: '8px', opacity: 0.6 }} />
-              </span>
-              <br />
-              {/* Line 2 */}
-              <span
-                onClick={() => setActiveField('headingLine2')}
-                className="visual-editable-item"
-                title="Click to edit Heading Line 2"
-                style={{
-                  display: 'inline-block',
-                  cursor: 'pointer',
-                  borderRadius: '6px',
-                  padding: '2px 6px',
-                  margin: '-2px -6px',
-                  transition: 'background-color 0.15s ease'
-                }}
-              >
-                {currentTitle2}
-                <Edit3 size={16} color="#38bdf8" style={{ marginLeft: '8px', opacity: 0.6 }} />
-              </span>
-            </h1>
-          </div>
-
-          {/* 3. SUPPORTING PARAGRAPH */}
-          <p
-            onClick={() => setActiveField('paragraph')}
-            className="visual-editable-item"
-            title="Click to edit description text"
-            style={{
-              fontSize: 'clamp(13.5px, 1.2vw, 15.5px)',
-              lineHeight: '1.65',
-              color: '#e2e8f0',
-              margin: '0 0 28px 0',
-              maxWidth: '580px',
-              cursor: 'pointer',
-              borderRadius: '6px',
-              padding: '6px 8px',
-              marginRight: '-8px',
-              marginLeft: '-8px',
-              textShadow: '0 2px 8px rgba(0,0,0,0.5)',
-              transition: 'background-color 0.15s ease'
-            }}
-          >
-            {currentParagraph}
-            <Edit3 size={13} color="#38bdf8" style={{ marginLeft: '6px', opacity: 0.6 }} />
-          </p>
-
-          {/* 4. ACTION BUTTONS ROW */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            
-            {/* Primary Action Button ("Donate Now") */}
-            <div
+              className="donate-button"
               onClick={() => setActiveField('primaryBtn')}
-              className="visual-editable-item"
-              title="Click to edit Primary Button Text & Destination URL"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                backgroundColor: '#fc791a',
-                color: '#ffffff',
-                borderRadius: '4px',
-                height: '42px',
-                padding: '0 22px',
-                cursor: 'pointer',
-                fontSize: '14.5px',
-                fontWeight: '700',
-                boxShadow: '0 4px 16px rgba(252, 121, 26, 0.4)',
-                border: '1.5px solid rgba(255,255,255,0.2)'
-              }}
             >
-              <span>{currentPrimaryBtn}</span>
-              <Edit3 size={12} color="#ffffff" style={{ opacity: 0.8 }} />
-            </div>
-
-            {/* Secondary Action Button ("Watch Video") */}
-            <div
+              {currentPrimaryBtn || 'Donate now'}
+              <Edit3 size={13} />
+            </button>
+            <button
+              type="button"
+              className="watch-button"
               onClick={() => setActiveField('watchVideo')}
-              className="visual-editable-item"
-              title="Click to edit Secondary Video Button Text & YouTube URL"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: 'rgba(15, 23, 42, 0.4)',
-                backdropFilter: 'blur(4px)',
-                borderRadius: '4px',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                color: '#ffffff',
-                fontSize: '14px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                padding: '8px 16px'
-              }}
             >
-              <Play size={12} color="#fc791a" />
-              <span>{currentWatchText}</span>
-              <Edit3 size={12} color="#ffffff" style={{ opacity: 0.8 }} />
-            </div>
+              <Play size={13} />
+              {currentWatchText || 'Watch video'}
+            </button>
           </div>
-
         </div>
 
-        {/* Bottom Slide Indicators Bar */}
-        <div style={{
-          position: 'absolute',
-          bottom: '20px',
-          right: '30px',
-          zIndex: 8,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <button
-            type="button"
-            onClick={() => setActiveSlideIdx((prev) => (prev - 1 + slides.length) % slides.length)}
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              border: 'none',
-              color: '#ffffff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <ChevronLeft size={16} />
-          </button>
-
-          <span style={{ fontSize: '12px', fontWeight: '700', color: '#ffffff' }}>
-            {safeIdx + 1} / {slides.length}
-          </span>
-
-          <button
-            type="button"
-            onClick={() => setActiveSlideIdx((prev) => (prev + 1) % slides.length)}
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              border: 'none',
-              color: '#ffffff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <ChevronRight size={16} />
-          </button>
+        <div className="slide-count">{safeIdx + 1} / {slides.length}</div>
+        <div className="swipe-hint">
+          <span />
+          <span className="active" />
+          <span />
         </div>
+      </article>
 
-      </div>
+      <button
+        type="button"
+        className="settings-row"
+        onClick={() => setActiveField('headingLine1')}
+      >
+        <span>
+          <Edit3 size={17} />
+          Edit hero content
+        </span>
+        <ChevronDown size={17} />
+      </button>
 
       {/* ── WordPress Floating Quick-Edit Popover Modal ── */}
       {activeField && (
