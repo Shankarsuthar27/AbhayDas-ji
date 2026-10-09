@@ -56,7 +56,7 @@ export default function HomepageCmsPage() {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [dirty, setDirty] = useState(false);
-  const [viewMode, setViewMode] = useState('split'); // 'split' | 'edit' | 'preview'
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [viewport, setViewport] = useState('desktop'); // 'desktop' | 'tablet' | 'mobile'
   const [fullPagePreviewOpen, setFullPagePreviewOpen] = useState(false);
 
@@ -381,38 +381,9 @@ export default function HomepageCmsPage() {
           {/* Top Live Preview View Mode Bar */}
           <div className="cms-view-mode-bar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              {activeSection !== 'hero' && (
-                <div className="cms-mode-tabs">
-                  <button
-                    type="button"
-                    className={`cms-mode-tab ${viewMode === 'edit' ? 'active' : ''}`}
-                    onClick={() => setViewMode('edit')}
-                    title="Editor form with embedded live preview below"
-                  >
-                    <Sliders size={13} /> Edit Form
-                  </button>
-                  <button
-                    type="button"
-                    className={`cms-mode-tab ${viewMode === 'split' ? 'active' : ''}`}
-                    onClick={() => setViewMode('split')}
-                    title="Side-by-side editing and live preview"
-                  >
-                    <Layout size={13} /> Split View (Live)
-                  </button>
-                  <button
-                    type="button"
-                    className={`cms-mode-tab ${viewMode === 'preview' ? 'active' : ''}`}
-                    onClick={() => setViewMode('preview')}
-                    title="Full live preview of this section"
-                  >
-                    <Eye size={13} /> Full Preview
-                  </button>
-                </div>
-              )}
-
               <div className="cms-live-indicator" style={{ color: '#16a34a' }}>
                 <span className="cms-live-pulse-dot" />
-                <span style={{ fontSize: '12px' }}>Real-Time Preview</span>
+                <span style={{ fontSize: '12px' }}>Real-Time Live Draft Sync Active</span>
               </div>
             </div>
 
@@ -456,27 +427,167 @@ export default function HomepageCmsPage() {
             </div>
           </div>
 
-          {/* Main Content Layout Container */}
-          <div
-            className={viewMode === 'split' && activeSection !== 'hero' ? 'cms-split-grid' : ''}
-            style={{
-              display: viewMode === 'split' && activeSection !== 'hero' ? 'grid' : 'flex',
-              flexDirection: 'column',
-              gap: '24px',
-              alignItems: 'start'
-            }}
-          >
-            {/* Form Column - Hidden for Hero section since it uses the full interactive visual canvas */}
-            {activeSection !== 'hero' && (
+          {/* Main Content Layout Container - Pure Full Width Live Preview Display for All Sections */}
+          <div style={{ width: '100%', minWidth: 0 }}>
+            {/* Live Preview Container (Rendered for all 11 sections in real-time!) */}
+            <div
+              className="cms-live-preview-card"
+              style={{
+                width: '100%',
+                minWidth: 0,
+                marginTop: 0
+              }}
+            >
+              <div className="cms-preview-header">
+                <div className="cms-live-indicator">
+                  <span className="cms-live-pulse-dot" />
+                  <span>Live Preview: {currentSecMeta?.label}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <span className="cms-preview-badge">Live Draft Sync</span>
+
+                  {/* Section Content Customizer Drawer Trigger for sections 2 to 11 */}
+                  {activeSection !== 'hero' && (
+                    <button
+                      type="button"
+                      className="admin-btn-secondary"
+                      onClick={() => setDrawerOpen(true)}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        backgroundColor: '#334155',
+                        color: '#ffffff',
+                        borderColor: '#475569',
+                        borderRadius: '6px'
+                      }}
+                    >
+                      <Sliders size={13} color="#38bdf8" />
+                      <span>Edit {currentSecMeta?.label}</span>
+                    </button>
+                  )}
+
+                  {/* Dedicated Save & Sync Status for ALL sections */}
+                  <span style={{ fontSize: '12px', color: dirty ? '#d97706' : '#16a34a', fontWeight: '600' }}>
+                    {dirty ? '⚠️ Unsaved changes' : '✓ All changes in sync.'}
+                  </span>
+                  <button
+                    type="button"
+                    className="admin-btn-primary"
+                    onClick={handleSave}
+                    disabled={saving}
+                    style={{
+                      backgroundColor: '#0284c7',
+                      borderColor: '#0284c7',
+                      padding: '6px 16px',
+                      fontSize: '12px',
+                      borderRadius: '6px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Save size={13} /> {saving ? 'Saving...' : 'Save All Changes'}
+                  </button>
+                </div>
+              </div>
+
+              <CmsSectionPreview
+                sectionId={activeSection}
+                formData={formData}
+                updateSection={updateSection}
+                viewport={viewport}
+                onNotify={(msg) => showToast('info', msg)}
+                onOpenEditor={() => setDrawerOpen(true)}
+              />
+            </div>
+          </div>
+
+          {/* Slide-Over Content Customizer Drawer (for Sections 2 to 11) */}
+          {drawerOpen && activeSection !== 'hero' && (
+            <>
+              {/* Semi-transparent Backdrop */}
               <div
+                onClick={() => setDrawerOpen(false)}
                 style={{
-                  display: viewMode === 'preview' ? 'none' : 'flex',
+                  position: 'fixed',
+                  inset: 0,
+                  backgroundColor: 'rgba(15, 23, 42, 0.45)',
+                  backdropFilter: 'blur(3px)',
+                  zIndex: 9998,
+                  transition: 'opacity 0.2s ease'
+                }}
+              />
+
+              {/* Drawer Container */}
+              <div
+                className="cms-customizer-drawer"
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  width: 'min(580px, 94vw)',
+                  backgroundColor: '#ffffff',
+                  boxShadow: '-10px 0 30px rgba(0, 0, 0, 0.25)',
+                  zIndex: 9999,
+                  display: 'flex',
                   flexDirection: 'column',
-                  gap: '20px',
-                  minWidth: 0,
-                  width: '100%'
+                  overflow: 'hidden'
                 }}
               >
+                {/* Drawer Header */}
+                <div style={{
+                  padding: '16px 20px',
+                  backgroundColor: '#0f172a',
+                  color: '#ffffff',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderBottom: '1px solid #1e293b'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Sliders size={18} color="#38bdf8" />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff' }}>
+                        Edit {currentSecMeta?.label}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                        Real-time Live Sync active
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDrawerOpen(false)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#cbd5e1',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      borderRadius: '4px'
+                    }}
+                    title="Close Drawer"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Drawer Scrollable Content */}
+                <div style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: '20px 24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px'
+                }}>
 
           {/* ========================================================================= */}
           {/* SECTION 2: BRIEF INTRODUCTION SECTION                                     */}
@@ -2441,97 +2552,51 @@ export default function HomepageCmsPage() {
             </div>
           )}
 
-          {/* Bottom Sticky Action Bar */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingTop: '16px',
-            borderTop: '1px solid #e2e8f0',
-            marginTop: '10px'
-          }}>
-            <span style={{ fontSize: '12px', color: '#64748b' }}>
-              {dirty ? '⚠️ You have unsaved changes.' : '✓ All changes in sync.'}
-            </span>
+                </div>
 
-            <button
-              type="button"
-              className="admin-btn-primary"
-              onClick={handleSave}
-              disabled={saving}
-              style={{ backgroundColor: '#0284c7', borderColor: '#0284c7', padding: '10px 24px' }}
-            >
-              <Save size={15} /> {saving ? 'Saving...' : 'Save All Changes'}
-            </button>
-          </div>
-        </div>
-      )}
-
-        {/* Live Preview Container (Rendered for all 11 sections in real-time!) */}
-        <div
-          className={viewMode === 'split' && activeSection !== 'hero' ? 'cms-sticky-preview' : 'cms-live-preview-card'}
-          style={{
-            width: '100%',
-            minWidth: 0,
-            marginTop: viewMode === 'edit' && activeSection !== 'hero' ? '12px' : 0
-          }}
-        >
-          <div className="cms-preview-header">
-            <div className="cms-live-indicator">
-              <span className="cms-live-pulse-dot" />
-              <span>Live Preview: {currentSecMeta?.label}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <span className="cms-preview-badge">Live Draft Sync</span>
-
-              {/* Dedicated Save & Sync Status for Hero Section Visual Canvas */}
-              {activeSection === 'hero' && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {/* Drawer Footer */}
+                <div style={{
+                  padding: '14px 20px',
+                  backgroundColor: '#f8fafc',
+                  borderTop: '1px solid #e2e8f0',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
                   <span style={{ fontSize: '12px', color: dirty ? '#d97706' : '#16a34a', fontWeight: '600' }}>
                     {dirty ? '⚠️ Unsaved changes' : '✓ All changes in sync.'}
                   </span>
-                  <button
-                    type="button"
-                    className="admin-btn-primary"
-                    onClick={handleSave}
-                    disabled={saving}
-                    style={{
-                      backgroundColor: '#0284c7',
-                      borderColor: '#0284c7',
-                      padding: '6px 16px',
-                      fontSize: '12px',
-                      borderRadius: '6px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Save size={13} /> {saving ? 'Saving...' : 'Save All Changes'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className="admin-btn-secondary"
+                      onClick={() => setDrawerOpen(false)}
+                      style={{ padding: '8px 16px', fontSize: '12px' }}
+                    >
+                      Done
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-btn-primary"
+                      onClick={handleSave}
+                      disabled={saving}
+                      style={{
+                        backgroundColor: '#0284c7',
+                        borderColor: '#0284c7',
+                        padding: '8px 18px',
+                        fontSize: '12px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Save size={13} /> {saving ? 'Saving...' : 'Save All Changes'}
+                    </button>
+                  </div>
                 </div>
-              )}
-
-              {viewMode === 'preview' && activeSection !== 'hero' && (
-                <button
-                  type="button"
-                  className="admin-btn-secondary"
-                  onClick={() => setViewMode('edit')}
-                  style={{ padding: '3px 8px', fontSize: '11px', backgroundColor: '#ffffff', color: '#0f172a' }}
-                >
-                  <Sliders size={11} /> Edit Form
-                </button>
-              )}
-            </div>
-          </div>
-          <CmsSectionPreview
-            sectionId={activeSection}
-            formData={formData}
-            updateSection={updateSection}
-            viewport={viewport}
-            onNotify={(msg) => showToast('info', msg)}
-          />
-        </div>
-      </div>
+              </div>
+            </>
+          )}
 
     </section>
   </div>

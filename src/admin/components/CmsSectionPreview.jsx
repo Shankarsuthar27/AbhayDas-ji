@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { CmsContext } from '../../context/CmsContext';
+import { Sliders } from 'lucide-react';
 import HeroSlider from '../../components/HeroSlider';
 import HeroVisualEditor from './HeroVisualEditor';
 import AboutSection from '../../components/AboutSection';
@@ -60,12 +61,26 @@ class PreviewErrorBoundary extends Component {
   }
 }
 
+const SECTION_TITLE_MAP = {
+  about: '2. Brief Introduction Section',
+  kathas: '3. Spiritual Katha Section',
+  donations: '4. Donation Section',
+  gallery: '5. Photo Gallery Section',
+  recentKatha: '6. Recent Katha (Video) Section',
+  events: '7. Upcoming Events Section',
+  news: '8. Latest News & Articles Section',
+  testimonials: '9. Testimonials & Team Section',
+  contact: '10. Contact CTA Banner Strip',
+  footer: '11. Footer Settings'
+};
+
 export default function CmsSectionPreview({
   sectionId,
   formData,
   updateSection,
   viewport = 'desktop',
-  onNotify
+  onNotify,
+  onOpenEditor
 }) {
   const handlePreviewClick = (e) => {
     const anchor = e.target.closest('a');
@@ -113,6 +128,63 @@ export default function CmsSectionPreview({
     };
   };
 
+  const wrapWithSectionBar = (component, title) => (
+    <div style={{ position: 'relative', width: '100%' }}>
+      <div style={{
+        backgroundColor: '#0f172a',
+        color: '#ffffff',
+        padding: '9px 16px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '10px',
+        borderBottom: '1px solid #1e293b'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor: '#38bdf8',
+            display: 'inline-block'
+          }} />
+          <span style={{ fontSize: '12px', fontWeight: '800', letterSpacing: '0.5px', textTransform: 'uppercase', color: '#93c5fd' }}>
+            {title} Display
+          </span>
+          <span style={{ fontSize: '11px', color: '#64748b', fontStyle: 'italic', marginLeft: '6px' }}>
+            💡 Live Draft Sync active — previewing real-time updates
+          </span>
+        </div>
+
+        {onOpenEditor && (
+          <button
+            type="button"
+            onClick={onOpenEditor}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#0284c7',
+              border: 'none',
+              color: '#ffffff',
+              padding: '5px 14px',
+              borderRadius: '6px',
+              fontSize: '11.5px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(2, 132, 199, 0.4)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Sliders size={12} /> Edit Section Content
+          </button>
+        )}
+      </div>
+      {component}
+    </div>
+  );
+
   const renderSectionContent = () => {
     switch (sectionId) {
       case 'hero':
@@ -125,61 +197,75 @@ export default function CmsSectionPreview({
           />
         );
       case 'about':
-        return (
+        return wrapWithSectionBar(
           <AboutSection
             onOpenDonate={() => onNotify?.('Preview: Donation popup opened')}
             onOpenVideo={(id) => onNotify?.(`Preview: Video player (${id}) opened`)}
             onNavigate={(url) => onNotify?.(`Preview: Navigate to ${url}`)}
-          />
+          />,
+          SECTION_TITLE_MAP.about
         );
       case 'kathas':
-        return (
+        return wrapWithSectionBar(
           <SpiritualKathas
             onOpenVideo={(id) => onNotify?.(`Preview: Video player (${id}) opened`)}
             onNavigate={(url) => onNotify?.(`Preview: Navigate to ${url}`)}
-          />
+          />,
+          SECTION_TITLE_MAP.kathas
         );
       case 'donations':
-        return (
+        return wrapWithSectionBar(
           <CampaignsSection
             onOpenDonate={() => onNotify?.('Preview: Donation popup opened')}
-          />
+          />,
+          SECTION_TITLE_MAP.donations
         );
       case 'gallery':
-        return (
+        return wrapWithSectionBar(
           <GallerySection
             onOpenLightbox={() => onNotify?.('Preview: Gallery lightbox opened')}
             onNavigate={(url) => onNotify?.(`Preview: Navigate to ${url}`)}
-          />
+          />,
+          SECTION_TITLE_MAP.gallery
         );
       case 'recentKatha':
-        return (
+        return wrapWithSectionBar(
           <VideoSection
             onOpenVideo={(id) => onNotify?.(`Preview: Video player (${id}) opened`)}
-          />
+          />,
+          SECTION_TITLE_MAP.recentKatha
         );
       case 'events':
-        return (
+        return wrapWithSectionBar(
           <EventsSection
             onOpenVolunteer={() => onNotify?.('Preview: Volunteer/RSVP opened')}
             onNavigate={(url) => onNotify?.(`Preview: Navigate to ${url}`)}
-          />
+          />,
+          SECTION_TITLE_MAP.events
         );
       case 'news':
-        return (
+        return wrapWithSectionBar(
           <NewsSection
             onNavigate={(url) => onNotify?.(`Preview: Read article (${url})`)}
-          />
+          />,
+          SECTION_TITLE_MAP.news
         );
       case 'testimonials':
-        return <TeamSection />;
+        return wrapWithSectionBar(
+          <TeamSection />,
+          SECTION_TITLE_MAP.testimonials
+        );
       case 'contact':
-        return <ContactBar />;
+        return wrapWithSectionBar(
+          <ContactBar />,
+          SECTION_TITLE_MAP.contact
+        );
       case 'footer':
-        return (
+        return wrapWithSectionBar(
           <Footer
             onNavigate={(url) => onNotify?.(`Preview: Navigate to ${url}`)}
-          />
+          />,
+          SECTION_TITLE_MAP.footer
         );
       case 'all':
         return (
