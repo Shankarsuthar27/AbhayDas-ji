@@ -381,32 +381,34 @@ export default function HomepageCmsPage() {
           {/* Top Live Preview View Mode Bar */}
           <div className="cms-view-mode-bar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <div className="cms-mode-tabs">
-                <button
-                  type="button"
-                  className={`cms-mode-tab ${viewMode === 'edit' ? 'active' : ''}`}
-                  onClick={() => setViewMode('edit')}
-                  title="Editor form with embedded live preview below"
-                >
-                  <Sliders size={13} /> Edit Form
-                </button>
-                <button
-                  type="button"
-                  className={`cms-mode-tab ${viewMode === 'split' ? 'active' : ''}`}
-                  onClick={() => setViewMode('split')}
-                  title="Side-by-side editing and live preview"
-                >
-                  <Layout size={13} /> Split View (Live)
-                </button>
-                <button
-                  type="button"
-                  className={`cms-mode-tab ${viewMode === 'preview' ? 'active' : ''}`}
-                  onClick={() => setViewMode('preview')}
-                  title="Full live preview of this section"
-                >
-                  <Eye size={13} /> Full Preview
-                </button>
-              </div>
+              {activeSection !== 'hero' && (
+                <div className="cms-mode-tabs">
+                  <button
+                    type="button"
+                    className={`cms-mode-tab ${viewMode === 'edit' ? 'active' : ''}`}
+                    onClick={() => setViewMode('edit')}
+                    title="Editor form with embedded live preview below"
+                  >
+                    <Sliders size={13} /> Edit Form
+                  </button>
+                  <button
+                    type="button"
+                    className={`cms-mode-tab ${viewMode === 'split' ? 'active' : ''}`}
+                    onClick={() => setViewMode('split')}
+                    title="Side-by-side editing and live preview"
+                  >
+                    <Layout size={13} /> Split View (Live)
+                  </button>
+                  <button
+                    type="button"
+                    className={`cms-mode-tab ${viewMode === 'preview' ? 'active' : ''}`}
+                    onClick={() => setViewMode('preview')}
+                    title="Full live preview of this section"
+                  >
+                    <Eye size={13} /> Full Preview
+                  </button>
+                </div>
+              )}
 
               <div className="cms-live-indicator" style={{ color: '#16a34a' }}>
                 <span className="cms-live-pulse-dot" />
@@ -456,292 +458,25 @@ export default function HomepageCmsPage() {
 
           {/* Main Content Layout Container */}
           <div
-            className={viewMode === 'split' ? 'cms-split-grid' : ''}
+            className={viewMode === 'split' && activeSection !== 'hero' ? 'cms-split-grid' : ''}
             style={{
-              display: viewMode === 'split' ? 'grid' : 'flex',
+              display: viewMode === 'split' && activeSection !== 'hero' ? 'grid' : 'flex',
               flexDirection: 'column',
               gap: '24px',
               alignItems: 'start'
             }}
           >
-            {/* Form Column */}
-            <div
-              style={{
-                display: viewMode === 'preview' ? 'none' : 'flex',
-                flexDirection: 'column',
-                gap: '20px',
-                minWidth: 0,
-                width: '100%'
-              }}
-            >
-
-          {/* ========================================================================= */}
-          {/* SECTION 1: HERO SECTION                                                   */}
-          {/* ========================================================================= */}
-          {activeSection === 'hero' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div>
-                <h2 className="admin-card-title">1. Hero Banner Section</h2>
-                <p className="admin-page-desc">Customize the hero background media, typography, and call-to-action buttons.</p>
-              </div>
-
-              <CmsImageUploader
-                label="Hero Background Media (Image / Video)"
-                description="Upload background banner or select video (Max 5MB)"
-                value={formData.hero.backgroundMedia}
-                onChange={(url) => updateSection('hero', { backgroundMedia: url })}
-                maxSizeMB={5}
-                allowVideo={true}
-              />
-
-              <div className="admin-form-group">
-                <label className="admin-label">Hero Badge / Subtitle</label>
-                <input
-                  type="text"
-                  className="admin-input-control"
-                  value={formData.hero.badge}
-                  onChange={(e) => updateSection('hero', { badge: e.target.value })}
-                  placeholder="Seva • Sanskar • Parampara"
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div className="admin-form-group">
-                  <label className="admin-label">Main Heading Line 1</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.hero.headingLine1}
-                    onChange={(e) => updateSection('hero', { headingLine1: e.target.value })}
-                    placeholder="Preserving Heritage,"
-                  />
-                </div>
-                <div className="admin-form-group">
-                  <label className="admin-label">Main Heading Line 2</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.hero.headingLine2}
-                    onChange={(e) => updateSection('hero', { headingLine2: e.target.value })}
-                    placeholder="Inspiring Generations"
-                  />
-                </div>
-              </div>
-
-              <div className="admin-form-group">
-                <label className="admin-label">Supporting Paragraph Text</label>
-                <textarea
-                  rows={3}
-                  className="admin-textarea-control"
-                  value={formData.hero.paragraph}
-                  onChange={(e) => updateSection('hero', { paragraph: e.target.value })}
-                  placeholder="Welcome to the official spiritual platform..."
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div className="admin-form-group">
-                  <label className="admin-label">Primary Action Button ("Donate Now")</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.hero.primaryBtnText}
-                    onChange={(e) => updateSection('hero', { primaryBtnText: e.target.value })}
-                    placeholder="Donate Now"
-                  />
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.hero.primaryBtnUrl}
-                    onChange={(e) => updateSection('hero', { primaryBtnUrl: e.target.value })}
-                    placeholder="Destination Link"
-                    style={{ marginTop: '6px' }}
-                  />
-                </div>
-
-                <div className="admin-form-group">
-                  <label className="admin-label">Secondary Button ("Watch Video")</label>
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.hero.watchVideoText}
-                    onChange={(e) => updateSection('hero', { watchVideoText: e.target.value })}
-                    placeholder="Watch Video"
-                  />
-                  <input
-                    type="text"
-                    className="admin-input-control"
-                    value={formData.hero.watchVideoUrl}
-                    onChange={(e) => updateSection('hero', { watchVideoUrl: e.target.value })}
-                    placeholder="YouTube Video URL"
-                    style={{ marginTop: '6px' }}
-                  />
-                </div>
-              </div>
-
-              {/* Repeatable Hero Slides Carousel Manager */}
-              <div style={{ marginTop: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <label className="admin-label" style={{ margin: 0 }}>
-                    Hero Carousel Slides ({(formData.hero.slides || []).length})
-                  </label>
-                  <button
-                    type="button"
-                    className="admin-btn-secondary"
-                    onClick={() => {
-                      setDirty(true);
-                      const newId = `hs_${Date.now()}`;
-                      setFormData((prev) => ({
-                        ...prev,
-                        hero: {
-                          ...prev.hero,
-                          slides: [
-                            ...(prev.hero.slides || []),
-                            {
-                              id: newId,
-                              title: 'New Hero Slide Title',
-                              badge: 'Sacred Parampara',
-                              desc: 'Spiritual discourse and sacred teachings description...',
-                              image: '/images/img_4.jpg',
-                              status: 'published'
-                            }
-                          ]
-                        }
-                      }));
-                    }}
-                    style={{ padding: '4px 10px', fontSize: '12px' }}
-                  >
-                    <Plus size={13} /> Add Hero Slide
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {(formData.hero.slides || []).map((slide, idx) => (
-                    <div
-                      key={slide.id || idx}
-                      style={{
-                        padding: '16px',
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '12px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>
-                          Slide #{idx + 1}: {slide.title || 'Untitled Slide'}
-                        </span>
-
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <button
-                            type="button"
-                            onClick={() => toggleStatus('slides', 'hero', idx)}
-                            style={{
-                              padding: '4px 10px',
-                              borderRadius: '6px',
-                              fontSize: '11px',
-                              fontWeight: '700',
-                              border: 'none',
-                              cursor: 'pointer',
-                              backgroundColor: slide.status === 'published' ? '#ecfdf5' : '#f1f5f9',
-                              color: slide.status === 'published' ? '#059669' : '#64748b'
-                            }}
-                          >
-                            {slide.status === 'published' ? 'Published' : 'Draft'}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => moveItem('slides', 'hero', idx, -1)}
-                            disabled={idx === 0}
-                            style={{ padding: '4px', border: 'none', background: 'none' }}
-                          >
-                            <ChevronUp size={15} color={idx === 0 ? '#cbd5e1' : '#475569'} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => moveItem('slides', 'hero', idx, 1)}
-                            disabled={idx === (formData.hero.slides || []).length - 1}
-                            style={{ padding: '4px', border: 'none', background: 'none' }}
-                          >
-                            <ChevronDown size={15} color={idx === (formData.hero.slides || []).length - 1 ? '#cbd5e1' : '#475569'} />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => removeItem('slides', 'hero', idx)}
-                            style={{ padding: '4px', border: 'none', background: 'none', color: '#ef4444' }}
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Slide Badge / Subtitle</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={slide.badge || ''}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...(formData.hero.slides || [])];
-                              list[idx] = { ...list[idx], badge: e.target.value };
-                              updateSection('hero', { slides: list });
-                            }}
-                          />
-                        </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Slide Main Title</label>
-                          <input
-                            type="text"
-                            className="admin-input-control"
-                            value={slide.title || ''}
-                            onChange={(e) => {
-                              setDirty(true);
-                              const list = [...(formData.hero.slides || [])];
-                              list[idx] = { ...list[idx], title: e.target.value };
-                              updateSection('hero', { slides: list });
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="admin-form-group">
-                        <label className="admin-label">Slide Description</label>
-                        <textarea
-                          rows={2}
-                          className="admin-textarea-control"
-                          value={slide.desc || ''}
-                          onChange={(e) => {
-                            setDirty(true);
-                            const list = [...(formData.hero.slides || [])];
-                            list[idx] = { ...list[idx], desc: e.target.value };
-                            updateSection('hero', { slides: list });
-                          }}
-                        />
-                      </div>
-
-                      <CmsImageUploader
-                        label="Slide Background Image"
-                        value={slide.image || slide.src || slide.url || ''}
-                        onChange={(url) => {
-                          setDirty(true);
-                          const list = [...(formData.hero.slides || [])];
-                          list[idx] = { ...list[idx], image: url, src: url, url: url };
-                          updateSection('hero', { slides: list });
-                        }}
-                        maxSizeMB={5}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+            {/* Form Column - Hidden for Hero section since it uses the full interactive visual canvas */}
+            {activeSection !== 'hero' && (
+              <div
+                style={{
+                  display: viewMode === 'preview' ? 'none' : 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                  minWidth: 0,
+                  width: '100%'
+                }}
+              >
 
           {/* ========================================================================= */}
           {/* SECTION 2: BRIEF INTRODUCTION SECTION                                     */}
@@ -2730,14 +2465,15 @@ export default function HomepageCmsPage() {
             </button>
           </div>
         </div>
+      )}
 
         {/* Live Preview Container (Rendered for all 11 sections in real-time!) */}
         <div
-          className={viewMode === 'split' ? 'cms-sticky-preview' : 'cms-live-preview-card'}
+          className={viewMode === 'split' && activeSection !== 'hero' ? 'cms-sticky-preview' : 'cms-live-preview-card'}
           style={{
             width: '100%',
             minWidth: 0,
-            marginTop: viewMode === 'edit' ? '12px' : 0
+            marginTop: viewMode === 'edit' && activeSection !== 'hero' ? '12px' : 0
           }}
         >
           <div className="cms-preview-header">
@@ -2745,9 +2481,37 @@ export default function HomepageCmsPage() {
               <span className="cms-live-pulse-dot" />
               <span>Live Preview: {currentSecMeta?.label}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <span className="cms-preview-badge">Live Draft Sync</span>
-              {viewMode === 'preview' && (
+
+              {/* Dedicated Save & Sync Status for Hero Section Visual Canvas */}
+              {activeSection === 'hero' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '12px', color: dirty ? '#d97706' : '#16a34a', fontWeight: '600' }}>
+                    {dirty ? '⚠️ Unsaved changes' : '✓ All changes in sync.'}
+                  </span>
+                  <button
+                    type="button"
+                    className="admin-btn-primary"
+                    onClick={handleSave}
+                    disabled={saving}
+                    style={{
+                      backgroundColor: '#0284c7',
+                      borderColor: '#0284c7',
+                      padding: '6px 16px',
+                      fontSize: '12px',
+                      borderRadius: '6px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Save size={13} /> {saving ? 'Saving...' : 'Save All Changes'}
+                  </button>
+                </div>
+              )}
+
+              {viewMode === 'preview' && activeSection !== 'hero' && (
                 <button
                   type="button"
                   className="admin-btn-secondary"
