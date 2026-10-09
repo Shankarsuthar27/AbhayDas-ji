@@ -241,7 +241,10 @@ export default function EventsPage({
                 कार्यक्रम विवरण (Event Overview)
               </h3>
 
-              {activeEvent.fullDescription.map((para, idx) => (
+              {(Array.isArray(activeEvent.fullDescription)
+                ? activeEvent.fullDescription
+                : [activeEvent.fullDescription || activeEvent.description || activeEvent.shortDescription || '']
+              ).map((para, idx) => (
                 <p key={idx}>{para}</p>
               ))}
             </div>

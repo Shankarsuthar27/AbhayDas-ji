@@ -40,6 +40,117 @@ import GalleryAdminPage from './admin/GalleryAdminPage';
 import HomepageCmsPage from './admin/HomepageCmsPage';
 import { CmsProvider } from './context/CmsContext';
 
+// Helper to resolve and normalize routes on initial load, browser back/forward, and manual refresh
+function resolveRoute(rawPath = '/', rawHash = '') {
+  try {
+    const p = (rawPath || '/').toLowerCase().trim();
+    // Normalize trailing slashes: e.g. "/about/" -> "/about", but keep "/" as "/"
+    const path = p.length > 1 && p.endsWith('/') ? p.slice(0, -1) : p;
+    const hash = (rawHash || '').toLowerCase().trim();
+
+    if (
+      path === '/admin' ||
+      path.startsWith('/admin/') ||
+      path.startsWith('/admin') ||
+      path === '/wp-admin' ||
+      path.startsWith('/wp-admin/') ||
+      path.startsWith('/wp-admin') ||
+      hash === '#/admin' ||
+      hash.startsWith('#/admin') ||
+      hash === '#admin' ||
+      hash.startsWith('#admin') ||
+      hash === '#/wp-admin' ||
+      hash.startsWith('#/wp-admin')
+    ) {
+      return path || '/admin';
+    }
+
+    if (
+      path === '/kathas/nani-bai-ka-mayra' ||
+      path === '/nani-bai-ka-mayra' ||
+      path.startsWith('/nani-bai-ka-mayra') ||
+      hash.includes('nani-bai-ka-mayra')
+    ) {
+      return '/kathas/nani-bai-ka-mayra';
+    }
+
+    if (
+      path === '/kathas/shrimad-bhagwat-katha' ||
+      path === '/shrimad-bhagwat-katha' ||
+      path === '/shrimad-bhagwad-katha' ||
+      path.startsWith('/shrimad-bhagwat-katha') ||
+      path.startsWith('/shrimad-bhagwad-katha') ||
+      hash.includes('shrimad-bhagwat-katha') ||
+      hash.includes('shrimad-bhagwad-katha')
+    ) {
+      return '/kathas/shrimad-bhagwat-katha';
+    }
+
+    if (
+      path === '/kathas/baba-ramdev-ji-katha' ||
+      path === '/baba-ramdev-ji-katha' ||
+      path === '/baba-ramdev-katha' ||
+      path.startsWith('/baba-ramdev-ji-katha') ||
+      path.startsWith('/baba-ramdev-katha') ||
+      hash.includes('baba-ramdev-ji-katha') ||
+      hash.includes('baba-ramdev-katha')
+    ) {
+      return '/kathas/baba-ramdev-ji-katha';
+    }
+
+    if (path === '/about' || path.startsWith('/about/') || hash === '#/about' || hash === '#about') {
+      return '/about';
+    }
+
+    if (
+      path.startsWith('/events') ||
+      path.startsWith('/event') ||
+      hash.startsWith('#/events') ||
+      hash.startsWith('#events')
+    ) {
+      return path || '/events';
+    }
+
+    if (
+      path === '/kathas' ||
+      path.startsWith('/kathas/') ||
+      path === '/spiritual-discourses-kathas' ||
+      path.startsWith('/spiritual-discourses-kathas/') ||
+      hash === '#/kathas' ||
+      hash === '#kathas'
+    ) {
+      return '/kathas';
+    }
+
+    if (
+      path === '/gallery' ||
+      path.startsWith('/gallery/') ||
+      hash === '#/gallery' ||
+      hash === '#gallery'
+    ) {
+      return '/gallery';
+    }
+
+    if (
+      path === '/news' ||
+      path.startsWith('/news/') ||
+      path === '/blog' ||
+      path.startsWith('/blog/') ||
+      hash === '#/news' ||
+      hash === '#news' ||
+      hash === '#/blog' ||
+      hash === '#blog'
+    ) {
+      return path || '/news';
+    }
+
+    return '/';
+  } catch (e) {
+    console.warn('Error resolving route, defaulting to /:', e);
+    return '/';
+  }
+}
+
 export default function App() {
   const [donateModalOpen, setDonateModalOpen] = useState(false);
   const [defaultCampaign, setDefaultCampaign] = useState('water-food');
@@ -48,176 +159,18 @@ export default function App() {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [lightboxState, setLightboxState] = useState({ images: null, index: null });
 
-  // Route state supporting /, /about, /events, /events/:id, /kathas, /kathas/nani-bai-ka-mayra, /kathas/shrimad-bhagwat-katha, /kathas/baba-ramdev-ji-katha, /gallery, /news seamlessly
+  // Route state supporting /, /about, /events, /events/:id, /kathas, /gallery, /news, /admin seamlessly
   const [currentRoute, setCurrentRoute] = useState(() => {
     if (typeof window !== 'undefined') {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      if (
-        path === '/kathas/nani-bai-ka-mayra' ||
-        path === '/nani-bai-ka-mayra' ||
-        path.startsWith('/nani-bai-ka-mayra') ||
-        hash.includes('nani-bai-ka-mayra')
-      ) {
-        return '/kathas/nani-bai-ka-mayra';
-      }
-      if (
-        path === '/kathas/shrimad-bhagwat-katha' ||
-        path === '/shrimad-bhagwat-katha' ||
-        path === '/shrimad-bhagwad-katha' ||
-        path.startsWith('/shrimad-bhagwat-katha') ||
-        path.startsWith('/shrimad-bhagwad-katha') ||
-        hash.includes('shrimad-bhagwat-katha') ||
-        hash.includes('shrimad-bhagwad-katha')
-      ) {
-        return '/kathas/shrimad-bhagwat-katha';
-      }
-      if (
-        path === '/kathas/baba-ramdev-ji-katha' ||
-        path === '/baba-ramdev-ji-katha' ||
-        path === '/baba-ramdev-katha' ||
-        path.startsWith('/baba-ramdev-ji-katha') ||
-        path.startsWith('/baba-ramdev-katha') ||
-        hash.includes('baba-ramdev-ji-katha') ||
-        hash.includes('baba-ramdev-katha')
-      ) {
-        return '/kathas/baba-ramdev-ji-katha';
-      }
-      if (path === '/about' || path.startsWith('/about/') || hash === '#/about' || hash === '#about') {
-        return '/about';
-      }
-      if (path.startsWith('/events') || path.startsWith('/event') || hash.startsWith('#/events') || hash.startsWith('#events')) {
-        return path || '/events';
-      }
-      if (
-        path === '/kathas' ||
-        path.startsWith('/kathas/') ||
-        path === '/spiritual-discourses-kathas' ||
-        path.startsWith('/spiritual-discourses-kathas/') ||
-        hash === '#/kathas' ||
-        hash === '#kathas'
-      ) {
-        return '/kathas';
-      }
-      if (
-        path === '/gallery' ||
-        path.startsWith('/gallery/') ||
-        hash === '#/gallery' ||
-        hash === '#gallery'
-      ) {
-        return '/gallery';
-      }
-      if (
-        path === '/admin' ||
-        path.startsWith('/admin/') ||
-        path.startsWith('/admin') ||
-        path === '/wp-admin' ||
-        path.startsWith('/wp-admin/') ||
-        path.startsWith('/wp-admin') ||
-        hash === '#/admin' ||
-        hash.startsWith('#/admin') ||
-        hash === '#admin' ||
-        hash.startsWith('#admin') ||
-        hash === '#/wp-admin' ||
-        hash.startsWith('#/wp-admin')
-      ) {
-        return path || '/admin';
-      }
-      if (
-        path === '/news' ||
-        path.startsWith('/news/') ||
-        path === '/blog' ||
-        path.startsWith('/blog/') ||
-        hash === '#/news' ||
-        hash === '#news' ||
-        hash === '#/blog' ||
-        hash === '#blog'
-      ) {
-        return path || '/news';
-      }
+      return resolveRoute(window.location.pathname, window.location.hash);
     }
     return '/';
   });
 
   useEffect(() => {
     const handleLocationChange = () => {
-      const path = window.location.pathname.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
-      if (
-        path === '/admin' ||
-        path.startsWith('/admin/') ||
-        path.startsWith('/admin') ||
-        path === '/wp-admin' ||
-        path.startsWith('/wp-admin/') ||
-        path.startsWith('/wp-admin') ||
-        hash === '#/admin' ||
-        hash.startsWith('#/admin') ||
-        hash === '#admin' ||
-        hash.startsWith('#admin') ||
-        hash === '#/wp-admin' ||
-        hash.startsWith('#/wp-admin')
-      ) {
-        setCurrentRoute(path || '/admin');
-      } else if (path === '/about' || path.startsWith('/about/') || hash === '#/about' || hash === '#about') {
-        setCurrentRoute('/about');
-      } else if (
-        path === '/kathas/nani-bai-ka-mayra' ||
-        path === '/nani-bai-ka-mayra' ||
-        path.startsWith('/nani-bai-ka-mayra') ||
-        hash.includes('nani-bai-ka-mayra')
-      ) {
-        setCurrentRoute('/kathas/nani-bai-ka-mayra');
-      } else if (
-        path === '/kathas/shrimad-bhagwat-katha' ||
-        path === '/shrimad-bhagwat-katha' ||
-        path === '/shrimad-bhagwad-katha' ||
-        path.startsWith('/shrimad-bhagwat-katha') ||
-        path.startsWith('/shrimad-bhagwad-katha') ||
-        hash.includes('shrimad-bhagwat-katha') ||
-        hash.includes('shrimad-bhagwad-katha')
-      ) {
-        setCurrentRoute('/kathas/shrimad-bhagwat-katha');
-      } else if (
-        path === '/kathas/baba-ramdev-ji-katha' ||
-        path === '/baba-ramdev-ji-katha' ||
-        path === '/baba-ramdev-katha' ||
-        path.startsWith('/baba-ramdev-ji-katha') ||
-        path.startsWith('/baba-ramdev-katha') ||
-        hash.includes('baba-ramdev-ji-katha') ||
-        hash.includes('baba-ramdev-katha')
-      ) {
-        setCurrentRoute('/kathas/baba-ramdev-ji-katha');
-      } else if (path.startsWith('/events') || path.startsWith('/event') || hash.startsWith('#/events') || hash.startsWith('#events')) {
-        setCurrentRoute(path || '/events');
-      } else if (
-        path === '/kathas' ||
-        path.startsWith('/kathas/') ||
-        path === '/spiritual-discourses-kathas' ||
-        path.startsWith('/spiritual-discourses-kathas/') ||
-        hash === '#/kathas' ||
-        hash === '#kathas'
-      ) {
-        setCurrentRoute('/kathas');
-      } else if (
-        path === '/gallery' ||
-        path.startsWith('/gallery/') ||
-        hash === '#/gallery' ||
-        hash === '#gallery'
-      ) {
-        setCurrentRoute('/gallery');
-      } else if (
-        path === '/news' ||
-        path.startsWith('/news/') ||
-        path === '/blog' ||
-        path.startsWith('/blog/') ||
-        hash === '#/news' ||
-        hash === '#news' ||
-        hash === '#/blog' ||
-        hash === '#blog'
-      ) {
-        setCurrentRoute(path || '/news');
-      } else {
-        setCurrentRoute('/');
+      if (typeof window !== 'undefined') {
+        setCurrentRoute(resolveRoute(window.location.pathname, window.location.hash));
       }
     };
 
@@ -230,9 +183,17 @@ export default function App() {
   }, []);
 
   const navigateTo = (path) => {
-    window.history.pushState({}, '', path);
-    setCurrentRoute(path.toLowerCase());
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    try {
+      window.history.pushState({}, '', path);
+    } catch (e) {
+      // Ignored
+    }
+    setCurrentRoute(resolveRoute(path));
+    try {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } catch (e) {
+      // Ignored
+    }
   };
 
   const handleOpenDonate = (campaignId = 'water-food') => {

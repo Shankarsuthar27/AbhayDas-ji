@@ -26,21 +26,44 @@ export function AdminAuthProvider({ children }) {
     }
 
     // 2. Sync with Firebase Auth state
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const adminData = {
-          uid: user.uid,
-          email: user.email,
-          username: 'admin2233',
-          role: 'administrator'
-        };
-        setCurrentUser(adminData);
-        localStorage.setItem('shreeabhaydas_admin_user', JSON.stringify(adminData));
+    let unsubscribe = () => {};
+    try {
+      if (auth) {
+        unsubscribe = onAuthStateChanged(
+          auth,
+          (user) => {
+            if (user) {
+              const adminData = {
+                uid: user.uid,
+                email: user.email,
+                username: 'admin2233',
+                role: 'administrator'
+              };
+              setCurrentUser(adminData);
+              localStorage.setItem('shreeabhaydas_admin_user', JSON.stringify(adminData));
+            }
+            setLoading(false);
+          },
+          (authErr) => {
+            console.warn('Firebase Auth state error:', authErr?.message);
+            setLoading(false);
+          }
+        );
+      } else {
+        setLoading(false);
       }
+    } catch (e) {
+      console.warn('Firebase Auth listener note:', e?.message);
       setLoading(false);
-    });
+    }
 
-    return () => unsubscribe();
+    return () => {
+      try {
+        if (typeof unsubscribe === 'function') unsubscribe();
+      } catch (e) {
+        // Ignored
+      }
+    };
   }, []);
 
   /**

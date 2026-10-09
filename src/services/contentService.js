@@ -153,6 +153,11 @@ export function formatFirestoreEvent(id, data) {
 export function subscribeNews(onUpdate) {
   let unsubscribe = null;
 
+  if (!db) {
+    onUpdate(staticNews);
+    return () => {};
+  }
+
   try {
     const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
     unsubscribe = onSnapshot(
@@ -163,9 +168,15 @@ export function subscribeNews(onUpdate) {
         );
 
         // Merge: Firestore dynamic items first, then static articles that don't collide
-        const firestoreSlugs = new Set(firestoreItems.map((item) => item.slug.toLowerCase()));
+        const firestoreSlugs = new Set(
+          firestoreItems
+            .map((item) => (item?.slug ? item.slug.toLowerCase() : ''))
+            .filter(Boolean)
+        );
         const remainingStatic = staticNews.filter(
-          (s) => !firestoreSlugs.has(s.slug.toLowerCase()) && !firestoreItems.some((f) => f.id === s.id)
+          (s) =>
+            !firestoreSlugs.has((s?.slug ? s.slug.toLowerCase() : '')) &&
+            !firestoreItems.some((f) => f.id === s.id)
         );
 
         const merged = [...firestoreItems, ...remainingStatic];
@@ -173,15 +184,18 @@ export function subscribeNews(onUpdate) {
       },
       (err) => {
         console.warn('Firestore onSnapshot news note:', err.message);
-        // Fallback to one-time getDocs or static
-        getDocs(collection(db, 'news'))
-          .then((snap) => {
-            const firestoreItems = snap.docs.map((d) => formatFirestoreNews(d.id, d.data()));
-            onUpdate([...firestoreItems, ...staticNews]);
-          })
-          .catch(() => {
-            onUpdate(staticNews);
-          });
+        if (db) {
+          getDocs(collection(db, 'news'))
+            .then((snap) => {
+              const firestoreItems = snap.docs.map((d) => formatFirestoreNews(d.id, d.data()));
+              onUpdate([...firestoreItems, ...staticNews]);
+            })
+            .catch(() => {
+              onUpdate(staticNews);
+            });
+        } else {
+          onUpdate(staticNews);
+        }
       }
     );
   } catch (err) {
@@ -200,6 +214,11 @@ export function subscribeNews(onUpdate) {
 export function subscribeEvents(onUpdate) {
   let unsubscribe = null;
 
+  if (!db) {
+    onUpdate(staticEvents);
+    return () => {};
+  }
+
   try {
     const q = query(collection(db, 'events'), orderBy('createdAt', 'desc'));
     unsubscribe = onSnapshot(
@@ -210,9 +229,15 @@ export function subscribeEvents(onUpdate) {
         );
 
         // Merge: Firestore dynamic items first, then static events
-        const firestoreSlugs = new Set(firestoreItems.map((item) => item.slug.toLowerCase()));
+        const firestoreSlugs = new Set(
+          firestoreItems
+            .map((item) => (item?.slug ? item.slug.toLowerCase() : ''))
+            .filter(Boolean)
+        );
         const remainingStatic = staticEvents.filter(
-          (s) => !firestoreSlugs.has(s.slug.toLowerCase()) && !firestoreItems.some((f) => f.id === s.id)
+          (s) =>
+            !firestoreSlugs.has((s?.slug ? s.slug.toLowerCase() : '')) &&
+            !firestoreItems.some((f) => f.id === s.id)
         );
 
         const merged = [...firestoreItems, ...remainingStatic];
@@ -220,14 +245,18 @@ export function subscribeEvents(onUpdate) {
       },
       (err) => {
         console.warn('Firestore onSnapshot events note:', err.message);
-        getDocs(collection(db, 'events'))
-          .then((snap) => {
-            const firestoreItems = snap.docs.map((d) => formatFirestoreEvent(d.id, d.data()));
-            onUpdate([...firestoreItems, ...staticEvents]);
-          })
-          .catch(() => {
-            onUpdate(staticEvents);
-          });
+        if (db) {
+          getDocs(collection(db, 'events'))
+            .then((snap) => {
+              const firestoreItems = snap.docs.map((d) => formatFirestoreEvent(d.id, d.data()));
+              onUpdate([...firestoreItems, ...staticEvents]);
+            })
+            .catch(() => {
+              onUpdate(staticEvents);
+            });
+        } else {
+          onUpdate(staticEvents);
+        }
       }
     );
   } catch (err) {

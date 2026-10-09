@@ -401,23 +401,25 @@ export function subscribeHomepageCms(callback) {
   // Firestore Live Listener
   let unsubFirestore = () => {};
   try {
-    const docRef = doc(db, 'settings', 'homepage');
-    unsubFirestore = onSnapshot(
-      docRef,
-      (docSnap) => {
-        if (docSnap.exists()) {
-          const remoteData = docSnap.data();
-          const merged = deepMerge(DEFAULT_HOMEPAGE_CMS, remoteData);
-          if (typeof window !== 'undefined') {
-            localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(merged));
+    if (db) {
+      const docRef = doc(db, 'settings', 'homepage');
+      unsubFirestore = onSnapshot(
+        docRef,
+        (docSnap) => {
+          if (docSnap.exists()) {
+            const remoteData = docSnap.data();
+            const merged = deepMerge(DEFAULT_HOMEPAGE_CMS, remoteData);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(merged));
+            }
+            callback(merged);
           }
-          callback(merged);
+        },
+        (err) => {
+          console.warn('Firestore live listener note:', err.message);
         }
-      },
-      (err) => {
-        console.warn('Firestore live listener note:', err.message);
-      }
-    );
+      );
+    }
   } catch (err) {
     console.warn('Firestore subscription unavailable:', err.message);
   }

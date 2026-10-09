@@ -36,7 +36,7 @@ export default function NewsPage({ onNavigate, articleSlug }) {
 
     if (slugToFind) {
       const found = staticNews.find(
-        (a) => a.slug.toLowerCase() === slugToFind.toLowerCase() || String(a.id) === String(slugToFind)
+        (a) => (a?.slug && a.slug.toLowerCase() === slugToFind.toLowerCase()) || String(a?.id) === String(slugToFind)
       );
       if (found) return found;
     }
@@ -72,7 +72,7 @@ export default function NewsPage({ onNavigate, articleSlug }) {
 
     if (slugToFind) {
       const found = articles.find(
-        (a) => a.slug.toLowerCase() === slugToFind.toLowerCase() || String(a.id) === String(slugToFind)
+        (a) => (a?.slug && a.slug.toLowerCase() === slugToFind.toLowerCase()) || String(a?.id) === String(slugToFind)
       );
       if (found) {
         setSelectedArticle(found);
@@ -109,7 +109,7 @@ export default function NewsPage({ onNavigate, articleSlug }) {
       if (pathParts.length >= 2 && (pathParts[0] === 'news' || pathParts[0] === 'blog')) {
         const pathSlug = pathParts[1].toLowerCase();
         const found = articles.find(
-          (a) => a.slug.toLowerCase() === pathSlug || String(a.id) === pathSlug
+          (a) => (a?.slug && a.slug.toLowerCase() === pathSlug) || String(a?.id) === pathSlug
         );
         setSelectedArticle(found || null);
       } else {
