@@ -1,23 +1,21 @@
 
 <?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
-    <!-- Home Page -->
+  
     <url>
         <loc>https://shreeabhaydas.com/</loc>
         <lastmod>2026-10-09T11:25:53+00:00</lastmod>
         <priority>1.0000</priority>
     </url>
 
-    <!-- About Page -->
+ 
     <url>
         <loc>https://shreeabhaydas.com/about</loc>
         <priority>0.8000</priority>
     </url>
 
-    <!-- News Page -->
     <url>
         <loc>https://shreeabhaydas.com/news</loc>
         <priority>0.8000</priority>
