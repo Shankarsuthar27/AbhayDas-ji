@@ -31,8 +31,17 @@
   RewriteRule ^\.well-known/ - [L]
 
   # ----------------------------------------------------------------------------
-  # 4. Route Handling for Admin Portals
+  # 4. Physical Directory Collision & Route Handling
+  # Fix for Google Search Console 403 Forbidden on /gallery:
+  # Intercept /gallery requests before LiteSpeed attempts directory listing
   # ----------------------------------------------------------------------------
+  # Redirect any direct image file requests in /gallery/*.ext to /images/gallery/*.ext
+  RewriteRule ^gallery/(.+\.(?:jpe?g|png|webp|svg|gif|avif))$ /images/gallery/$1 [NC,R=301,L]
+
+  # Explicitly rewrite /gallery and /gallery/ to /index.html
+  RewriteRule ^gallery/?$ /index.html [L,QSA]
+
+  # Admin Portals
   RewriteRule ^wp-admin/?$ /index.html [L,QSA]
   RewriteRule ^wp-admin/.*$ /index.html [L,QSA]
   RewriteRule ^admin/?$ /index.html [L,QSA]
