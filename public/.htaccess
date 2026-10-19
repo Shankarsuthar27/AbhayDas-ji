@@ -1,26 +1,109 @@
+# ==============================================================================
+# LiteSpeed / Apache Configuration for ShreeAbhaydas.com
+# Platform: Hostinger LiteSpeed Web Server
+# Architecture: Vite React Single Page Application
+# ==============================================================================
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # Explicitly rewrite /wp-admin and /admin requests to index.html
+  # ----------------------------------------------------------------------------
+  # 1. Canonical Redirect: Force HTTPS
+  # ----------------------------------------------------------------------------
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://shreeabhaydas.com/$1 [R=301,L]
+
+  # ----------------------------------------------------------------------------
+  # 2. Canonical Redirect: Force Non-WWW (shreeabhaydas.com)
+  # ----------------------------------------------------------------------------
+  RewriteCond %{HTTP_HOST} ^www\.shreeabhaydas\.com$ [NC]
+  RewriteRule ^(.*)$ https://shreeabhaydas.com/$1 [R=301,L]
+
+  # ----------------------------------------------------------------------------
+  # 3. Direct Crawl Access for Googlebot & SEO Assets
+  # Ensure robots.txt, sitemap.xml, and verification files are never rewritten
+  # ----------------------------------------------------------------------------
+  RewriteRule ^robots\.txt$ - [L]
+  RewriteRule ^sitemap\.xml$ - [L]
+  RewriteRule ^google.*\.html$ - [L]
+  RewriteRule ^\.well-known/ - [L]
+
+  # ----------------------------------------------------------------------------
+  # 4. Route Handling for Admin Portals
+  # ----------------------------------------------------------------------------
   RewriteRule ^wp-admin/?$ /index.html [L,QSA]
   RewriteRule ^wp-admin/.*$ /index.html [L,QSA]
   RewriteRule ^admin/?$ /index.html [L,QSA]
   RewriteRule ^admin/.*$ /index.html [L,QSA]
 
-  # Serve existing files directly
+  # ----------------------------------------------------------------------------
+  # 5. SPA Fallback: Serve Existing Files Directly, Rewrite Others to index.html
+  # ----------------------------------------------------------------------------
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . /index.html [L]
 </IfModule>
 
-# Disable directory listing
+# ------------------------------------------------------------------------------
+# 6. Disable Directory Browsing
+# ------------------------------------------------------------------------------
 Options -Indexes
 
-# Ensure modern MIME types
+# ------------------------------------------------------------------------------
+# 7. MIME Types Configuration
+# ------------------------------------------------------------------------------
 <IfModule mod_mime.c>
   AddType application/javascript .js .mjs
   AddType text/css .css
   AddType image/svg+xml .svg
+  AddType application/xml .xml
+  AddType text/xml .xml
+  AddType text/plain .txt
+  AddType image/webp .webp
+  AddType image/png .png
+  AddType image/jpeg .jpg .jpeg
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# 8. HTTP Headers: SEO Crawl Permission & Security
+# ------------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  # Ensure indexable pages send explicit indexing headers and bypass proxy cache
+  <FilesMatch "\.(html|htm)$">
+    Header set X-Robots-Tag "index, follow, max-image-preview:large"
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # Allow crawler access to robots.txt and sitemap.xml
+  <FilesMatch "(robots\.txt|sitemap\.xml)$">
+    Header set X-Robots-Tag "noindex, follow"
+    Header set Cache-Control "max-age=3600, public"
+  </FilesMatch>
+
+  # Security headers
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# 9. Browser Caching for Production Performance
+# ------------------------------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 month"
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType text/plain "access plus 1 hour"
+  ExpiresByType application/xml "access plus 1 hour"
 </IfModule>

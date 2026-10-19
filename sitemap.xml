@@ -1,10 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-       <loc>https://shreeabhaydas.com/</loc>
-       <lastmod>2026-10-09T11:25:53+00:00</lastmod>
-       <priority>1.0000</priority>
+    <loc>https://shreeabhaydas.com/</loc>
+    <lastmod>2026-10-19T06:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://shreeabhaydas.com/about</loc>
+    <lastmod>2026-10-19T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://shreeabhaydas.com/kathas</loc>
+    <lastmod>2026-10-19T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://shreeabhaydas.com/kathas/nani-bai-ka-mayra</loc>
+    <lastmod>2026-10-19T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://shreeabhaydas.com/kathas/shrimad-bhagwat-katha</loc>
+    <lastmod>2026-10-19T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://shreeabhaydas.com/kathas/baba-ramdev-ji-katha</loc>
+    <lastmod>2026-10-19T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://shreeabhaydas.com/events</loc>
+    <lastmod>2026-10-19T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://shreeabhaydas.com/gallery</loc>
+    <lastmod>2026-10-19T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://shreeabhaydas.com/news</loc>
+    <lastmod>2026-10-19T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
   </url>
 </urlset>
