@@ -39,7 +39,7 @@
   RewriteRule ^gallery/(.+\.(?:jpe?g|png|webp|svg|gif|avif))$ /images/gallery/$1 [NC,R=301,L]
 
   # Explicitly rewrite /gallery and /gallery/ to /index.html
-  RewriteRule ^gallery/?$ /index.html [L,QSA]
+  RewriteRule ^gallery/?$ /index.html [L,QSA]https://127.0.0.1:58000/static/artifacts/9565f60a-325b-4054-a5c9-e8cf6a151bc3/.user_uploaded/media_1792561076551.png?csrf=842e81b7-3178-4d88-ae12-e27025b24420
 
   # Admin Portals
   RewriteRule ^wp-admin/?$ /index.html [L,QSA]

@@ -161,6 +161,8 @@ export default function NewsPage({ onNavigate, articleSlug }) {
       window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareTitle)}`, '_blank');
     } else if (platform === 'linkedin') {
       window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`, '_blank');
+    } else if (platform === 'tumblr') {
+      window.open(`https://www.tumblr.com/widgets/share/tool?canonicalUrl=${encodeURIComponent(currentUrl)}&title=${encodeURIComponent(shareTitle)}`, '_blank');
     } else if (platform === 'pinterest') {
       window.open(`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(currentUrl)}&description=${encodeURIComponent(shareTitle)}`, '_blank');
     } else {
@@ -388,62 +390,46 @@ export default function NewsPage({ onNavigate, articleSlug }) {
                 );
               })()}
 
-              {/* 6. Social Share Row (Facebook, Twitter, LinkedIn, Pinterest) */}
-              <div className="news-single-share-bar">
+              {/* 6. Social Share Row matching user reference image (Facebook, Twitter, LinkedIn, Tumblr) */}
+              <div className="news-single-share-bar" aria-label="Share on Social Media">
                 <button
                   type="button"
-                  className="news-share-pill"
-                  onClick={() => handleShare('link')}
-                  title="Share link"
-                  aria-label="Share"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <circle cx="18" cy="5" r="3"></circle>
-                    <circle cx="6" cy="12" r="3"></circle>
-                    <circle cx="18" cy="19" r="3"></circle>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                  </svg>
-                </button>
-
-                <button
-                  type="button"
-                  className="news-share-pill"
+                  className="news-share-pill news-share-fb"
                   onClick={() => handleShare('facebook')}
                   title="Share on Facebook"
                   aria-label="Facebook"
                 >
-                  <span className="share-letter">f</span>
+                  <span className="sr-only">Facebook</span>
                 </button>
 
                 <button
                   type="button"
-                  className="news-share-pill"
+                  className="news-share-pill news-share-twitter"
                   onClick={() => handleShare('twitter')}
                   title="Share on Twitter"
                   aria-label="Twitter"
                 >
-                  <span className="share-letter">t</span>
+                  <span className="sr-only">Twitter</span>
                 </button>
 
                 <button
                   type="button"
-                  className="news-share-pill"
+                  className="news-share-pill news-share-linkedin"
                   onClick={() => handleShare('linkedin')}
                   title="Share on LinkedIn"
                   aria-label="LinkedIn"
                 >
-                  <span className="share-letter">in</span>
+                  <span className="sr-only">LinkedIn</span>
                 </button>
 
                 <button
                   type="button"
-                  className="news-share-pill"
-                  onClick={() => handleShare('pinterest')}
-                  title="Share on Pinterest"
-                  aria-label="Pinterest"
+                  className="news-share-pill news-share-tumblr"
+                  onClick={() => handleShare('tumblr')}
+                  title="Share on Tumblr"
+                  aria-label="Tumblr"
                 >
-                  <span className="share-letter">p</span>
+                  <span className="sr-only">Tumblr</span>
                 </button>
               </div>
 
