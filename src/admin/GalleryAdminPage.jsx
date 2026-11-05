@@ -12,6 +12,7 @@ import { ref, deleteObject } from 'firebase/storage';
 import { db, storage } from '../firebase';
 import { processGalleryImage, compressImage } from './utils/helpers';
 import { NEWS_MEDIA_PRESETS } from './utils/mediaPresets';
+import { galleryData } from '../data/galleryData';
 import { 
   Image as ImageIcon, 
   RotateCw, 
@@ -81,41 +82,94 @@ export default function GalleryAdminPage() {
   // Lightbox Modal for Admin Preview
   const [previewModalItem, setPreviewModalItem] = useState(null);
 
-  // Fetch gallery images from Firestore
+  // Deleted static photo IDs stored locally
+  const [deletedStaticIds, setDeletedStaticIds] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('shreeabhaydas_deleted_gallery_ids') || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+
+  // Fetch gallery images from Firestore & combine with complete Ashram Archive (171 photos)
   const fetchGallery = async () => {
     setLoading(true);
     try {
-      let gQuery;
+      let dynamicItems = [];
       try {
-        gQuery = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
-      } catch (e) {
-        gQuery = collection(db, 'gallery');
+        let gQuery;
+        try {
+          gQuery = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
+        } catch (e) {
+          gQuery = collection(db, 'gallery');
+        }
+
+        const snapshot = await getDocs(gQuery);
+        dynamicItems = snapshot.docs.map((d) => ({
+          id: d.id,
+          ...d.data()
+        }));
+
+        // Sort in memory by createdAt descending if Firestore query was unindexed
+        dynamicItems.sort((a, b) => {
+          const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dbTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dbTime - da;
+        });
+      } catch (err) {
+        if (err?.code !== 'permission-denied' && !err?.message?.includes('permission')) {
+          console.warn('Firestore gallery fetch note (using local cache):', err?.message);
+        }
+        try {
+          dynamicItems = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
+        } catch (fallbackErr) {
+          dynamicItems = [];
+        }
       }
 
-      const snapshot = await getDocs(gQuery);
-      const items = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data()
-      }));
+      // Read deleted static IDs from localStorage
+      let deletedIds = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem('shreeabhaydas_deleted_gallery_ids') || '[]');
+        setDeletedStaticIds(deletedIds);
+      } catch (e) {}
+      const delSet = new Set(deletedIds.map(String));
 
-      // Sort in memory by createdAt descending if Firestore query was unindexed
-      items.sort((a, b) => {
-        const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dbTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dbTime - da;
-      });
+      // Avoid duplicates if any dynamic upload has the same URL as a static photo
+      const dynamicUrls = new Set(dynamicItems.map((d) => d.url));
 
-      setGalleryItems(items);
+      // Map static curated photos from galleryData (171 photos)
+      const staticItems = (galleryData || [])
+        .filter((item) => {
+          const sId = String(item.id);
+          return (
+            !delSet.has(sId) &&
+            !delSet.has(`static_${sId}`) &&
+            !dynamicUrls.has(item.full) &&
+            !dynamicUrls.has(item.thumb)
+          );
+        })
+        .map((item) => ({
+          id: `static_${item.id}`,
+          rawId: item.id,
+          title: item.title || item.name || `Pujya Maharaj Ji #${item.id}`,
+          caption: item.caption || item.alt || '',
+          category: item.category || 'Darshan',
+          url: item.full || item.thumb,
+          thumb: item.thumb,
+          storagePath: '',
+          fileName: item.name || `gallery_${item.id}.jpg`,
+          fileSize: 0,
+          author: 'Ashram Archive',
+          createdAt: null,
+          isStatic: true
+        }));
+
+      // Combined: dynamic admin uploads first, followed by curated ashram archive
+      const combined = [...dynamicItems, ...staticItems];
+      setGalleryItems(combined);
     } catch (err) {
-      if (err?.code !== 'permission-denied' && !err?.message?.includes('permission')) {
-        console.warn('Firestore gallery fetch note (using local cache):', err?.message);
-      }
-      try {
-        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
-        setGalleryItems(cached);
-      } catch (fallbackErr) {
-        setGalleryItems([]);
-      }
+      console.error('Failed to load gallery:', err);
     } finally {
       setLoading(false);
     }
@@ -378,36 +432,86 @@ export default function GalleryAdminPage() {
     }
   };
 
-  // Delete photo from Firestore & Storage
+  // Delete photo from Firestore / Storage / Archive Cache
   const handleDeleteImage = async (id, storagePath, title) => {
-    const confirmDelete = window.confirm(`Are you sure you want to delete this photo?\n"${title || 'Untitled'}"`);
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete this photo?\n"${title || 'Untitled'}"`
+    );
     if (!confirmDelete) return;
 
     setDeletingId(id);
-    try {
-      await deleteDoc(doc(db, 'gallery', id));
-    } catch (delErr) {
-      console.warn('Firestore delete note (removed locally):', delErr?.message);
-    }
 
-    if (storagePath) {
+    const isStatic =
+      String(id).startsWith('static_') ||
+      galleryItems.find((x) => x.id === id)?.isStatic;
+
+    if (isStatic) {
       try {
-        const fileRef = ref(storage, storagePath);
-        await deleteObject(fileRef);
-      } catch (storageErr) {
-        console.warn('Storage cleanup note:', storageErr.message);
+        const rawId = String(id).replace('static_', '');
+        const currentDeleted = JSON.parse(
+          localStorage.getItem('shreeabhaydas_deleted_gallery_ids') || '[]'
+        );
+        if (!currentDeleted.includes(rawId)) currentDeleted.push(rawId);
+        if (!currentDeleted.includes(String(id))) currentDeleted.push(String(id));
+        localStorage.setItem(
+          'shreeabhaydas_deleted_gallery_ids',
+          JSON.stringify(currentDeleted)
+        );
+        setDeletedStaticIds(currentDeleted);
+        window.dispatchEvent(new Event('storage'));
+      } catch (e) {
+        console.warn('Could not record deleted static ID:', e);
       }
+    } else {
+      try {
+        await deleteDoc(doc(db, 'gallery', id));
+      } catch (delErr) {
+        console.warn('Firestore delete note (removed locally):', delErr?.message);
+      }
+
+      if (storagePath) {
+        try {
+          const fileRef = ref(storage, storagePath);
+          await deleteObject(fileRef);
+        } catch (storageErr) {
+          console.warn('Storage cleanup note:', storageErr.message);
+        }
+      }
+
+      try {
+        const cached = JSON.parse(
+          localStorage.getItem('shreeabhaydas_gallery_cache') || '[]'
+        );
+        const updated = cached.filter((item) => item.id !== id);
+        localStorage.setItem(
+          'shreeabhaydas_gallery_cache',
+          JSON.stringify(updated)
+        );
+      } catch (e) {}
     }
 
     setGalleryItems((prev) => prev.filter((item) => item.id !== id));
-    try {
-      const cached = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
-      const updated = cached.filter((item) => item.id !== id);
-      localStorage.setItem('shreeabhaydas_gallery_cache', JSON.stringify(updated));
-    } catch (e) {}
-
     toast.success('Photo removed from Gallery.');
     setDeletingId(null);
+  };
+
+  // Restore any hidden archive photos
+  const handleRestoreArchive = () => {
+    if (
+      window.confirm(
+        'Restore all removed archive gallery photos back into the manager?'
+      )
+    ) {
+      try {
+        localStorage.removeItem('shreeabhaydas_deleted_gallery_ids');
+        setDeletedStaticIds([]);
+        window.dispatchEvent(new Event('storage'));
+        toast.success('All archive photos restored!');
+        fetchGallery();
+      } catch (e) {
+        console.warn('Failed to restore archive:', e);
+      }
+    }
   };
 
   // Copy photo link to clipboard
@@ -424,16 +528,20 @@ export default function GalleryAdminPage() {
 
   // Filter gallery items by search keyword and category
   const filteredGallery = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
     return galleryItems.filter((item) => {
       const matchesSearch =
-        !searchQuery.trim() ||
-        (item.title && item.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.caption && item.caption.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.category && item.category.toLowerCase().includes(searchQuery.toLowerCase()));
+        !q ||
+        (item.title && item.title.toLowerCase().includes(q)) ||
+        (item.caption && item.caption.toLowerCase().includes(q)) ||
+        (item.name && item.name.toLowerCase().includes(q)) ||
+        (item.alt && item.alt.toLowerCase().includes(q)) ||
+        (item.category && item.category.toLowerCase().includes(q));
 
       const matchesCat =
         filterCategory === 'All' ||
-        (item.category && item.category.toLowerCase() === filterCategory.toLowerCase());
+        (item.category &&
+          item.category.toLowerCase() === filterCategory.toLowerCase());
 
       return matchesSearch && matchesCat;
     });
@@ -449,14 +557,27 @@ export default function GalleryAdminPage() {
             Upload and organize darshan photos for the live public gallery.
           </p>
         </div>
-        <button
-          type="button"
-          className="admin-btn-secondary"
-          onClick={fetchGallery}
-          disabled={loading}
-        >
-          <RotateCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {deletedStaticIds.length > 0 && (
+            <button
+              type="button"
+              className="admin-btn-secondary"
+              onClick={handleRestoreArchive}
+              title="Restore all hidden archive photos"
+              style={{ color: '#0284c7', borderColor: '#bae6fd' }}
+            >
+              <RotateCw size={14} /> Restore Archive Photos ({Math.ceil(deletedStaticIds.length / 2)})
+            </button>
+          )}
+          <button
+            type="button"
+            className="admin-btn-secondary"
+            onClick={fetchGallery}
+            disabled={loading}
+          >
+            <RotateCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
+          </button>
+        </div>
       </div>
 
       {/* Upload Manager Card */}
@@ -945,7 +1066,11 @@ export default function GalleryAdminPage() {
                       {item.category || 'Darshan'}
                     </span>
                     <span className="admin-gallery-card-date">
-                      {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '—'}
+                      {item.isStatic
+                        ? 'Ashram Archive'
+                        : item.createdAt
+                        ? new Date(item.createdAt).toLocaleDateString()
+                        : 'Uploaded'}
                     </span>
                   </div>
                 </div>
@@ -986,8 +1111,14 @@ export default function GalleryAdminPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span className="admin-cat-badge">{previewModalItem.category || 'Darshan'}</span>
                 {previewModalItem.dimensions && <span>{previewModalItem.dimensions}</span>}
-                {previewModalItem.createdAt && (
-                  <span>Uploaded {new Date(previewModalItem.createdAt).toLocaleDateString()}</span>
+                {previewModalItem.isStatic ? (
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>Curated Ashram Archive</span>
+                ) : (
+                  previewModalItem.createdAt && (
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                      Uploaded {new Date(previewModalItem.createdAt).toLocaleDateString()}
+                    </span>
+                  )
                 )}
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>

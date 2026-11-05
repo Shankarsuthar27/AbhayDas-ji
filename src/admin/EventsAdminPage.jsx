@@ -25,7 +25,6 @@ import {
   Sparkles,
   Link2,
   ExternalLink,
-  Eye,
   Check,
   Clock
 } from 'lucide-react';
@@ -608,15 +607,6 @@ export default function EventsAdminPage() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewModalImage(eventImage)}
-                    className="admin-btn-secondary"
-                    style={{ padding: '6px 12px', fontSize: '12px' }}
-                    title="View Full Size"
-                  >
-                    <Eye size={13} /> Full View
-                  </button>
                   <button
                     type="button"
                     onClick={handleRemoveImage}

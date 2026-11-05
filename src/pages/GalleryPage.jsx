@@ -64,10 +64,34 @@ export default function GalleryPage({ onNavigate }) {
     return () => { isMounted = false; };
   }, []);
 
+  // Sync with localStorage changes if admin deletes/restores photos
+  const [storageTrigger, setStorageTrigger] = useState(0);
+  useEffect(() => {
+    const onStorage = () => setStorageTrigger((prev) => prev + 1);
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   // Combined list: dynamic admin uploads first, followed by static curated gallery
   const combinedGallery = useMemo(() => {
-    return [...firestoreItems, ...galleryData];
-  }, [firestoreItems]);
+    let deletedIds = [];
+    try {
+      deletedIds = JSON.parse(
+        localStorage.getItem('shreeabhaydas_deleted_gallery_ids') || '[]'
+      );
+    } catch (e) {}
+    const delSet = new Set(deletedIds.map(String));
+
+    const activeStatic = (galleryData || []).filter(
+      (item) =>
+        !delSet.has(String(item.id)) && !delSet.has(`static_${item.id}`)
+    );
+    const activeDynamic = firestoreItems.filter(
+      (item) => !delSet.has(String(item.id))
+    );
+
+    return [...activeDynamic, ...activeStatic];
+  }, [firestoreItems, storageTrigger]);
 
   // Filter items by search keyword
   const filteredGallery = useMemo(() => {
