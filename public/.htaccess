@@ -48,6 +48,17 @@
   RewriteRule ^admin/.*$ /index.html [L,QSA]
 
   # ----------------------------------------------------------------------------
+  # 5. Social Media Sharing & News Link Previews (WhatsApp, Facebook, Twitter)
+  # ----------------------------------------------------------------------------
+  # 1. If pre-rendered article index.html exists, serve directly with full OG image
+  RewriteCond %{DOCUMENT_ROOT}/news/$1/index.html -f
+  RewriteRule ^news/([a-zA-Z0-9_\-]+)/?$ /news/$1/index.html [L]
+
+  # 2. For social media bots sharing dynamic articles, route to share.php
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|WhatsApp|Twitterbot|Pinterest|LinkedInBot|TelegramBot|Slackbot) [NC]
+  RewriteRule ^news/([a-zA-Z0-9_\-]+)/?$ /share.php?type=news&slug=$1 [L,QSA]
+
+  # ----------------------------------------------------------------------------
   # 5. SPA Fallback: Serve Existing Files Directly, Rewrite Others to index.html
   # ----------------------------------------------------------------------------
   RewriteRule ^index\.html$ - [L]

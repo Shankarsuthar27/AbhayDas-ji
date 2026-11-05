@@ -84,13 +84,49 @@ export default function NewsPage({ onNavigate, articleSlug }) {
     }
   }, [articleSlug, articles]);
 
-  // Update document title and scroll to top
+  // Update document title, Open Graph metadata for WhatsApp/social sharing, and scroll to top
   useEffect(() => {
+    const setMeta = (attr, key, content) => {
+      let el = document.querySelector(`meta[${attr}="${key}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
     if (selectedArticle) {
       document.title = `${selectedArticle.title} – Shree Abhay Das Ji Maharaj`;
       window.scrollTo({ top: 0, behavior: 'instant' });
+
+      const canonicalUrl = `https://shreeabhaydas.com/news/${selectedArticle.slug || selectedArticle.id}`;
+      let imgUrl = selectedArticle.image || selectedArticle.featuredImage || '/images/img_35.png';
+      if (!imgUrl.startsWith('http')) {
+        imgUrl = `https://shreeabhaydas.com${imgUrl.startsWith('/') ? '' : '/'}${imgUrl}`;
+      }
+      const cleanExcerpt = selectedArticle.excerpt || selectedArticle.description || selectedArticle.title;
+
+      setMeta('property', 'og:title', selectedArticle.title);
+      setMeta('property', 'og:description', cleanExcerpt);
+      setMeta('property', 'og:image', imgUrl);
+      setMeta('property', 'og:image:secure_url', imgUrl);
+      setMeta('property', 'og:image:width', '1200');
+      setMeta('property', 'og:image:height', '630');
+      setMeta('property', 'og:url', canonicalUrl);
+      setMeta('property', 'og:type', 'article');
+      setMeta('name', 'twitter:title', selectedArticle.title);
+      setMeta('name', 'twitter:description', cleanExcerpt);
+      setMeta('name', 'twitter:image', imgUrl);
+
+      const canonicalTag = document.querySelector("link[rel='canonical']");
+      if (canonicalTag) canonicalTag.setAttribute('href', canonicalUrl);
     } else {
       document.title = "News And Articles – Shree Abhay Das Ji Maharaj";
+      setMeta('property', 'og:title', 'स्वामी श्री अभयदास जी महाराज | Shree Abhaydas Ji Maharaj - Official Website');
+      setMeta('property', 'og:image', 'https://shreeabhaydas.com/images/img_35.png');
+      setMeta('property', 'og:url', 'https://shreeabhaydas.com/news');
+      setMeta('property', 'og:type', 'website');
     }
   }, [selectedArticle]);
 
@@ -165,30 +201,60 @@ export default function NewsPage({ onNavigate, articleSlug }) {
     });
   }, [articles, searchQuery, activeCategory]);
 
-  // Share article link
+  // Share article link with WhatsApp image preview support
   const handleShare = async (platform) => {
+    // Ensure public URL for WhatsApp/social scrapers so preview images always render
     const currentUrl = window.location.href;
+    const publicUrl = currentUrl.replace(
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i,
+      'https://shreeabhaydas.com'
+    );
     const shareTitle = selectedArticle ? selectedArticle.title : 'News - Shree Abhay Das Ji Maharaj';
+    const shareText = `*${shareTitle}*\n\n${publicUrl}`;
 
     if (platform === 'whatsapp') {
-      const shareText = `*${shareTitle}*\n\nRead more at:\n${currentUrl}`;
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+      // 1. On mobile devices with native share API (Android Chrome, iOS Safari):
+      // Allows user to pick WhatsApp and natively transmits rich preview with image
+      if (typeof navigator !== 'undefined' && navigator.share && /android|iphone|ipad|mobile/i.test(navigator.userAgent)) {
+        try {
+          await navigator.share({
+            title: shareTitle,
+            text: `*${shareTitle}*`,
+            url: publicUrl
+          });
+          return;
+        } catch (err) {
+          // If user cancels or share fails, fallback to wa.me / api.whatsapp
+        }
+      }
+
+      // 2. Direct WhatsApp URL (Desktop WhatsApp Web or mobile fallback)
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+      window.open(waUrl, '_blank');
     } else if (platform === 'facebook') {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, '_blank');
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(publicUrl)}`, '_blank');
     } else if (platform === 'twitter') {
-      window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareTitle)}`, '_blank');
+      window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(publicUrl)}&text=${encodeURIComponent(shareTitle)}`, '_blank');
     } else if (platform === 'linkedin') {
-      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`, '_blank');
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`, '_blank');
     } else if (platform === 'tumblr') {
-      window.open(`https://www.tumblr.com/widgets/share/tool?canonicalUrl=${encodeURIComponent(currentUrl)}&title=${encodeURIComponent(shareTitle)}`, '_blank');
+      window.open(`https://www.tumblr.com/widgets/share/tool?canonicalUrl=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(shareTitle)}`, '_blank');
     } else if (platform === 'pinterest') {
-      window.open(`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(currentUrl)}&description=${encodeURIComponent(shareTitle)}`, '_blank');
+      const pinImg = selectedArticle?.image
+        ? (selectedArticle.image.startsWith('http')
+            ? selectedArticle.image
+            : `https://shreeabhaydas.com${selectedArticle.image.startsWith('/') ? '' : '/'}${selectedArticle.image}`)
+        : 'https://shreeabhaydas.com/images/img_35.png';
+      window.open(
+        `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(publicUrl)}&media=${encodeURIComponent(pinImg)}&description=${encodeURIComponent(shareTitle)}`,
+        '_blank'
+      );
     } else {
       try {
-        await navigator.clipboard.writeText(currentUrl);
+        await navigator.clipboard.writeText(publicUrl);
         showToast("Article link copied to clipboard!");
       } catch (err) {
-        showToast("Link: " + currentUrl);
+        showToast("Link: " + publicUrl);
       }
     }
   };
