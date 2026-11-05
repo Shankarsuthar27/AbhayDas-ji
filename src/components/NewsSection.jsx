@@ -36,21 +36,29 @@ export default function NewsSection({ onNavigate }) {
   };
 
   const handleSelectArticle = (item) => {
-    if (item.link && !item.link.startsWith('#')) {
-      if (item.link.startsWith('http')) {
-        window.open(item.link, '_blank');
-      } else if (onNavigate) {
-        onNavigate(item.link);
-      } else {
-        window.history.pushState({}, '', item.link);
-        window.dispatchEvent(new Event('popstate'));
-      }
-    } else if (item.fullContent && item.fullContent.length > 100) {
-      setActiveArticle(item);
-    } else if (onNavigate) {
-      onNavigate(`/news/${item.slug}`);
+    const slug =
+      item.slug ||
+      (item.title
+        ? item.title
+            .toLowerCase()
+            .replace(/[^\w\u0900-\u097F\-]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+        : item.id);
+
+    const targetUrl =
+      item.link && !item.link.startsWith('#')
+        ? item.link
+        : `/news/${slug}`;
+
+    if (targetUrl.startsWith('http')) {
+      window.open(targetUrl, '_blank');
+      return;
+    }
+
+    if (onNavigate) {
+      onNavigate(targetUrl);
     } else {
-      window.history.pushState({}, '', `/news/${item.slug}`);
+      window.history.pushState({}, '', targetUrl);
       window.dispatchEvent(new Event('popstate'));
     }
   };
@@ -455,30 +463,48 @@ function NewsCard({ item, onSelect }) {
         </div>
 
         {/* Title */}
-        <h3 style={{
-          fontSize: '18.5px',
-          fontWeight: '800',
-          color: '#111827',
-          lineHeight: '1.45',
-          margin: '0 0 16px 0',
-          flex: 1,
-          transition: 'color 0.2s ease'
-        }}>
+        <h3
+          onClick={(e) => {
+            e.preventDefault();
+            onSelect(item);
+          }}
+          style={{
+            fontSize: '18.5px',
+            fontWeight: '800',
+            color: '#111827',
+            lineHeight: '1.45',
+            margin: '0 0 16px 0',
+            flex: 1,
+            transition: 'color 0.2s ease',
+            cursor: 'pointer'
+          }}
+        >
           {item.title}
         </h3>
 
         {/* Read More Link */}
-        <div style={{
-          color: '#fc791a',
-          fontWeight: '800',
-          fontSize: '14px',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          marginTop: 'auto'
-        }}>
+        <a
+          href={item.link && !item.link.startsWith('#') ? item.link : `/news/${item.slug || item.id}`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onSelect(item);
+          }}
+          style={{
+            color: '#fc791a',
+            fontWeight: '800',
+            fontSize: '14px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            marginTop: 'auto',
+            textDecoration: 'none',
+            cursor: 'pointer'
+          }}
+          aria-label={`Read more: ${item.title}`}
+        >
           Read More <span>→</span>
-        </div>
+        </a>
       </div>
     </article>
   );

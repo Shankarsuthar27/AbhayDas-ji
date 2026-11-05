@@ -76,7 +76,11 @@ export default function NewsPage({ onNavigate, articleSlug }) {
       );
       if (found) {
         setSelectedArticle(found);
+      } else {
+        setSelectedArticle(null);
       }
+    } else {
+      setSelectedArticle(null);
     }
   }, [articleSlug, articles]);
 
@@ -84,6 +88,7 @@ export default function NewsPage({ onNavigate, articleSlug }) {
   useEffect(() => {
     if (selectedArticle) {
       document.title = `${selectedArticle.title} – Shree Abhay Das Ji Maharaj`;
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } else {
       document.title = "News And Articles – Shree Abhay Das Ji Maharaj";
     }
@@ -94,10 +99,20 @@ export default function NewsPage({ onNavigate, articleSlug }) {
     setSelectedArticle(article);
     if (article) {
       const newUrl = `/news/${article.slug}`;
-      window.history.pushState({ articleSlug: article.slug }, '', newUrl);
+      if (onNavigate) {
+        onNavigate(newUrl);
+      } else {
+        window.history.pushState({ articleSlug: article.slug }, '', newUrl);
+        window.dispatchEvent(new Event('popstate'));
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      window.history.pushState({}, '', '/news');
+      if (onNavigate) {
+        onNavigate('/news');
+      } else {
+        window.history.pushState({}, '', '/news');
+        window.dispatchEvent(new Event('popstate'));
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };

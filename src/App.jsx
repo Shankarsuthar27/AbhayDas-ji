@@ -141,10 +141,19 @@ function resolveRoute(rawPath = '/', rawHash = '') {
       path.startsWith('/blog/') ||
       hash === '#/news' ||
       hash === '#news' ||
+      hash.startsWith('#/news/') ||
+      hash.startsWith('#news/') ||
       hash === '#/blog' ||
-      hash === '#blog'
+      hash === '#blog' ||
+      hash.startsWith('#/blog/') ||
+      hash.startsWith('#blog/')
     ) {
-      return (path && path !== '/') ? path : '/news';
+      if (path && path !== '/') return path;
+      if (hash) {
+        const cleanHash = hash.replace(/^#\/?/, '/');
+        return cleanHash.startsWith('/') ? cleanHash : `/${cleanHash}`;
+      }
+      return '/news';
     }
 
     return '/';
@@ -324,13 +333,12 @@ export default function App() {
         ) : currentRoute === '/news' || currentRoute.startsWith('/news') || currentRoute.startsWith('/blog') ? (
           <NewsPage
             onNavigate={navigateTo}
-            articleSlug={
-              currentRoute.startsWith('/news/')
-                ? currentRoute.replace('/news/', '')
-                : currentRoute.startsWith('/blog/')
-                ? currentRoute.replace('/blog/', '')
-                : null
-            }
+            articleSlug={(() => {
+              const clean = (currentRoute || '').split('?')[0].split('#')[0];
+              if (clean.startsWith('/news/')) return clean.replace('/news/', '');
+              if (clean.startsWith('/blog/')) return clean.replace('/blog/', '');
+              return null;
+            })()}
           />
         ) : (
           <>
