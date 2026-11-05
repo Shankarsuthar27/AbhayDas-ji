@@ -21,56 +21,131 @@ export default function GalleryPage({ onNavigate }) {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
-  // Fetch dynamic photos uploaded via admin panel
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchDynamicGallery() {
+  // Fetch dynamic photos uploaded via admin panel (Firestore + Local Cache + CMS)
+  const fetchDynamicGallery = useCallback(async () => {
+    // 1. Fetch from Firestore collection 'gallery'
+    let firestoreDocs = [];
+    try {
+      let gQuery;
       try {
-        let gQuery;
-        try {
-          gQuery = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
-        } catch (e) {
-          gQuery = collection(db, 'gallery');
-        }
-        const snap = await getDocs(gQuery);
-        if (!isMounted) return;
-        const docs = snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: `fs_${d.id}`,
-            thumb: data.url,
-            full: data.url,
-            title: data.title || data.caption || 'Divine Darshan',
-            alt: data.title || 'Pujya Shree Abhay Das Ji Maharaj - Sacred Moment',
-            name: data.title || data.caption || 'Divine Darshan',
-            caption: data.caption || data.title || '',
-            category: data.category || 'Darshan',
-            createdAt: data.createdAt
-          };
-        });
-
-        docs.sort((a, b) => {
-          const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return tb - ta;
-        });
-
-        setFirestoreItems(docs);
-      } catch (err) {
-        console.warn('Dynamic gallery fetch note:', err.message);
+        gQuery = query(collection(db, 'gallery'), orderBy('createdAt', 'desc'));
+      } catch (e) {
+        gQuery = collection(db, 'gallery');
+      }
+      const snap = await getDocs(gQuery);
+      firestoreDocs = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          thumb: data.url,
+          full: data.url,
+          title: data.title || data.caption || 'Divine Darshan',
+          alt: data.title || 'Pujya Shree Abhay Das Ji Maharaj - Sacred Moment',
+          name: data.title || data.caption || 'Divine Darshan',
+          caption: data.caption || data.title || '',
+          category: data.category || 'Darshan',
+          createdAt: data.createdAt
+        };
+      });
+    } catch (err) {
+      if (err?.code !== 'permission-denied' && !err?.message?.includes('permission')) {
+        console.warn('Dynamic gallery fetch note (using local cache):', err.message);
       }
     }
-    fetchDynamicGallery();
-    return () => { isMounted = false; };
+
+    // 2. Fetch from Local Admin Gallery Cache (ensures offline/local uploads immediately appear)
+    let localDocs = [];
+    try {
+      const cached = JSON.parse(
+        localStorage.getItem('shreeabhaydas_gallery_cache') || '[]'
+      );
+      localDocs = (Array.isArray(cached) ? cached : []).map((data, idx) => ({
+        id: data.id || `local_${idx}_${Date.now()}`,
+        thumb: data.url,
+        full: data.url,
+        title: data.title || data.caption || 'Divine Darshan',
+        alt: data.title || 'Pujya Shree Abhay Das Ji Maharaj - Sacred Moment',
+        name: data.title || data.caption || 'Divine Darshan',
+        caption: data.caption || data.title || '',
+        category: data.category || 'Darshan',
+        createdAt: data.createdAt || new Date().toISOString()
+      }));
+    } catch (e) {
+      localDocs = [];
+    }
+
+    // 3. Fetch from Homepage CMS Gallery section (if user added photos via CMS)
+    let cmsDocs = [];
+    try {
+      const cmsRaw = JSON.parse(
+        localStorage.getItem('shree_homepage_cms') || '{}'
+      );
+      const cmsImages = cmsRaw?.gallery?.images || [];
+      cmsDocs = (Array.isArray(cmsImages) ? cmsImages : [])
+        .filter((img) => img.src || img.url)
+        .map((img, idx) => ({
+          id: img.id || `cms_${idx}`,
+          thumb: img.src || img.url,
+          full: img.src || img.url,
+          title: img.title || 'Divine Darshan',
+          alt: img.title || 'Pujya Shree Abhay Das Ji Maharaj - Sacred Moment',
+          name: img.title || 'Divine Darshan',
+          caption: img.title || '',
+          category: 'Darshan',
+          createdAt: new Date().toISOString()
+        }));
+    } catch (e) {
+      cmsDocs = [];
+    }
+
+    // 4. Merge all dynamic sources without duplicates (local uploads first so newest added images appear on top)
+    const seenUrls = new Set();
+    const seenIds = new Set();
+    const merged = [];
+
+    for (const item of [...localDocs, ...firestoreDocs, ...cmsDocs]) {
+      const url = item.full || item.thumb;
+      if (!url) continue;
+      if (seenUrls.has(url) || (item.id && seenIds.has(item.id))) continue;
+      seenUrls.add(url);
+      if (item.id) seenIds.add(item.id);
+      merged.push(item);
+    }
+
+    merged.sort((a, b) => {
+      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return tb - ta;
+    });
+
+    setFirestoreItems(merged);
   }, []);
 
-  // Sync with localStorage changes if admin deletes/restores photos
+  // Fetch on mount
+  useEffect(() => {
+    fetchDynamicGallery();
+  }, [fetchDynamicGallery]);
+
+  // Real-time synchronization when images are uploaded, deleted, or when tab regains focus
   const [storageTrigger, setStorageTrigger] = useState(0);
   useEffect(() => {
-    const onStorage = () => setStorageTrigger((prev) => prev + 1);
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+    const handleUpdate = () => {
+      fetchDynamicGallery();
+      setStorageTrigger((prev) => prev + 1);
+    };
+
+    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('gallery_updated', handleUpdate);
+    window.addEventListener('shree_cms_updated', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('gallery_updated', handleUpdate);
+      window.removeEventListener('shree_cms_updated', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
+  }, [fetchDynamicGallery]);
 
   // Combined list: dynamic admin uploads first, followed by static curated gallery
   const combinedGallery = useMemo(() => {
@@ -384,7 +459,7 @@ export default function GalleryPage({ onNavigate }) {
                 aria-label={`View ${item.name || item.title}`}
               >
                 <img
-                  src={item.thumb}
+                  src={item.thumb || item.full || item.url}
                   alt={item.alt || item.name}
                   className="gallery-card-img"
                   loading="lazy"
@@ -551,7 +626,7 @@ export default function GalleryPage({ onNavigate }) {
             >
               <img
                 key={currentItem.id}
-                src={currentItem.full || currentItem.thumb}
+                src={currentItem.full || currentItem.thumb || currentItem.url}
                 alt={currentItem.alt || currentItem.name}
                 className={`gallery-lightbox-img ${isZoomed ? 'is-zoomed' : ''}`}
                 title={isZoomed ? "Click to Zoom Out" : "Click to Zoom In"}

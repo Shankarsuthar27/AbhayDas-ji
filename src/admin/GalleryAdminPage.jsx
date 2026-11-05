@@ -120,12 +120,34 @@ export default function GalleryAdminPage() {
         if (err?.code !== 'permission-denied' && !err?.message?.includes('permission')) {
           console.warn('Firestore gallery fetch note (using local cache):', err?.message);
         }
-        try {
-          dynamicItems = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
-        } catch (fallbackErr) {
-          dynamicItems = [];
-        }
       }
+
+      // Merge Firestore docs and local cached uploads
+      let cachedDocs = [];
+      try {
+        cachedDocs = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
+      } catch (e) {
+        cachedDocs = [];
+      }
+
+      const mergedDynamicMap = new Map();
+      // Add firestore items first
+      dynamicItems.forEach((d) => {
+        const key = d.url || d.id;
+        if (key) mergedDynamicMap.set(key, d);
+      });
+      // Merge or prepend local cached uploads
+      cachedDocs.forEach((d) => {
+        const key = d.url || d.id;
+        if (key) mergedDynamicMap.set(key, { ...mergedDynamicMap.get(key), ...d });
+      });
+
+      const allDynamic = Array.from(mergedDynamicMap.values());
+      allDynamic.sort((a, b) => {
+        const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dbTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dbTime - da;
+      });
 
       // Read deleted static IDs from localStorage
       let deletedIds = [];
@@ -136,7 +158,7 @@ export default function GalleryAdminPage() {
       const delSet = new Set(deletedIds.map(String));
 
       // Avoid duplicates if any dynamic upload has the same URL as a static photo
-      const dynamicUrls = new Set(dynamicItems.map((d) => d.url));
+      const dynamicUrls = new Set(allDynamic.map((d) => d.url));
 
       // Map static curated photos from galleryData (171 photos)
       const staticItems = (galleryData || [])
@@ -166,7 +188,7 @@ export default function GalleryAdminPage() {
         }));
 
       // Combined: dynamic admin uploads first, followed by curated ashram archive
-      const combined = [...dynamicItems, ...staticItems];
+      const combined = [...allDynamic, ...staticItems];
       setGalleryItems(combined);
     } catch (err) {
       console.error('Failed to load gallery:', err);
@@ -333,6 +355,8 @@ export default function GalleryAdminPage() {
           const cached = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
           cached.unshift({ id: docId, ...newDoc });
           localStorage.setItem('shreeabhaydas_gallery_cache', JSON.stringify(cached));
+          window.dispatchEvent(new Event('storage'));
+          window.dispatchEvent(new CustomEvent('gallery_updated'));
         } catch (e) {}
 
         successCount++;
@@ -353,6 +377,10 @@ export default function GalleryAdminPage() {
       );
       handleClearQueue();
       fetchGallery();
+      try {
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('gallery_updated'));
+      } catch (e) {}
     }
 
     if (errors.length > 0) {
@@ -383,7 +411,22 @@ export default function GalleryAdminPage() {
         createdAt: new Date().toISOString()
       };
 
-      await addDoc(collection(db, 'gallery'), newDoc);
+      let docId = `gallery_url_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      try {
+        const docRef = await addDoc(collection(db, 'gallery'), newDoc);
+        docId = docRef.id;
+      } catch (addErr) {
+        console.warn('Firestore addDoc URL note (saving locally):', addErr?.message);
+      }
+
+      try {
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
+        cached.unshift({ id: docId, ...newDoc });
+        localStorage.setItem('shreeabhaydas_gallery_cache', JSON.stringify(cached));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('gallery_updated'));
+      } catch (e) {}
+
       toast.success('Photo added to Gallery from URL!');
       setUrlInput('');
       setUrlTitle('');
@@ -419,7 +462,22 @@ export default function GalleryAdminPage() {
         createdAt: new Date().toISOString()
       };
 
-      await addDoc(collection(db, 'gallery'), newDoc);
+      let docId = `gallery_preset_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      try {
+        const docRef = await addDoc(collection(db, 'gallery'), newDoc);
+        docId = docRef.id;
+      } catch (addErr) {
+        console.warn('Firestore addDoc preset note (saving locally):', addErr?.message);
+      }
+
+      try {
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
+        cached.unshift({ id: docId, ...newDoc });
+        localStorage.setItem('shreeabhaydas_gallery_cache', JSON.stringify(cached));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('gallery_updated'));
+      } catch (e) {}
+
       toast.success(`"${selectedPreset.title}" added to Gallery!`);
       setSelectedPreset(null);
       setPresetTitle('');
@@ -487,10 +545,16 @@ export default function GalleryAdminPage() {
           'shreeabhaydas_gallery_cache',
           JSON.stringify(updated)
         );
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('gallery_updated'));
       } catch (e) {}
     }
 
     setGalleryItems((prev) => prev.filter((item) => item.id !== id));
+    try {
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('gallery_updated'));
+    } catch (e) {}
     toast.success('Photo removed from Gallery.');
     setDeletingId(null);
   };
@@ -506,6 +570,7 @@ export default function GalleryAdminPage() {
         localStorage.removeItem('shreeabhaydas_deleted_gallery_ids');
         setDeletedStaticIds([]);
         window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('gallery_updated'));
         toast.success('All archive photos restored!');
         fetchGallery();
       } catch (e) {
