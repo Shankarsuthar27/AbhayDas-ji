@@ -96,7 +96,8 @@ export function AdminAuthProvider({ children }) {
         uid: userCredential.user.uid,
         email: userCredential.user.email,
         username: 'admin2233',
-        role: 'administrator'
+        role: 'administrator',
+        isCloudAuth: true
       };
       setCurrentUser(adminData);
       localStorage.setItem('shreeabhaydas_admin_user', JSON.stringify(adminData));
@@ -105,21 +106,34 @@ export function AdminAuthProvider({ children }) {
       console.warn('Firebase Auth sign-in note:', fbError.code, fbError.message);
 
       // If user does not exist in Firebase yet, attempt to create it automatically
-      if (fbError.code === 'auth/user-not-found' || fbError.code === 'auth/invalid-credential') {
+      if (
+        fbError.code === 'auth/user-not-found' ||
+        fbError.code === 'auth/invalid-credential' ||
+        fbError.code === 'auth/invalid-login-credentials'
+      ) {
         try {
           const newCredential = await createUserWithEmailAndPassword(auth, email, trimmedPass);
           const adminData = {
             uid: newCredential.user.uid,
             email: newCredential.user.email,
             username: 'admin2233',
-            role: 'administrator'
+            role: 'administrator',
+            isCloudAuth: true
           };
           setCurrentUser(adminData);
           localStorage.setItem('shreeabhaydas_admin_user', JSON.stringify(adminData));
           return adminData;
         } catch (createErr) {
-          console.warn('Firebase createUser note:', createErr.code);
+          console.warn('Firebase createUser note:', createErr.code, createErr.message);
         }
+      }
+
+      if (fbError.code === 'auth/configuration-not-found') {
+        console.warn(
+          '[Firebase Auth Action Required] "auth/configuration-not-found":\n' +
+          '1. Enable Email/Password in Firebase Console -> Authentication -> Sign-in method.\n' +
+          '2. Add your Hostinger domain to Firebase Console -> Authentication -> Settings -> Authorized domains.'
+        );
       }
 
       // Validated Credentials Fallback:
@@ -129,7 +143,11 @@ export function AdminAuthProvider({ children }) {
         uid: 'admin_local_2233',
         email,
         username: 'admin2233',
-        role: 'administrator'
+        role: 'administrator',
+        isCloudAuth: false,
+        authWarning: fbError.code === 'auth/configuration-not-found'
+          ? 'Firebase Authentication is not enabled or Hostinger domain is not authorized in Firebase Console.'
+          : fbError.message
       };
       setCurrentUser(fallbackAdmin);
       localStorage.setItem('shreeabhaydas_admin_user', JSON.stringify(fallbackAdmin));

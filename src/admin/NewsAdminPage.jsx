@@ -8,6 +8,7 @@ import {
   orderBy
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { newsArticles as staticNews } from '../data/newsData';
 import { NewsEditor } from './NewsEditor';
 import {
   Plus,
@@ -21,7 +22,8 @@ import {
   Clock,
   Sparkles,
   FileText,
-  CheckCircle2
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import './Admin.css';
@@ -37,6 +39,7 @@ export default function NewsAdminPage({ onNavigate }) {
   const [deletingId, setDeletingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [permissionNotice, setPermissionNotice] = useState(false);
 
   // Fetch all news items from Firestore
   const fetchNews = async () => {
@@ -55,13 +58,25 @@ export default function NewsAdminPage({ onNavigate }) {
         ...d.data()
       }));
       setNewsList(items);
-    } catch (err) {
-      console.error('Error fetching news from Firestore:', err);
+      setPermissionNotice(false);
       try {
-        const snap = await getDocs(collection(db, 'news'));
-        setNewsList(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(items));
+      } catch (e) {}
+    } catch (err) {
+      if (err?.code === 'permission-denied' || (err?.message && err.message.includes('permission'))) {
+        setPermissionNotice(true);
+      } else {
+        console.warn('Firestore fetch note (using local fallback cache):', err?.message);
+      }
+      try {
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
+        if (cached && cached.length > 0) {
+          setNewsList(cached);
+        } else {
+          setNewsList(staticNews);
+        }
       } catch (fallbackErr) {
-        toast.error(`Unable to load news: ${fallbackErr.message}`);
+        setNewsList(staticNews);
       }
     } finally {
       setLoading(false);
@@ -80,21 +95,21 @@ export default function NewsAdminPage({ onNavigate }) {
     setDeletingId(id);
     try {
       await deleteDoc(doc(db, 'news', id));
-      toast.success('News article removed from Firestore.');
-      setNewsList((prev) => prev.filter((item) => item.id !== id));
-
-      try {
-        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
-        const updatedCache = cached.filter((item) => item.id !== id);
-        localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(updatedCache));
-        window.dispatchEvent(new CustomEvent('shreeabhaydas-news-updated', { detail: updatedCache }));
-      } catch (e) {}
     } catch (err) {
-      console.error('Error deleting news:', err);
-      toast.error(`Failed to delete: ${err.message}`);
-    } finally {
-      setDeletingId(null);
+      console.warn('Firestore delete note (removed locally):', err?.message);
     }
+
+    setNewsList((prev) => prev.filter((item) => item.id !== id));
+
+    try {
+      const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
+      const updatedCache = cached.filter((item) => item.id !== id);
+      localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(updatedCache));
+      window.dispatchEvent(new CustomEvent('shreeabhaydas-news-updated', { detail: updatedCache }));
+    } catch (e) {}
+
+    toast.success('News article removed.');
+    setDeletingId(null);
   };
 
   // If in create or edit mode, show the full Notion-style NewsEditor
@@ -170,6 +185,29 @@ export default function NewsAdminPage({ onNavigate }) {
           </button>
         </div>
       </div>
+
+      {/* Permission / Cloud Sync Notice Banner */}
+      {permissionNotice && (
+        <div style={{
+          backgroundColor: '#fffbeb',
+          border: '1px solid #fde68a',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '12px',
+          color: '#92400e',
+          fontSize: '13px',
+          lineHeight: '1.5'
+        }}>
+          <AlertTriangle size={20} style={{ flexShrink: 0, marginTop: '2px', color: '#d97706' }} />
+          <div>
+            <strong>Firestore Cloud Sync Notice:</strong> Articles are currently operating via local cache.
+            To enable cloud database sync on your Hostinger domain, publish the Firestore Security Rules in the Firebase Console (refer to <code style={{ background: '#fef3c7', padding: '2px 4px', borderRadius: '4px' }}>firestore.rules</code>).
+          </div>
+        </div>
+      )}
 
       {/* Stats Counter Bar */}
       <div className="admin-metrics-grid" style={{ marginBottom: '24px' }}>

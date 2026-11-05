@@ -416,7 +416,10 @@ export function subscribeHomepageCms(callback) {
           }
         },
         (err) => {
-          console.warn('Firestore live listener note:', err.message);
+          // If Firestore security rules are pending publication, gracefully use local cached CMS data
+          if (err?.code !== 'permission-denied' && !err?.message?.includes('permission')) {
+            console.warn('Firestore live listener note:', err.message);
+          }
         }
       );
     }

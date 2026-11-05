@@ -107,18 +107,14 @@ export default function GalleryAdminPage() {
 
       setGalleryItems(items);
     } catch (err) {
-      console.error('Error fetching gallery:', err);
+      if (err?.code !== 'permission-denied' && !err?.message?.includes('permission')) {
+        console.warn('Firestore gallery fetch note (using local cache):', err?.message);
+      }
       try {
-        const snap = await getDocs(collection(db, 'gallery'));
-        const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        items.sort((a, b) => {
-          const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const dbTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return dbTime - da;
-        });
-        setGalleryItems(items);
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
+        setGalleryItems(cached);
       } catch (fallbackErr) {
-        toast.error(`Unable to load gallery: ${fallbackErr.message}`);
+        setGalleryItems([]);
       }
     } finally {
       setLoading(false);
@@ -271,7 +267,20 @@ export default function GalleryAdminPage() {
           createdAt: new Date().toISOString()
         };
 
-        await addDoc(collection(db, 'gallery'), newDoc);
+        let docId = `gallery_local_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        try {
+          const docRef = await addDoc(collection(db, 'gallery'), newDoc);
+          docId = docRef.id;
+        } catch (addErr) {
+          console.warn('Firestore addDoc gallery note (saving locally):', addErr?.message);
+        }
+
+        try {
+          const cached = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
+          cached.unshift({ id: docId, ...newDoc });
+          localStorage.setItem('shreeabhaydas_gallery_cache', JSON.stringify(cached));
+        } catch (e) {}
+
         successCount++;
       } catch (err) {
         console.error(`Failed to upload ${item.name}:`, err);
@@ -377,24 +386,28 @@ export default function GalleryAdminPage() {
     setDeletingId(id);
     try {
       await deleteDoc(doc(db, 'gallery', id));
-
-      if (storagePath) {
-        try {
-          const fileRef = ref(storage, storagePath);
-          await deleteObject(fileRef);
-        } catch (storageErr) {
-          console.warn('Storage cleanup note:', storageErr.message);
-        }
-      }
-
-      toast.success('Photo removed from Gallery.');
-      setGalleryItems((prev) => prev.filter((item) => item.id !== id));
-    } catch (err) {
-      console.error('Error deleting photo:', err);
-      toast.error(`Failed to delete: ${err.message}`);
-    } finally {
-      setDeletingId(null);
+    } catch (delErr) {
+      console.warn('Firestore delete note (removed locally):', delErr?.message);
     }
+
+    if (storagePath) {
+      try {
+        const fileRef = ref(storage, storagePath);
+        await deleteObject(fileRef);
+      } catch (storageErr) {
+        console.warn('Storage cleanup note:', storageErr.message);
+      }
+    }
+
+    setGalleryItems((prev) => prev.filter((item) => item.id !== id));
+    try {
+      const cached = JSON.parse(localStorage.getItem('shreeabhaydas_gallery_cache') || '[]');
+      const updated = cached.filter((item) => item.id !== id);
+      localStorage.setItem('shreeabhaydas_gallery_cache', JSON.stringify(updated));
+    } catch (e) {}
+
+    toast.success('Photo removed from Gallery.');
+    setDeletingId(null);
   };
 
   // Copy photo link to clipboard

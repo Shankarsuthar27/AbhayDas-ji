@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { doc, getDoc, addDoc, updateDoc, collection } from 'firebase/firestore';
 import { db } from '../firebase';
+import { newsArticles as staticNews } from '../data/newsData';
 import { useAdminAuth } from './AdminAuthContext';
 import { 
   slugify, 
@@ -109,47 +110,62 @@ export const NewsEditor = ({ editId = null, onBack, onSaved }) => {
     if (!editId) return;
 
     let isMounted = true;
+    const populateFields = (data) => {
+      setTitle(data.title || '');
+      setSlug(data.slug || slugify(data.title || ''));
+      setExcerpt(data.excerpt || data.description || '');
+      setContent(data.content || `<p>${data.description || ''}</p>`);
+      
+      const existingImg = data.featuredImage || data.image || data.url || data.imageUrl || '';
+      setFeaturedImage(existingImg);
+      if (existingImg) {
+        setImageMeta({
+          fileName: 'Current Cover',
+          source: existingImg.startsWith('data:') ? 'direct' : existingImg.startsWith('/') ? 'preset' : 'url'
+        });
+      }
+
+      // Load additional gallery images
+      const addl = data.galleryImages || data.additionalImages || (data.secondaryImage ? [data.secondaryImage] : []);
+      setAdditionalImages(Array.isArray(addl) ? addl.filter((url) => url && url !== existingImg) : []);
+
+      setCategoryId(data.categoryId || (data.category ? data.category.toLowerCase() : ''));
+      setSelectedTags(data.tags || []);
+      setStatus(data.status || 'published');
+      setFeatured(Boolean(data.featured));
+      setSeoTitle(data.seoTitle || '');
+      setSeoDescription(data.seoDescription || '');
+      setScheduledAt(data.scheduledAt || '');
+    };
+
     const loadArticle = async () => {
       setLoadingInitial(true);
       try {
         const docRef = doc(db, 'news', editId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists() && isMounted) {
-          const data = docSnap.data();
-          setTitle(data.title || '');
-          setSlug(data.slug || slugify(data.title || ''));
-          setExcerpt(data.excerpt || data.description || '');
-          setContent(data.content || `<p>${data.description || ''}</p>`);
-          
-          const existingImg = data.featuredImage || data.image || data.url || data.imageUrl || '';
-          setFeaturedImage(existingImg);
-          if (existingImg) {
-            setImageMeta({
-              fileName: 'Current Cover',
-              source: existingImg.startsWith('data:') ? 'direct' : existingImg.startsWith('/') ? 'preset' : 'url'
-            });
-          }
-
-          // Load additional gallery images
-          const addl = data.galleryImages || data.additionalImages || (data.secondaryImage ? [data.secondaryImage] : []);
-          setAdditionalImages(Array.isArray(addl) ? addl.filter((url) => url && url !== existingImg) : []);
-
-          setCategoryId(data.categoryId || (data.category ? data.category.toLowerCase() : ''));
-          setSelectedTags(data.tags || []);
-          setStatus(data.status || 'published');
-          setFeatured(Boolean(data.featured));
-          setSeoTitle(data.seoTitle || '');
-          setSeoDescription(data.seoDescription || '');
-          setScheduledAt(data.scheduledAt || '');
-        } else if (isMounted) {
-          toast.error('Article document not found in Firestore.');
+          populateFields(docSnap.data());
+          return;
         }
       } catch (err) {
-        console.error('Error fetching article for editing:', err);
-        if (isMounted) toast.error(`Failed to load article: ${err.message}`);
-      } finally {
-        if (isMounted) setLoadingInitial(false);
+        console.warn('Firestore getDoc note (checking local cache):', err?.message);
       }
+
+      // Fallback to local cache or static data
+      try {
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
+        const found = cached.find((c) => String(c.id) === String(editId)) ||
+                      staticNews.find((s) => String(s.id) === String(editId) || s.slug === editId);
+        if (found && isMounted) {
+          populateFields(found);
+          return;
+        }
+      } catch (e) {}
+
+      if (isMounted) {
+        toast.error('Article could not be loaded from Firestore or cache.');
+      }
+      if (isMounted) setLoadingInitial(false);
     };
 
     loadArticle();
@@ -485,35 +501,54 @@ export const NewsEditor = ({ editId = null, onBack, onSaved }) => {
         updatedAt: new Date().toISOString()
       };
 
-      if (isEditMode && editId) {
-        const docRef = doc(db, 'news', editId);
-        await updateDoc(docRef, articlePayload);
-        toast.success('Article updated successfully in Firestore!');
+      let savedDocId = editId || `news_local_${Date.now()}`;
+      let firestoreSynced = false;
 
+      if (isEditMode && editId) {
         try {
-          const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
-          const updatedCache = cached.map((item) => (item.id === editId ? { ...item, ...articlePayload } : item));
-          localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(updatedCache));
-          window.dispatchEvent(new CustomEvent('shreeabhaydas-news-updated', { detail: updatedCache }));
-        } catch (e) {}
+          const docRef = doc(db, 'news', editId);
+          await updateDoc(docRef, articlePayload);
+          firestoreSynced = true;
+        } catch (updateErr) {
+          console.warn('Firestore update note (saving locally):', updateErr?.message);
+        }
       } else {
         articlePayload.createdAt = new Date().toISOString();
-        const docRef = await addDoc(collection(db, 'news'), articlePayload);
-        toast.success(`Article published to Firestore! (ID: ${docRef.id.slice(0, 6)}...)`);
-
         try {
-          const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
-          const updatedCache = [{ id: docRef.id, ...articlePayload }, ...cached.filter((item) => item.id !== docRef.id)];
-          localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(updatedCache));
-          window.dispatchEvent(new CustomEvent('shreeabhaydas-news-updated', { detail: updatedCache }));
-        } catch (e) {}
+          const docRef = await addDoc(collection(db, 'news'), articlePayload);
+          savedDocId = docRef.id;
+          firestoreSynced = true;
+        } catch (createErr) {
+          console.warn('Firestore addDoc note (saving locally):', createErr?.message);
+        }
+      }
+
+      // Always save to persistent local cache and broadcast update event
+      try {
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_news_cache') || '[]');
+        const updatedArticle = { id: savedDocId, ...articlePayload };
+        const updatedCache = isEditMode
+          ? cached.map((item) => (String(item.id) === String(editId) ? updatedArticle : item))
+          : [updatedArticle, ...cached.filter((item) => String(item.id) !== String(savedDocId))];
+        localStorage.setItem('shreeabhaydas_news_cache', JSON.stringify(updatedCache));
+        window.dispatchEvent(new CustomEvent('shreeabhaydas-news-updated', { detail: updatedCache }));
+      } catch (cacheErr) {
+        console.warn('Cache update note:', cacheErr);
+      }
+
+      if (firestoreSynced) {
+        toast.success(isEditMode ? 'Article updated in Firestore!' : 'Article published to Firestore!');
+      } else {
+        toast.success('Article saved locally! (Note: Cloud sync is pending Firestore rules in Firebase Console).', {
+          duration: 5000
+        });
       }
 
       if (onSaved) onSaved();
       else if (onBack) onBack();
     } catch (err) {
-      console.error('Error saving article to Firestore:', err);
-      toast.error(`Save failed: ${err.message}`);
+      console.error('Error in article save process:', err);
+      toast.error(`Save process error: ${err.message}`);
     } finally {
       setIsSaving(false);
     }

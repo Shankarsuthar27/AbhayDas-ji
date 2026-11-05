@@ -185,6 +185,26 @@ export default function App() {
     };
   }, []);
 
+  // Synchronize Canonical Tag & OG URL dynamically on route navigation
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const canonicalTag = document.querySelector("link[rel='canonical']");
+      const normalizedPath = currentRoute === '/' ? '' : currentRoute;
+      const targetUrl = `https://shreeabhaydas.com${normalizedPath}`;
+      if (canonicalTag) {
+        canonicalTag.setAttribute('href', targetUrl);
+      }
+      const ogUrlTag = document.querySelector("meta[property='og:url']");
+      if (ogUrlTag) {
+        ogUrlTag.setAttribute('content', targetUrl);
+      }
+      const twitterUrlTag = document.querySelector("meta[name='twitter:url']");
+      if (twitterUrlTag) {
+        twitterUrlTag.setAttribute('content', targetUrl);
+      }
+    }
+  }, [currentRoute]);
+
   const navigateTo = (path) => {
     try {
       window.history.pushState({}, '', path);

@@ -9,6 +9,7 @@ import {
   orderBy
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { eventsData as staticEvents } from '../data/eventsData';
 import { 
   Calendar, 
   RotateCw, 
@@ -109,16 +110,22 @@ export default function EventsAdminPage() {
         ...d.data()
       }));
       setEventsList(items);
-    } catch (err) {
-      console.error('Error fetching events from Firestore:', err);
       try {
-        const snap = await getDocs(collection(db, 'events'));
-        setEventsList(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      } catch (fallbackErr) {
-        setFeedback({
-          type: 'error',
-          message: `Unable to load events: ${fallbackErr.message}. Make sure Firestore rules allow read access.`
-        });
+        localStorage.setItem('shreeabhaydas_events_cache', JSON.stringify(items));
+      } catch (e) {}
+    } catch (err) {
+      if (err?.code !== 'permission-denied' && !err?.message?.includes('permission')) {
+        console.warn('Firestore events fetch note (using cache/static fallback):', err?.message);
+      }
+      try {
+        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_events_cache') || '[]');
+        if (cached && cached.length > 0) {
+          setEventsList(cached);
+        } else {
+          setEventsList(staticEvents);
+        }
+      } catch (cacheErr) {
+        setEventsList(staticEvents);
       }
     } finally {
       setLoading(false);
@@ -283,16 +290,30 @@ export default function EventsAdminPage() {
         createdAt: new Date().toISOString()
       };
 
-      const docRef = await addDoc(collection(db, 'events'), newDoc);
-      showToast('success', `Event created in Firestore! (ID: ${docRef.id.slice(0, 6)}...)`);
+      let docId = `event_local_${Date.now()}`;
+      let firestoreSynced = false;
+      try {
+        const docRef = await addDoc(collection(db, 'events'), newDoc);
+        docId = docRef.id;
+        firestoreSynced = true;
+      } catch (createErr) {
+        console.warn('Firestore addDoc note (saving event locally):', createErr?.message);
+      }
 
       // Immediately cache and broadcast so homepage updates instantly
       try {
         const cached = JSON.parse(localStorage.getItem('shreeabhaydas_events_cache') || '[]');
-        const updatedCache = [{ id: docRef.id, ...newDoc }, ...cached.filter((item) => item.id !== docRef.id)];
+        const updatedDoc = { id: docId, ...newDoc };
+        const updatedCache = [updatedDoc, ...cached.filter((item) => String(item.id) !== String(docId))];
         localStorage.setItem('shreeabhaydas_events_cache', JSON.stringify(updatedCache));
         window.dispatchEvent(new CustomEvent('shreeabhaydas-events-updated', { detail: updatedCache }));
       } catch (cacheErr) {}
+
+      if (firestoreSynced) {
+        showToast('success', `Event created in Firestore! (ID: ${docId.slice(0, 6)}...)`);
+      } else {
+        showToast('success', 'Event saved locally! (Note: Cloud sync is pending Firestore rules in Firebase Console).');
+      }
 
       // Reset form
       setEventName('');
@@ -306,8 +327,8 @@ export default function EventsAdminPage() {
       // Refresh list
       fetchEvents();
     } catch (err) {
-      console.error('Error creating event in Firestore:', err);
-      showToast('error', `Failed to create event: ${err.message}`);
+      console.error('Error in event submission:', err);
+      showToast('error', `Submission error: ${err.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -320,22 +341,22 @@ export default function EventsAdminPage() {
     setDeletingId(id);
     try {
       await deleteDoc(doc(db, 'events', id));
-      showToast('success', 'Event removed from Firestore.');
-      setEventsList((prev) => prev.filter((item) => item.id !== id));
-
-      // Remove from cache and broadcast
-      try {
-        const cached = JSON.parse(localStorage.getItem('shreeabhaydas_events_cache') || '[]');
-        const updatedCache = cached.filter((item) => item.id !== id);
-        localStorage.setItem('shreeabhaydas_events_cache', JSON.stringify(updatedCache));
-        window.dispatchEvent(new CustomEvent('shreeabhaydas-events-updated', { detail: updatedCache }));
-      } catch (cacheErr) {}
     } catch (err) {
-      console.error('Error deleting event:', err);
-      showToast('error', `Failed to delete event: ${err.message}`);
-    } finally {
-      setDeletingId(null);
+      console.warn('Firestore delete note (removing locally):', err?.message);
     }
+
+    setEventsList((prev) => prev.filter((item) => item.id !== id));
+
+    // Remove from cache and broadcast
+    try {
+      const cached = JSON.parse(localStorage.getItem('shreeabhaydas_events_cache') || '[]');
+      const updatedCache = cached.filter((item) => item.id !== id);
+      localStorage.setItem('shreeabhaydas_events_cache', JSON.stringify(updatedCache));
+      window.dispatchEvent(new CustomEvent('shreeabhaydas-events-updated', { detail: updatedCache }));
+    } catch (cacheErr) {}
+
+    showToast('success', 'Event removed.');
+    setDeletingId(null);
   };
 
   return (

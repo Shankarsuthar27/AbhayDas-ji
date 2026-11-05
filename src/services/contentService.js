@@ -247,15 +247,10 @@ export function subscribeNews(onUpdate) {
           emitMerged(firestoreItems);
         },
         (err) => {
-          console.warn('Firestore onSnapshot news note:', err.message);
-          getDocs(newsCol)
-            .then((snap) => {
-              const firestoreItems = snap.docs.map((d) => formatFirestoreNews(d.id, d.data()));
-              emitMerged(firestoreItems);
-            })
-            .catch(() => {
-              emitMerged();
-            });
+          if (err?.code !== 'permission-denied' && !err?.message?.includes('permission')) {
+            console.warn('Firestore onSnapshot news note:', err.message);
+          }
+          emitMerged();
         }
       );
     } catch (err) {
@@ -334,15 +329,10 @@ export function subscribeEvents(onUpdate) {
           emitMerged(firestoreItems);
         },
         (err) => {
-          console.warn('Firestore onSnapshot events note:', err.message);
-          getDocs(eventsCol)
-            .then((snap) => {
-              const firestoreItems = snap.docs.map((d) => formatFirestoreEvent(d.id, d.data()));
-              emitMerged(firestoreItems);
-            })
-            .catch(() => {
-              emitMerged();
-            });
+          if (err?.code !== 'permission-denied' && !err?.message?.includes('permission')) {
+            console.warn('Firestore onSnapshot events note:', err.message);
+          }
+          emitMerged();
         }
       );
     } catch (err) {

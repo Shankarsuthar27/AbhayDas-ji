@@ -1,0 +1,10 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      // Allow read and write to all paths so images uploaded via admin panel can be saved and viewed
+      allow read, write: if true;
+    }
+  }
+}
+

@@ -294,6 +294,18 @@
   transform: translateY(0);
 }
 
+.news-share-pill.news-share-whatsapp {
+  background-image: none;
+  background-color: #f5f7f6;
+  color: #122f2a;
+}
+
+.news-share-pill.news-share-whatsapp:hover {
+  background-color: #25D366;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+}
+
 .news-share-pill.news-share-fb {
   background-position: -66px -32px;
 }
